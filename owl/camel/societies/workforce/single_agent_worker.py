@@ -48,9 +48,7 @@ class SingleAgentWorker(Worker):
         super().reset()
         self.worker.reset()
 
-    async def _process_task(
-        self, task: Task, dependencies: List[Task]
-    ) -> TaskState:
+    async def _process_task(self, task: Task, dependencies: List[Task]) -> TaskState:
         r"""Processes a task with its dependencies.
 
         This method asynchronously processes a given task, considering its
@@ -79,23 +77,20 @@ class SingleAgentWorker(Worker):
         try:
             response = self.worker.step(req, response_format=TaskResult)
         except Exception as e:
-            print(
-                f"{Fore.RED}Error occurred while processing task {task.id}:"
-                f"\n{e}{Fore.RESET}"
-            )
+            print(f"{Fore.RED}Error occurred while processing task {task.id}:" f"\n{e}{Fore.RESET}")
             return TaskState.FAILED
 
         print(f"======\n{Fore.GREEN}Reply from {self}:{Fore.RESET}")
 
         result_dict = ast.literal_eval(response.msg.content)
         task_result = TaskResult(**result_dict)
-        
+
         color = Fore.RED if task_result.failed else Fore.GREEN
         print_text_animated(
             f"\n{color}{task_result.content}{Fore.RESET}\n======",
             delay=0.005,
-        )   
-        
+        )
+
         if task_result.failed:
             task.failure_reason = task_result.content
             return TaskState.FAILED

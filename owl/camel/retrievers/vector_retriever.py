@@ -61,11 +61,7 @@ class VectorRetriever(BaseRetriever):
         """
         self.embedding_model = embedding_model or OpenAIEmbedding()
         self.storage = (
-            storage
-            if storage is not None
-            else QdrantStorage(
-                vector_dim=self.embedding_model.get_output_dim()
-            )
+            storage if storage is not None else QdrantStorage(vector_dim=self.embedding_model.get_output_dim())
         )
         self.uio: UnstructuredIO = UnstructuredIO()
 
@@ -101,6 +97,7 @@ class VectorRetriever(BaseRetriever):
                 used for storing metadata. Defaults to None.
             **kwargs (Any): Additional keyword arguments for content parsing.
         """
+
         def sanitize_text(text: str):
             if not text:
                 return " "
@@ -111,12 +108,7 @@ class VectorRetriever(BaseRetriever):
         if isinstance(content, Element):
             elements = [content]
         elif isinstance(content, IOBase):
-            elements = (
-                self.uio.parse_bytes(
-                    file=content, metadata_filename=metadata_filename, **kwargs
-                )
-                or []
-            )
+            elements = self.uio.parse_bytes(file=content, metadata_filename=metadata_filename, **kwargs) or []
         elif isinstance(content, str):
             # Check if the content is URL
             parsed_url = urlparse(content)
@@ -139,9 +131,7 @@ class VectorRetriever(BaseRetriever):
                 ]
 
         if not elements:
-            warnings.warn(
-                f"No elements were extracted from the content: {content}"
-            )
+            warnings.warn(f"No elements were extracted from the content: {content}")
         else:
             # Chunk the content if required
             chunks = (
@@ -169,10 +159,7 @@ class VectorRetriever(BaseRetriever):
                     elif isinstance(content, IOBase):
                         content_path_info = {"content path": "From file bytes"}
                     elif isinstance(content, Element):
-                        content_path_info = {
-                            "content path": content.metadata.file_directory
-                            or ""
-                        }
+                        content_path_info = {"content path": content.metadata.file_directory or ""}
 
                     chunk_metadata = {"metadata": chunk.metadata.to_dict()}
                     # Remove the 'orig_elements' key if it exists
@@ -185,9 +172,7 @@ class VectorRetriever(BaseRetriever):
                         **chunk_text,
                     }
 
-                    records.append(
-                        VectorRecord(vector=vector, payload=combined_dict)
-                    )
+                    records.append(VectorRecord(vector=vector, payload=combined_dict))
 
                 self.storage.add(records=records)
 
@@ -229,41 +214,30 @@ class VectorRetriever(BaseRetriever):
 
         # If no results found, raise an error
         if not query_results:
-            raise ValueError(
-                "Query result is empty, please check if "
-                "the vector storage is empty."
-            )
+            raise ValueError("Query result is empty, please check if " "the vector storage is empty.")
 
         if query_results[0].record.payload is None:
-            raise ValueError(
-                "Payload of vector storage is None, please check the "
-                "collection."
-            )
+            raise ValueError("Payload of vector storage is None, please check the " "collection.")
 
         # format the results
         formatted_results = []
         for result in query_results:
-            if (
-                result.similarity >= similarity_threshold
-                and result.record.payload is not None
-            ):
+            if result.similarity >= similarity_threshold and result.record.payload is not None:
                 result_dict = {
-                    'similarity score': str(result.similarity),
-                    'content path': result.record.payload.get(
-                        'content path', ''
-                    ),
-                    'metadata': result.record.payload.get('metadata', {}),
-                    'extra_info': result.record.payload.get('extra_info', {}),
-                    'text': result.record.payload.get('text', ''),
+                    "similarity score": str(result.similarity),
+                    "content path": result.record.payload.get("content path", ""),
+                    "metadata": result.record.payload.get("metadata", {}),
+                    "extra_info": result.record.payload.get("extra_info", {}),
+                    "text": result.record.payload.get("text", ""),
                 }
                 formatted_results.append(result_dict)
 
-        content_path = query_results[0].record.payload.get('content path', '')
+        content_path = query_results[0].record.payload.get("content path", "")
 
         if not formatted_results:
             return [
                 {
-                    'text': (
+                    "text": (
                         f"No suitable information retrieved "
                         f"from {content_path} with similarity_threshold"
                         f" = {similarity_threshold}."

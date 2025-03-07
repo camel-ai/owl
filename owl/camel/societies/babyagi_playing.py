@@ -91,9 +91,7 @@ class BabyAGI:
             output_language,
         )
 
-        sys_msg_generator = SystemMessageGenerator(
-            task_type=self.task_type, **(sys_msg_generator_kwargs or {})
-        )
+        sys_msg_generator = SystemMessageGenerator(task_type=self.task_type, **(sys_msg_generator_kwargs or {}))
 
         init_assistant_sys_msg = sys_msg_generator.from_dicts(
             meta_dicts=[
@@ -205,8 +203,7 @@ class BabyAGI:
 
         self.task_creation_agent = TaskCreationAgent(
             objective=self.specified_task_prompt,
-            role_name=getattr(self.assistant_sys_msg, 'role_name', None)
-            or "assistant",
+            role_name=getattr(self.assistant_sys_msg, "role_name", None) or "assistant",
             output_language=output_language,
             message_window_size=message_window_size,
             **(task_creation_agent_kwargs or {}),
@@ -235,15 +232,12 @@ class BabyAGI:
         """
         if not self.subtasks:
             new_subtask_list = self.task_creation_agent.run(task_list=[])
-            prioritized_subtask_list = self.task_prioritization_agent.run(
-                new_subtask_list
-            )
+            prioritized_subtask_list = self.task_prioritization_agent.run(new_subtask_list)
             self.subtasks = deque(prioritized_subtask_list)
 
         task_name = self.subtasks.popleft()
         assistant_msg_msg = BaseMessage.make_user_message(
-            role_name=getattr(self.assistant_sys_msg, 'role_name', None)
-            or "assistant",
+            role_name=getattr(self.assistant_sys_msg, "role_name", None) or "assistant",
             content=f"{task_name}",
         )
 
@@ -253,9 +247,7 @@ class BabyAGI:
         self.solved_subtasks.append(task_name)
         past_tasks = self.solved_subtasks + list(self.subtasks)
 
-        new_subtask_list = self.task_creation_agent.run(
-            task_list=past_tasks[-self.MAX_TASK_HISTORY :]
-        )
+        new_subtask_list = self.task_creation_agent.run(task_list=past_tasks[-self.MAX_TASK_HISTORY :])
 
         if new_subtask_list:
             self.subtasks.extend(new_subtask_list)
@@ -265,13 +257,11 @@ class BabyAGI:
             self.subtasks = deque(prioritized_subtask_list)
         else:
             logger.info("no new tasks")
-        assistant_response.info['task_name'] = task_name
-        assistant_response.info['subtasks'] = list(self.subtasks)
+        assistant_response.info["task_name"] = task_name
+        assistant_response.info["subtasks"] = list(self.subtasks)
         if not self.subtasks:
             terminated = True
-            assistant_response.info['termination_reasons'] = (
-                "All tasks are solved"
-            )
+            assistant_response.info["termination_reasons"] = "All tasks are solved"
             return ChatAgentResponse(
                 msgs=[assistant_msg],
                 terminated=terminated,

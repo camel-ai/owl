@@ -1,0 +1,24 @@
+name: CodeQL Analysis
+
+on:
+  schedule:
+    - cron: '20 14 * * 1'
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: python
+        queries: security-extended,security-and-quality
+        
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2

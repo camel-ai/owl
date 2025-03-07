@@ -47,8 +47,8 @@ class ChunkrReader:
         timeout: int = 30,
         **kwargs: Any,
     ) -> None:
-        self._api_key = api_key or os.getenv('CHUNKR_API_KEY')
-        self._url = os.getenv('CHUNKR_API_URL') or url
+        self._api_key = api_key or os.getenv("CHUNKR_API_KEY")
+        self._url = os.getenv("CHUNKR_API_URL") or url
         self._headers = {
             "Authorization": f"{self._api_key}",
             **kwargs,
@@ -75,17 +75,15 @@ class ChunkrReader:
         Returns:
             str: The task ID.
         """
-        with open(file_path, 'rb') as file:
-            files: dict[
-                str, Union[tuple[None, IO[bytes]], tuple[None, str]]
-            ] = {
-                'file': (
+        with open(file_path, "rb") as file:
+            files: dict[str, Union[tuple[None, IO[bytes]], tuple[None, str]]] = {
+                "file": (
                     None,
                     file,
                 ),  # Properly pass the file as a binary stream
-                'model': (None, model),
-                'ocr_strategy': (None, ocr_strategy),
-                'target_chunk_length': (None, target_chunk_length),
+                "model": (None, model),
+                "ocr_strategy": (None, ocr_strategy),
+                "target_chunk_length": (None, target_chunk_length),
             }
             try:
                 response = requests.post(
@@ -95,7 +93,7 @@ class ChunkrReader:
                     timeout=self.timeout,
                 )
                 response.raise_for_status()
-                task_id = response.json().get('task_id')
+                task_id = response.json().get("task_id")
                 if not task_id:
                     raise ValueError("Task ID not returned in the response.")
                 logger.info(f"Task submitted successfully. Task ID: {task_id}")
@@ -126,20 +124,15 @@ class ChunkrReader:
 
         while attempts < max_retries:
             try:
-                response = requests.get(
-                    url_get, headers=self._headers, timeout=self.timeout
-                )
+                response = requests.get(url_get, headers=self._headers, timeout=self.timeout)
                 response.raise_for_status()
-                task_status = response.json().get('status')
+                task_status = response.json().get("status")
 
                 if task_status == "Succeeded":
                     logger.info(f"Task {task_id} completed successfully.")
                     return self._pretty_print_response(response.json())
                 else:
-                    logger.info(
-                        f"Task {task_id} is still {task_status}. Retrying "
-                        "in 5 seconds..."
-                    )
+                    logger.info(f"Task {task_id} is still {task_status}. Retrying " "in 5 seconds...")
             except Exception as e:
                 logger.error(f"Failed to retrieve task status: {e}")
                 raise ValueError(f"Failed to retrieve task status: {e}") from e

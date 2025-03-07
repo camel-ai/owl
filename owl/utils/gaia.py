@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../")
 
 import json
@@ -49,7 +50,6 @@ class GAIABenchmark(BaseBenchmark):
         """
         super().__init__("gaia", data_dir, save_to, processes)
 
-
     def download(self):
         r"""Download the GAIA dataset."""
         from huggingface_hub import snapshot_download
@@ -60,33 +60,31 @@ class GAIABenchmark(BaseBenchmark):
             local_dir=self.data_dir,
             local_dir_use_symlinks=True,
         )
-    
+
     def _check_task_completed(self, task_id: str) -> bool:
         for data in self._results:
             if data["task_id"] == task_id:
                 return True
-        return False 
-
+        return False
 
     def dump_tasks(self, save_path: str, datas):
         constructed_data = []
         for idx, data in enumerate(datas):
             tmp_dict = {
-                'idx': idx,
-                'task_id': data['task_id'],
-                'Question': data['Question'],
-                'Level': data['Level'],
-                'Final answer': data['Final answer'],
-                'Annotation Metadata': data['Annotator Metadata']
+                "idx": idx,
+                "task_id": data["task_id"],
+                "Question": data["Question"],
+                "Level": data["Level"],
+                "Final answer": data["Final answer"],
+                "Annotation Metadata": data["Annotator Metadata"],
             }
 
             constructed_data.append(tmp_dict)
-        with open(save_path, 'w', encoding="utf-8") as f:
+        with open(save_path, "w", encoding="utf-8") as f:
             json.dump(constructed_data, f, indent=4)
         f.close()
 
         print(f"Successfully dumped tasks to {save_path}")
-
 
     def load(self, force_download=False):
         r"""Load the GAIA dataset.
@@ -127,7 +125,6 @@ class GAIABenchmark(BaseBenchmark):
         r"""Get the training set."""
         raise NotImplementedError("GAIA does not have a training set.")
 
-
     def run(
         self,
         user_role_name: str,
@@ -144,24 +141,11 @@ class GAIABenchmark(BaseBenchmark):
 
         # Validate inputs
         if on not in ["valid", "test"]:
-            raise ValueError(
-                f"Invalid value for `on`: {on}, expected 'valid' or 'test'."
-            )
+            raise ValueError(f"Invalid value for `on`: {on}, expected 'valid' or 'test'.")
 
-        levels = (
-            [1, 2, 3]
-            if level == "all"
-            else [level]
-            if isinstance(level, int)
-            else level
-        )
-        if not all(
-            isinstance(level, int) and level in [1, 2, 3] for level in levels
-        ):
-            raise ValueError(
-                f"Invalid value for `level`: {level}, expected 1, 2, 3 "
-                "or 'all'."
-            )
+        levels = [1, 2, 3] if level == "all" else [level] if isinstance(level, int) else level
+        if not all(isinstance(level, int) and level in [1, 2, 3] for level in levels):
+            raise ValueError(f"Invalid value for `level`: {level}, expected 1, 2, 3 " "or 'all'.")
         logger.info(f"Running benchmark on {on} set at levels {levels}.")
         datas = [data for data in self._data[on] if data["Level"] in levels]
         # Shuffle and subset data if necessary
@@ -169,19 +153,19 @@ class GAIABenchmark(BaseBenchmark):
             random.shuffle(datas)
         if subset:
             datas = datas[:subset]
-        
+
         if idx is not None:
             # pick only the tasks with the specified idx
-            if len(idx) != 0:   
+            if len(idx) != 0:
                 datas = [datas[i] for i in idx]
 
         logger.info(f"Number of tasks: {len(datas)}")
 
         self._results = []
-        
+
         if save_result:
             try:
-                with open(self.save_to, 'r', encoding='utf-8') as f:
+                with open(self.save_to, "r", encoding="utf-8") as f:
                     self._results = json.load(f)
                 f.close()
             except Exception as e:
@@ -191,9 +175,11 @@ class GAIABenchmark(BaseBenchmark):
         # Process tasks
         for task in tqdm(datas, desc="Running"):
             if self._check_task_completed(task["task_id"]):
-                logger.success(f"The following task is already completed:\n task id: {task['task_id']}, question: {task['Question']}")
+                logger.success(
+                    f"The following task is already completed:\n task id: {task['task_id']}, question: {task['Question']}"
+                )
                 continue
-            
+
             if_prepared_task, info = self._prepare_task(task)
             if not if_prepared_task:
                 _result_info = {
@@ -203,7 +189,7 @@ class GAIABenchmark(BaseBenchmark):
                     "model_answer": None,
                     "ground_truth": None,
                     "score": 0,
-                    "history": None
+                    "history": None,
                 }
                 self._results.append(_result_info)
                 continue
@@ -211,11 +197,10 @@ class GAIABenchmark(BaseBenchmark):
                 logger.info(f"Task Question: {task['Question']}")
                 logger.info(f"Required tools: {task['Annotator Metadata']['Tools']}")
 
-
                 task_kwargs = {
-                        'task_prompt': task['Question'],
-                        'with_task_specify': False,
-                    }
+                    "task_prompt": task["Question"],
+                    "with_task_specify": False,
+                }
 
                 society = OwlGaiaRolePlaying(
                     **task_kwargs,
@@ -236,7 +221,8 @@ class GAIABenchmark(BaseBenchmark):
 
                 _result_info = {
                     "task_id": task["task_id"],
-                    "question": task["Question"] + "Please decompose the task into several sub-tasks and find the answer step-by-step.",
+                    "question": task["Question"]
+                    + "Please decompose the task into several sub-tasks and find the answer step-by-step.",
                     "level": task["Level"],
                     "model_answer": answer,
                     "ground_truth": task["Final answer"],
@@ -246,49 +232,45 @@ class GAIABenchmark(BaseBenchmark):
                 }
                 self._results.append(_result_info)
 
-
             except Exception as e:
                 logger.error(f"Error in processing task: {e}")
-                
-    
+
             if save_result:
-                with open(self.save_to, 'w') as f:
+                with open(self.save_to, "w") as f:
                     json.dump(self._results, f, indent=4, ensure_ascii=False)
                 f.close()
 
         return self._generate_summary()
-    
 
     def _prepare_task(self, task: Dict[str, Any]) -> Tuple[bool, str]:
         r"""Prepare the task by validating and enriching its data."""
         if task["file_name"]:
-            
-            if isinstance(task['file_name'], Path):
-                task['file_name'] = str(task['file_name'])
+
+            if isinstance(task["file_name"], Path):
+                task["file_name"] = str(task["file_name"])
 
             file_path = Path(task["file_name"])
             if not file_path.exists():
-                logger.info(
-                    f"Skipping task because file not found: {file_path}"
-                )
+                logger.info(f"Skipping task because file not found: {file_path}")
                 return False, f"Skipping task because file not found: {file_path}"
-            if file_path.suffix in ['.pdf', '.docx', '.doc', '.txt']:
+            if file_path.suffix in [".pdf", ".docx", ".doc", ".txt"]:
                 task["Question"] += f" Here are the necessary document files: {file_path}"
 
-            elif file_path.suffix in ['.jpg', '.jpeg', '.png']:
+            elif file_path.suffix in [".jpg", ".jpeg", ".png"]:
                 task["Question"] += f" Here are the necessary image files: {file_path}"
-            
-            elif file_path.suffix in ['.xlsx', 'xls', '.csv']:
-                task["Question"] += f" Here are the necessary table files: {file_path}, for processing excel file, you can write python code and leverage excel toolkit to process the file step-by-step and get the information."
-            
-            elif file_path.suffix in ['.py']:
+
+            elif file_path.suffix in [".xlsx", "xls", ".csv"]:
+                task[
+                    "Question"
+                ] += f" Here are the necessary table files: {file_path}, for processing excel file, you can write python code and leverage excel toolkit to process the file step-by-step and get the information."
+
+            elif file_path.suffix in [".py"]:
                 task["Question"] += f" Here are the necessary python files: {file_path}"
 
             else:
                 task["Question"] += f" Here are the necessary files: {file_path}"
 
         return True, None
-        
 
     def _create_task(self, task: Dict[str, Any]) -> Task:
         r"""Create a user message from a task.
@@ -301,7 +283,6 @@ class GAIABenchmark(BaseBenchmark):
         """
         return Task(id=str(task["task_id"]), content=task["Question"])
 
-
     def _generate_summary(self) -> Dict[str, Any]:
         r"""Generate and return a summary of the benchmark results."""
         correct = sum(result["score"] for result in self._results)
@@ -311,7 +292,6 @@ class GAIABenchmark(BaseBenchmark):
             "results": self._results,
             "accuracy": correct / len(self._results) if len(self._results) > 0 else 0,
         }
-
 
     def question_scorer(self, model_answer: str, ground_truth: str) -> bool:
         r"""Scorer for the GAIA benchmark.
@@ -339,9 +319,7 @@ class GAIABenchmark(BaseBenchmark):
             return normalized_answer == float(ground_truth)
 
         elif any(char in ground_truth for char in [",", ";"]):
-            logger.info(
-                f"Evaluating {model_answer} as a comma separated list."
-            )
+            logger.info(f"Evaluating {model_answer} as a comma separated list.")
             gt_elems = self.split_string(ground_truth)
             ma_elems = self.split_string(model_answer)
 
@@ -368,22 +346,16 @@ class GAIABenchmark(BaseBenchmark):
             gt_elem = self.normalize_str(ground_truth)
             return ma_elem == gt_elem
 
-
     def normalize_number_str(self, number_str: str) -> float:
         for char in ["$", "%", ","]:
             number_str = number_str.replace(char, "")
         try:
             return float(number_str)
         except ValueError:
-            logger.error(
-                f"String {number_str} cannot be normalized to number str."
-            )
+            logger.error(f"String {number_str} cannot be normalized to number str.")
             return float("inf")
 
-
-    def split_string(
-        self, s: str, char_list: Optional[List[str]] = None
-    ) -> list[str]:
+    def split_string(self, s: str, char_list: Optional[List[str]] = None) -> list[str]:
         r"""Split a string based on a list of characters.
 
         Args:
@@ -396,7 +368,6 @@ class GAIABenchmark(BaseBenchmark):
             char_list = [",", ";"]
         pattern = f"[{''.join(char_list)}]"
         return re.split(pattern, s)
-
 
     def normalize_str(self, input_str, remove_punct=True) -> str:
         r"""Normalize a string.

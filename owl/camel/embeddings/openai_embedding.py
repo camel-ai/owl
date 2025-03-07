@@ -41,9 +41,7 @@ class OpenAIEmbedding(BaseEmbedding[str]):
 
     def __init__(
         self,
-        model_type: EmbeddingModelType = (
-            EmbeddingModelType.TEXT_EMBEDDING_3_SMALL
-        ),
+        model_type: EmbeddingModelType = (EmbeddingModelType.TEXT_EMBEDDING_3_SMALL),
         api_key: str | None = None,
         dimensions: int | NotGiven = NOT_GIVEN,
     ) -> None:

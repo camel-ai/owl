@@ -14,4 +14,4 @@
 from .persona import Persona
 from .persona_hub import PersonaHub
 
-__all__ = ['Persona', 'PersonaHub']
+__all__ = ["Persona", "PersonaHub"]

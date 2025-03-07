@@ -96,10 +96,7 @@ class DockerInterpreter(BaseInterpreter):
             return
 
         if not is_docker_running():
-            raise InterpreterError(
-                "Docker daemon is not running. Please install/start docker "
-                "and try again."
-            )
+            raise InterpreterError("Docker daemon is not running. Please install/start docker " "and try again.")
 
         import docker
 
@@ -116,17 +113,15 @@ class DockerInterpreter(BaseInterpreter):
         filename = str(uuid.uuid4())
         # create a tar in memory
         tar_stream = io.BytesIO()
-        with tarfile.open(fileobj=tar_stream, mode='w') as tar:
+        with tarfile.open(fileobj=tar_stream, mode="w") as tar:
             tarinfo = tarfile.TarInfo(name=filename)
             tarinfo.size = len(content)
-            tar.addfile(tarinfo, io.BytesIO(content.encode('utf-8')))
+            tar.addfile(tarinfo, io.BytesIO(content.encode("utf-8")))
         tar_stream.seek(0)
 
         # copy the tar into the container
         if self._container is None:
-            raise InterpreterError(
-                "Container is not initialized. Try running the code again."
-            )
+            raise InterpreterError("Container is not initialized. Try running the code again.")
         self._container.put_archive("/tmp", tar_stream)
         return Path(f"/tmp/{filename}")
 
@@ -136,15 +131,9 @@ class DockerInterpreter(BaseInterpreter):
         code_type: str,
     ) -> str:
         code_type = self._check_code_type(code_type)
-        commands = shlex.split(
-            self._CODE_EXECUTE_CMD_MAPPING[code_type].format(
-                file_name=file.as_posix()
-            )
-        )
+        commands = shlex.split(self._CODE_EXECUTE_CMD_MAPPING[code_type].format(file_name=file.as_posix()))
         if self._container is None:
-            raise InterpreterError(
-                "Container is not initialized. Try running the code again."
-            )
+            raise InterpreterError("Container is not initialized. Try running the code again.")
         stdout, stderr = self._container.exec_run(
             commands,
             demux=True,
@@ -190,10 +179,7 @@ class DockerInterpreter(BaseInterpreter):
 
         # Print code for security checking
         if self.require_confirm:
-            logger.info(
-                f"The following {code_type} code will run on your "
-                "computer: {code}"
-            )
+            logger.info(f"The following {code_type} code will run on your " "computer: {code}")
             while True:
                 choice = input("Running code? [Y/n]:").lower()
                 if choice in ["y", "yes", "ye", ""]:
@@ -240,6 +226,4 @@ class DockerInterpreter(BaseInterpreter):
 
     def update_action_space(self, action_space: Dict[str, Any]) -> None:
         r"""Updates action space for *python* interpreter"""
-        raise RuntimeError(
-            "SubprocessInterpreter doesn't support " "`action_space`."
-        )
+        raise RuntimeError("SubprocessInterpreter doesn't support " "`action_space`.")

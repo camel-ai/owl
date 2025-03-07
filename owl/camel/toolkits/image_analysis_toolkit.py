@@ -35,11 +35,12 @@ class ImageAnalysisToolkit(BaseToolkit):
     This class provides methods for understanding images, such as identifying
     objects, text in images.
     """
-    def __init__(self, model: Literal['gpt-4o', 'gpt-4o-mini'] = 'gpt-4o'):
+
+    def __init__(self, model: Literal["gpt-4o", "gpt-4o-mini"] = "gpt-4o"):
         self.model_type = ModelType.GPT_4O
-        if model == 'gpt-4o':
+        if model == "gpt-4o":
             self.model_type = ModelType.GPT_4O
-        elif model == 'gpt-4o-mini':
+        elif model == "gpt-4o-mini":
             self.model_type = ModelType.GPT_4O_MINI
         else:
             raise ValueError(f"Invalid model type: {model}")
@@ -51,12 +52,9 @@ class ImageAnalysisToolkit(BaseToolkit):
         image_url = image_path
 
         if not is_url:
-            image_url = (
-                f"data:image/jpeg;base64,{self._encode_image(image_path)}"
-            )
+            image_url = f"data:image/jpeg;base64,{self._encode_image(image_path)}"
         return image_url
 
-            
     def _encode_image(self, image_path: str):
         r"""Encode an image by its image path.
 
@@ -65,11 +63,10 @@ class ImageAnalysisToolkit(BaseToolkit):
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode("utf-8")
 
-    
     def _judge_if_write_code(self, question: str, image_path: str) -> Tuple[bool, str]:
 
         _image_url = self._construct_image_url(image_path)
-        
+
         prompt = f"""
         Given the question <question>{question}</question>, do you think it is suitable to write python code (using libraries like cv2) to process the image to get the answer?
         Your output should be in json format (```json ```) including the following fields:
@@ -81,16 +78,16 @@ class ImageAnalysisToolkit(BaseToolkit):
             {
                 "role": "system",
                 "content": "You are a helpful assistant for image relevant tasks, and can judge whether \
-                the given image is suitable for writing code to process or not. "
+                the given image is suitable for writing code to process or not. ",
             },
             {
                 "role": "user",
                 "content": [
-                    {'type': 'text', 'text': prompt},
+                    {"type": "text", "text": prompt},
                     {
-                        'type': 'image_url',
-                        'image_url': {
-                            'url': _image_url,
+                        "type": "image_url",
+                        "image_url": {
+                            "url": _image_url,
                         },
                     },
                 ],
@@ -98,7 +95,7 @@ class ImageAnalysisToolkit(BaseToolkit):
         ]
 
         LLM = OpenAIModel(model_type=self.model_type)
-        resp = LLM.run(messages) 
+        resp = LLM.run(messages)
 
         result_str = resp.choices[0].message.content.lower()
         result_str = result_str.replace("```json", "").replace("```", "").strip()
@@ -109,12 +106,11 @@ class ImageAnalysisToolkit(BaseToolkit):
         image_caption = result_dict.get("image_caption", "")
 
         return if_write_code, image_caption
-    
 
     def _get_image_caption(self, image_path: str) -> str:
 
         _image_url = self._construct_image_url(image_path)
-        
+
         prompt = f"""
         Please make a detailed description about the image.
         """
@@ -123,11 +119,11 @@ class ImageAnalysisToolkit(BaseToolkit):
             {
                 "role": "user",
                 "content": [
-                    {'type': 'text', 'text': prompt},
+                    {"type": "text", "text": prompt},
                     {
-                        'type': 'image_url',
-                        'image_url': {
-                            'url': _image_url,
+                        "type": "image_url",
+                        "image_url": {
+                            "url": _image_url,
                         },
                     },
                 ],
@@ -135,10 +131,9 @@ class ImageAnalysisToolkit(BaseToolkit):
         ]
 
         LLM = OpenAIModel(model_type=self.model_type)
-        resp = LLM.run(messages) 
+        resp = LLM.run(messages)
 
         return resp.choices[0].message.content
-
 
     def ask_question_about_image(self, image_path: str, question: str) -> str:
         r"""Ask a question about the image based on the image path.
@@ -157,14 +152,9 @@ class ImageAnalysisToolkit(BaseToolkit):
         parsed_url = urlparse(image_path)
         is_url = all([parsed_url.scheme, parsed_url.netloc])
 
-        if not (
-            image_path.endswith(".jpg") or \
-            image_path.endswith(".jpeg") or \
-            image_path.endswith(".png")
-        ):
+        if not (image_path.endswith(".jpg") or image_path.endswith(".jpeg") or image_path.endswith(".png")):
             logger.warning(
-                f"The image path `{image_path}` is not a valid image path. "
-                f"Please provide a valid image path."
+                f"The image path `{image_path}` is not a valid image path. " f"Please provide a valid image path."
             )
             return f"The image path `{image_path}` is not a valid image path."
 
@@ -203,9 +193,9 @@ class ImageAnalysisToolkit(BaseToolkit):
         else:
             import requests
             from io import BytesIO
+
             url_image = requests.get(image_path)
             image_object = Image.open(BytesIO(url_image.content))
-
 
         # if_write_code, image_caption = self._judge_if_write_code(question, image_path)
 
@@ -214,26 +204,20 @@ class ImageAnalysisToolkit(BaseToolkit):
         #     Please write and execute python code (for example, using cv2 library) to process the image and complete the task: {question}
         #     Here are the image path you need to process: {image_path}
         #     Here are the caption about the image: <image_caption>{image_caption}</image_caption>
-        #     """   
+        #     """
         #     message = BaseMessage.make_user_message(
         #         role_name='user',
         #         content=prompt,
         #     )
         #     resp = code_agent.step(message)
         #     return resp.msgs[0].content
-        
 
         # else:
         prompt = question
-        message = BaseMessage.make_user_message(
-            role_name='user',
-            content=prompt,
-            image_list=[image_object]
-        )
+        message = BaseMessage.make_user_message(role_name="user", content=prompt, image_list=[image_object])
 
         resp = image_agent.step(message)
         return resp.msgs[0].content
-
 
     def get_tools(self) -> List[FunctionTool]:
         r"""Returns a list of FunctionTool objects representing the functions

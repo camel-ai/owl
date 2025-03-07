@@ -28,9 +28,7 @@ class BaseConverter(ABC):
     """
 
     @abstractmethod
-    def convert(
-        self, content: str, *args: Any, **kwargs: Dict[str, Any]
-    ) -> BaseModel:
+    def convert(self, content: str, *args: Any, **kwargs: Dict[str, Any]) -> BaseModel:
         r"""Structures the input text into the expected response format.
 
         Args:

@@ -127,10 +127,7 @@ class ChatGPTConfig(BaseConfig):
             tools_schema = []
             for tool in self.tools:
                 if not isinstance(tool, FunctionTool):
-                    raise ValueError(
-                        f"The tool {tool} should "
-                        "be an instance of `FunctionTool`."
-                    )
+                    raise ValueError(f"The tool {tool} should " "be an instance of `FunctionTool`.")
                 tools_schema.append(tool.get_openai_tool_schema())
         config_dict["tools"] = NOT_GIVEN
         return config_dict

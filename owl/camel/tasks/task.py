@@ -29,9 +29,8 @@ from .task_prompt import (
 )
 from loguru import logger
 
-def parse_response(
-    response: str, task_id: Optional[str] = None
-) -> List["Task"]:
+
+def parse_response(response: str, task_id: Optional[str] = None) -> List["Task"]:
     r"""Parse Tasks from a response.
 
     Args:
@@ -239,14 +238,12 @@ class Task(BaseModel):
             role_name=role_name,
             content=self.content,
         )
-        msg = BaseMessage.make_user_message(
-            role_name=role_name, content=content
-        )
+        msg = BaseMessage.make_user_message(role_name=role_name, content=content)
         response = agent.step(msg)
         tasks = task_parser(response.msg.content, self.id)
         for task in tasks:
             task.additional_info = self.additional_info
-        
+
         # print decompse result
         for task in tasks:
             logger.info(f"Decompose task {self.id} to {task.id}: {task.content}\n")
@@ -281,9 +278,7 @@ class Task(BaseModel):
             additional_info=self.additional_info,
             other_results=sub_tasks_result,
         )
-        msg = BaseMessage.make_user_message(
-            role_name=role_name, content=content
-        )
+        msg = BaseMessage.make_user_message(role_name=role_name, content=content)
         response = agent.step(msg)
         result = response.msg.content
         if result_parser:
@@ -427,9 +422,7 @@ class TaskManager:
 
         role_name = agent.role_name
         content = template.format(role_name=role_name, content=task.content)
-        msg = BaseMessage.make_user_message(
-            role_name=role_name, content=content
-        )
+        msg = BaseMessage.make_user_message(role_name=role_name, content=content)
         response = agent.step(msg)
         if task_parser is None:
             task_parser = parse_response

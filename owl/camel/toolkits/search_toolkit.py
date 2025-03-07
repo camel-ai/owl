@@ -30,6 +30,7 @@ from camel.agents import ChatAgent
 from camel.models import ModelFactory
 from camel.types import ModelType, ModelPlatformType
 
+
 class SearchToolkit(BaseToolkit):
     r"""A class representing a toolkit for web search.
 
@@ -52,6 +53,7 @@ class SearchToolkit(BaseToolkit):
                 exists, return the summary of this entity in a string.
         """
         import wikipedia
+
         logger.debug(f"Calling search_wiki function with entity: {entity}")
 
         result: str
@@ -59,16 +61,14 @@ class SearchToolkit(BaseToolkit):
         try:
             page = wikipedia.page(entity)
             result_dict = {
-                'url': page.url,
-                'title': page.title,
-                'content': page.content,
+                "url": page.url,
+                "title": page.title,
+                "content": page.content,
             }
             result = str(result_dict)
 
         except wikipedia.exceptions.DisambiguationError as e:
-            result = wikipedia.summary(
-                e.options[0], sentences=5, auto_suggest=False
-            )
+            result = wikipedia.summary(e.options[0], sentences=5, auto_suggest=False)
         except wikipedia.exceptions.PageError:
             result = (
                 "There is no page in Wikipedia corresponding to entity "
@@ -77,7 +77,7 @@ class SearchToolkit(BaseToolkit):
             )
         except wikipedia.exceptions.WikipediaException as e:
             result = f"An exception occurred during the search: {e}"
-        
+
         except Exception as e:
             logger.error(f"An exception occurred during the search: {e}")
             return e
@@ -86,9 +86,7 @@ class SearchToolkit(BaseToolkit):
 
     @dependencies_required("duckduckgo_search")
     @retry(delay=5)
-    def search_duckduckgo(
-        self, query: str, source: str = "text", max_results: int = 5
-    ) -> List[Dict[str, Any]]:
+    def search_duckduckgo(self, query: str, source: str = "text", max_results: int = 5) -> List[Dict[str, Any]]:
         r"""Use DuckDuckGo search engine to search information for
         the given query.
 
@@ -108,6 +106,7 @@ class SearchToolkit(BaseToolkit):
         """
         from duckduckgo_search import DDGS
         from requests.exceptions import RequestException
+
         logger.debug(f"Calling search_duckduckgo function with query: {query}")
 
         ddgs = DDGS()
@@ -329,9 +328,7 @@ class SearchToolkit(BaseToolkit):
         return data
 
     @api_keys_required("GOOGLE_API_KEY", "SEARCH_ENGINE_ID")
-    def search_google(
-        self, query: str, num_result_pages: int = 6
-    ) -> List[Dict[str, Any]]:
+    def search_google(self, query: str, num_result_pages: int = 6) -> List[Dict[str, Any]]:
         r"""Use Google search engine to search information for the given query.
 
         Args:
@@ -363,6 +360,7 @@ class SearchToolkit(BaseToolkit):
             title, description, url of a website.
         """
         import requests
+
         logger.debug(f"Calling search_google function with query: {query}")
 
         # https://developers.google.com/custom-search/v1/overview
@@ -404,13 +402,8 @@ class SearchToolkit(BaseToolkit):
                         continue
                     if "metatags" not in search_item["pagemap"]:
                         continue
-                    if (
-                        "og:description"
-                        in search_item["pagemap"]["metatags"][0]
-                    ):
-                        long_description = search_item["pagemap"]["metatags"][
-                            0
-                        ]["og:description"]
+                    if "og:description" in search_item["pagemap"]["metatags"][0]:
+                        long_description = search_item["pagemap"]["metatags"][0]["og:description"]
                     else:
                         long_description = "N/A"
                     # Get the page title
@@ -443,18 +436,20 @@ class SearchToolkit(BaseToolkit):
             responses.append({"error": f"google search failed with error: {e}"})
 
         # If no answer found, return an empty list
-        
+
         # breakpoint()
         if len(responses) == 0:
-            responses.append("No relevant webpages found. Please simplify your query and expand the search space as much as you can, then try again.")
+            responses.append(
+                "No relevant webpages found. Please simplify your query and expand the search space as much as you can, then try again."
+            )
         logger.debug(f"search result: {responses}")
-        responses.append("If the search result does not contain the information you want, please make reflection on your query: what went well, what didn't, then refine your search plan.")
+        responses.append(
+            "If the search result does not contain the information you want, please make reflection on your query: what went well, what didn't, then refine your search plan."
+        )
         return responses
 
     @dependencies_required("wolframalpha")
-    def query_wolfram_alpha(
-        self, query: str, is_detailed: bool = False
-    ) -> Union[str, Dict[str, Any]]:
+    def query_wolfram_alpha(self, query: str, is_detailed: bool = False) -> Union[str, Dict[str, Any]]:
         r"""Queries Wolfram|Alpha and returns the result. Wolfram|Alpha is an
         answer engine developed by Wolfram Research. It is offered as an online
         service that answers factual queries by computing answers from
@@ -491,9 +486,7 @@ class SearchToolkit(BaseToolkit):
         pased_result = self._parse_wolfram_result(res)
 
         if is_detailed:
-            step_info = self._get_wolframalpha_step_by_step_solution(
-                WOLFRAMALPHA_APP_ID, query
-            )
+            step_info = self._get_wolframalpha_step_by_step_solution(WOLFRAMALPHA_APP_ID, query)
             pased_result["steps"] = step_info
             return pased_result
 
@@ -553,9 +546,7 @@ class SearchToolkit(BaseToolkit):
 
         return output
 
-    def _get_wolframalpha_step_by_step_solution(
-        self, app_id: str, query: str
-    ) -> dict:
+    def _get_wolframalpha_step_by_step_solution(self, app_id: str, query: str) -> dict:
         r"""Retrieve a step-by-step solution from the Wolfram Alpha API for a
         given query.
 
@@ -595,9 +586,7 @@ class SearchToolkit(BaseToolkit):
                 plaintext = subpod.find("plaintext")
                 if plaintext is not None and plaintext.text:
                     step_text = plaintext.text.strip()
-                    cleaned_step = step_text.replace(
-                        "Hint: |", ""
-                    ).strip()  # Remove 'Hint: |' if present
+                    cleaned_step = step_text.replace("Hint: |", "").strip()  # Remove 'Hint: |' if present
                     steps.append(cleaned_step)
 
         # Structuring the steps into a dictionary
@@ -607,9 +596,7 @@ class SearchToolkit(BaseToolkit):
 
         return structured_steps
 
-    def tavily_search(
-        self, query: str, num_results: int = 5, **kwargs
-    ) -> List[Dict[str, Any]]:
+    def tavily_search(self, query: str, num_results: int = 5, **kwargs) -> List[Dict[str, Any]]:
         r"""Use Tavily Search API to search information for the given query.
 
         Args:
@@ -655,7 +642,6 @@ class SearchToolkit(BaseToolkit):
             return results
         except Exception as e:
             return [{"error": f"An unexpected error occurred: {e!s}"}]
-    
 
     def search_archived_webpage(self, url: str, date: str) -> Tuple[bool, str]:
         r"""Given a url, search the wayback machine and returns the archived version of the url for a given date.
@@ -675,25 +661,27 @@ class SearchToolkit(BaseToolkit):
             if "archived_snapshots" in response and "closest" in response["archived_snapshots"]:
                 closest = response["archived_snapshots"]["closest"]
 
-            elif "archived_snapshots" in response_notimestamp and "closest" in response_notimestamp["archived_snapshots"]:
+            elif (
+                "archived_snapshots" in response_notimestamp
+                and "closest" in response_notimestamp["archived_snapshots"]
+            ):
                 closest = response_notimestamp["archived_snapshots"]["closest"]
             else:
                 return False, f"The url {url} was not archived on Wayback Machine, please try a different url."
-            
+
             target_url = closest["url"]
             return True, f"The archived version of the url {url} is {target_url}"
         except Exception as e:
             logger.warning(f"Error in search_archived_webpage: {e}")
             return False, f"An unexpected error occurred: {e!s}"
 
-    
     def web_search(self, question: str) -> str:
         r"""Performs web search about the given query, and return the search result, contaning relevant urls and results.
         If searching result does not include relevant information, you need to try other ways to solve the task instead of calling this tool again and again.
-        
+
         Args:
             question (str): The questions which wanting to obtain relevant information through online searches.
-        
+
         Returns:
             The search result containing url and necessary information.
         """
@@ -701,13 +689,17 @@ class SearchToolkit(BaseToolkit):
         model = ModelFactory.create(
             model_type=ModelType.GPT_4O_MINI,
             model_platform=ModelPlatformType.OPENAI,
-            model_config_dict={"temperature": 0, "top_p": 1}
+            model_config_dict={"temperature": 0, "top_p": 1},
         )
 
         search_agent = ChatAgent(
             "You are a helpful search agent.",
             model=model,
-            tools=[FunctionTool(self.search_wiki), FunctionTool(self.search_google), FunctionTool(self.search_archived_webpage)]
+            tools=[
+                FunctionTool(self.search_wiki),
+                FunctionTool(self.search_google),
+                FunctionTool(self.search_archived_webpage),
+            ],
         )
 
         prompt = f"""

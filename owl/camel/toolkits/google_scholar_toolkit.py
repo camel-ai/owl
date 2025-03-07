@@ -32,9 +32,7 @@ class GoogleScholarToolkit(BaseToolkit):
             manual assignment if desired.
     """
 
-    def __init__(
-        self, author_identifier: str, is_author_name: bool = False
-    ) -> None:
+    def __init__(self, author_identifier: str, is_author_name: bool = False) -> None:
         r"""Initializes the GoogleScholarToolkit with the author's identifier.
 
         Args:
@@ -84,7 +82,7 @@ class GoogleScholarToolkit(BaseToolkit):
         Returns:
             Optional[str]: The extracted author ID, or None if not found.
         """
-        match = re.search(r'user=([A-Za-z0-9-]+)', self.author_identifier)
+        match = re.search(r"user=([A-Za-z0-9-]+)", self.author_identifier)
         return match.group(1) if match else None
 
     def get_author_detailed_info(
@@ -115,14 +113,10 @@ class GoogleScholarToolkit(BaseToolkit):
         Returns:
             List[str]: A list of publication titles authored by the author.
         """
-        publication_titles = [
-            pub['bib']['title'] for pub in self.author['publications']
-        ]
+        publication_titles = [pub["bib"]["title"] for pub in self.author["publications"]]
         return publication_titles
 
-    def get_publication_by_title(
-        self, publication_title: str
-    ) -> Optional[dict]:
+    def get_publication_by_title(self, publication_title: str) -> Optional[dict]:
         r"""Retrieves detailed information about a specific publication by its
         title. Note that this method cannot retrieve the full content of the
         paper.
@@ -135,9 +129,9 @@ class GoogleScholarToolkit(BaseToolkit):
             Optional[dict]: A dictionary containing detailed information about
                 the publication if found; otherwise, `None`.
         """
-        publications = self.author['publications']
+        publications = self.author["publications"]
         for publication in publications:
-            if publication['bib']['title'] == publication_title:
+            if publication["bib"]["title"] == publication_title:
                 return self.scholarly.fill(publication)
         return None  # Return None if not found
 

@@ -23,12 +23,12 @@ from .slack.slack_app import SlackApp
 from .telegram_bot import TelegramBot
 
 __all__ = [
-    'DiscordApp',
-    'SlackApp',
-    'SlackAppMentionEventBody',
-    'SlackAppMentionEventProfile',
-    'SlackAuthProfile',
-    'SlackEventBody',
-    'SlackEventProfile',
-    'TelegramBot',
+    "DiscordApp",
+    "SlackApp",
+    "SlackAppMentionEventBody",
+    "SlackAppMentionEventProfile",
+    "SlackAuthProfile",
+    "SlackEventBody",
+    "SlackEventProfile",
+    "TelegramBot",
 ]

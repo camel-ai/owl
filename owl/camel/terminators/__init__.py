@@ -16,8 +16,8 @@ from .response_terminator import ResponseTerminator, ResponseWordsTerminator
 from .token_limit_terminator import TokenLimitTerminator
 
 __all__ = [
-    'BaseTerminator',
-    'ResponseTerminator',
-    'ResponseWordsTerminator',
-    'TokenLimitTerminator',
+    "BaseTerminator",
+    "ResponseTerminator",
+    "ResponseWordsTerminator",
+    "TokenLimitTerminator",
 ]

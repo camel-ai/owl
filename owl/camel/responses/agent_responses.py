@@ -39,8 +39,5 @@ class ChatAgentResponse(BaseModel):
     @property
     def msg(self):
         if len(self.msgs) != 1:
-            raise RuntimeError(
-                "Property msg is only available "
-                "for a single message in msgs."
-            )
+            raise RuntimeError("Property msg is only available " "for a single message in msgs.")
         return self.msgs[0]

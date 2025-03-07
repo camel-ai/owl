@@ -30,9 +30,7 @@ from camel.prompts import TextPrompt
 # Set structured output schema
 class PersonaResponse(BaseModel):
     persona_name: str = Field(description="The name of the persona")
-    persona_description: str = Field(
-        description="The description of the persona."
-    )
+    persona_description: str = Field(description="The description of the persona.")
 
 
 class PersonaHub:
@@ -111,17 +109,11 @@ class PersonaHub:
         """
         persona = Persona()
 
-        text_to_persona_prompt: Union[TextPrompt, str] = (
-            persona.text_to_persona_prompt
-        )
-        text_to_persona_prompt_instruction = text_to_persona_prompt.format(
-            action=action, text=text
-        )
+        text_to_persona_prompt: Union[TextPrompt, str] = persona.text_to_persona_prompt
+        text_to_persona_prompt_instruction = text_to_persona_prompt.format(action=action, text=text)
 
         # Set Agent to generate personal
-        t2p_agent = ChatAgent(
-            system_message="You are a helpful assistant", model=self.model
-        )
+        t2p_agent = ChatAgent(system_message="You are a helpful assistant", model=self.model)
         t2p_agent.reset()
 
         # Get output from agent
@@ -149,9 +141,7 @@ class PersonaHub:
         Returns:
             Dict[uuid.UUID, Persona]: A dictionary of related personas.
         """
-        persona_to_persona_prompt: Union[TextPrompt, str] = (
-            persona.persona_to_persona_prompt
-        )
+        persona_to_persona_prompt: Union[TextPrompt, str] = persona.persona_to_persona_prompt
         answer_template = """
 You MUST answer the question according to the format of the ANSWER TEMPLATE, and you can only modify the content within <BLANK>.
 ===== ANSWER TEMPLATE =====
@@ -169,16 +159,12 @@ persona_description: <BLANK>
             + answer_template
         )
 
-        p2p_agent = ChatAgent(
-            system_message="You're a helpful assistant.", model=self.model
-        )
+        p2p_agent = ChatAgent(system_message="You're a helpful assistant.", model=self.model)
         p2p_agent.reset()
 
         # Get output from agent
         try:
-            response = p2p_agent.step(
-                persona_to_persona_prompt_instruction  # type: ignore[arg-type]
-            )
+            response = p2p_agent.step(persona_to_persona_prompt_instruction)  # type: ignore[arg-type]
             # Structured output (TODO: Use a more robust parser)
             pattern = r"(\d+)\.\s*persona_name:\s*(.*?)\s*persona_description:\s*(.*?)\s*(?=\d+\.|$)"  # noqa: E501
             matches = re.findall(pattern, response.msg.content, re.DOTALL)
@@ -218,9 +204,7 @@ persona_description: <BLANK>
         unique_personas: Dict[uuid.UUID, Persona] = {}
         for persona_id, persona in self.personas.items():
             if not any(
-                self._is_similar(
-                    persona, up, similarity_threshold, embedding_model
-                )
+                self._is_similar(persona, up, similarity_threshold, embedding_model)
                 for up in unique_personas.values()
             ):
                 unique_personas[persona_id] = persona
@@ -228,9 +212,7 @@ persona_description: <BLANK>
 
     @staticmethod
     @lru_cache(maxsize=128)
-    def _get_embedding(
-        embedding_model: BaseEmbedding, description: Optional[str]
-    ) -> list[float]:
+    def _get_embedding(embedding_model: BaseEmbedding, description: Optional[str]) -> list[float]:
         r"""Cache embeddings to reduce recomputation."""
         return embedding_model.embed(description)
 
@@ -242,9 +224,7 @@ persona_description: <BLANK>
             vec1 (np.ndarray): Vector 1
             vec2 (np.ndarray): Vector 2
         """
-        return np.dot(vec1, vec2) / (
-            np.linalg.norm(vec1) * np.linalg.norm(vec2)
-        )
+        return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
     def _is_similar(
         self,
@@ -269,16 +249,10 @@ persona_description: <BLANK>
         persona1_description = persona1.description or ""
         persona2_description = persona2.description or ""
 
-        persona1_embeddings = self._get_embedding(
-            embedding_model, persona1_description
-        )
-        persona2_embeddings = self._get_embedding(
-            embedding_model, persona2_description
-        )
+        persona1_embeddings = self._get_embedding(embedding_model, persona1_description)
+        persona2_embeddings = self._get_embedding(embedding_model, persona2_description)
 
-        similarity = self._cosine_similarity(
-            np.array(persona1_embeddings), np.array(persona2_embeddings)
-        )
+        similarity = self._cosine_similarity(np.array(persona1_embeddings), np.array(persona2_embeddings))
 
         return similarity >= similarity_threshold
 

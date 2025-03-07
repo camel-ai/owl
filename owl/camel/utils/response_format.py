@@ -50,12 +50,7 @@ def get_pydantic_model(
     elif callable(input_data):
         WrapperClass = create_model(  # type: ignore[call-overload]
             f"{input_data.__name__.capitalize()}Model",
-            **{
-                name: (param.annotation, ...)
-                for name, param in inspect.signature(
-                    input_data
-                ).parameters.items()
-            },
+            **{name: (param.annotation, ...) for name, param in inspect.signature(input_data).parameters.items()},
         )
         return WrapperClass
     if issubclass(input_data, BaseModel):

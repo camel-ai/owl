@@ -36,7 +36,7 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
     """
 
     @api_keys_required("HUGGING_FACE_TOKEN")
-    @dependencies_required('huggingface_hub')
+    @dependencies_required("huggingface_hub")
     def __init__(self, token: Optional[str] = None):
         from huggingface_hub import HfApi
 
@@ -93,11 +93,7 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
         # Remove keys with None values
         metadata = {k: v for k, v in metadata.items() if v}
 
-        card_content = (
-            "---\n"
-            + yaml.dump(metadata, default_flow_style=False, allow_unicode=True)
-            + "\n---"
-        )
+        card_content = "---\n" + yaml.dump(metadata, default_flow_style=False, allow_unicode=True) + "\n---"
 
         if content:
             card_content += f"\n\n# Additional Information\n{content}\n"
@@ -109,9 +105,7 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
             file_type="md",
         )
 
-    def create_dataset(
-        self, name: str, private: bool = False, **kwargs: Any
-    ) -> str:
+    def create_dataset(self, name: str, private: bool = False, **kwargs: Any) -> str:
         r"""Creates a new dataset on the Hugging Face Hub.
 
         Args:
@@ -140,9 +134,7 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
 
         return f"https://huggingface.co/datasets/{name}"
 
-    def list_datasets(
-        self, username: str, limit: int = 100, **kwargs: Any
-    ) -> List[str]:
+    def list_datasets(self, username: str, limit: int = 100, **kwargs: Any) -> List[str]:
         r"""Lists all datasets for the current user.
 
         Args:
@@ -155,12 +147,7 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
             List[str]: A list of dataset ids.
         """
         try:
-            return [
-                dataset.id
-                for dataset in self.api.list_datasets(
-                    author=username, limit=limit, **kwargs
-                )
-            ]
+            return [dataset.id for dataset in self.api.list_datasets(author=username, limit=limit, **kwargs)]
         except Exception as e:
             logger.error(f"Error listing datasets: {e}")
             return []
@@ -201,15 +188,10 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
         Raises:
             ValueError: If the dataset already has a records file.
         """
-        existing_records = self._download_records(
-            dataset_name=dataset_name, filepath=filepath, **kwargs
-        )
+        existing_records = self._download_records(dataset_name=dataset_name, filepath=filepath, **kwargs)
 
         if existing_records:
-            raise ValueError(
-                f"Dataset '{filepath}' already exists. "
-                f"Use `update_records` to modify."
-            )
+            raise ValueError(f"Dataset '{filepath}' already exists. " f"Use `update_records` to modify.")
 
         self._upload_records(
             records=records,
@@ -237,15 +219,10 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
             ValueError: If the dataset does not have an existing file to update
                 records in.
         """
-        existing_records = self._download_records(
-            dataset_name=dataset_name, filepath=filepath, **kwargs
-        )
+        existing_records = self._download_records(dataset_name=dataset_name, filepath=filepath, **kwargs)
 
         if not existing_records:
-            logger.warning(
-                f"Dataset '{dataset_name}' does not have existing "
-                "records. Adding new records."
-            )
+            logger.warning(f"Dataset '{dataset_name}' does not have existing " "records. Adding new records.")
             self._upload_records(
                 records=records,
                 dataset_name=dataset_name,
@@ -285,19 +262,14 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
             ValueError: If the dataset does not have an existing file to delete
                 records from.
         """
-        existing_records = self._download_records(
-            dataset_name=dataset_name, filepath=filepath, **kwargs
-        )
+        existing_records = self._download_records(dataset_name=dataset_name, filepath=filepath, **kwargs)
 
         if not existing_records:
             raise ValueError(
-                f"Dataset '{dataset_name}' does not have an existing file to "
-                f"delete records from."
+                f"Dataset '{dataset_name}' does not have an existing file to " f"delete records from."
             )
 
-        filtered_records = [
-            record for record in existing_records if record.id != record_id
-        ]
+        filtered_records = [record for record in existing_records if record.id != record_id]
 
         self._upload_records(
             records=filtered_records,
@@ -322,13 +294,9 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
         Returns:
             List[Record]: A list of records in the dataset.
         """
-        return self._download_records(
-            dataset_name=dataset_name, filepath=filepath, **kwargs
-        )
+        return self._download_records(dataset_name=dataset_name, filepath=filepath, **kwargs)
 
-    def _download_records(
-        self, dataset_name: str, filepath: str, **kwargs: Any
-    ) -> List[Record]:
+    def _download_records(self, dataset_name: str, filepath: str, **kwargs: Any) -> List[Record]:
         from huggingface_hub import hf_hub_download
         from huggingface_hub.errors import EntryNotFoundError
 
@@ -359,9 +327,7 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
         filepath: str,
         **kwargs: Any,
     ):
-        with tempfile.NamedTemporaryFile(
-            delete=False, mode="w", newline="", encoding="utf-8"
-        ) as f:
+        with tempfile.NamedTemporaryFile(delete=False, mode="w", newline="", encoding="utf-8") as f:
             json.dump([record.model_dump() for record in records], f)
             temp_file_path = f.name
 
@@ -388,25 +354,19 @@ class HuggingFaceDatasetManager(BaseDatasetManager):
         file_type: str = "json",
         **kwargs: Any,
     ):
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=f".{file_type}"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=f".{file_type}") as f:
             if file_type == "json":
                 if isinstance(file_content, str):
                     try:
                         json_content = json.loads(file_content)
                     except json.JSONDecodeError:
-                        raise ValueError(
-                            "Invalid JSON string provided for file_content."
-                        )
+                        raise ValueError("Invalid JSON string provided for file_content.")
                 else:
                     try:
                         json.dumps(file_content)
                         json_content = file_content
                     except (TypeError, ValueError):
-                        raise ValueError(
-                            "file_content is not JSON serializable."
-                        )
+                        raise ValueError("file_content is not JSON serializable.")
 
                 json.dump(json_content, f)
             elif file_type == "md" or file_type == "txt":

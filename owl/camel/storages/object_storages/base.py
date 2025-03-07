@@ -59,9 +59,7 @@ class BaseObjectStorage(ABC):
         file_key, filename = self.canonicalize_path(file_path)
         return self._get_file(file_key, filename)
 
-    def upload_file(
-        self, local_file_path: Path, remote_file_path: PurePath
-    ) -> None:
+    def upload_file(self, local_file_path: Path, remote_file_path: PurePath) -> None:
         r"""Upload a local file to the object storage.
 
         Args:
@@ -71,14 +69,10 @@ class BaseObjectStorage(ABC):
         file_key, _ = self.canonicalize_path(remote_file_path)
         # check if the local file exists
         if not local_file_path.exists():
-            raise FileNotFoundError(
-                f"Local file {local_file_path} does not exist."
-            )
+            raise FileNotFoundError(f"Local file {local_file_path} does not exist.")
         self._upload_file(local_file_path, file_key)
 
-    def download_file(
-        self, local_file_path: Path, remote_file_path: PurePath
-    ) -> None:
+    def download_file(self, local_file_path: Path, remote_file_path: PurePath) -> None:
         r"""Download a file from the object storage to the local system.
 
         Args:
@@ -101,9 +95,7 @@ class BaseObjectStorage(ABC):
         pass
 
     @abstractmethod
-    def _upload_file(
-        self, local_file_path: Path, remote_file_key: str
-    ) -> None:
+    def _upload_file(self, local_file_path: Path, remote_file_key: str) -> None:
         pass
 
     @abstractmethod

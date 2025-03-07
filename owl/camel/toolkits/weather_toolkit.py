@@ -36,7 +36,7 @@ class WeatherToolkit(BaseToolkit):
             variables.
         """
         # Get `OPENWEATHERMAP_API_KEY` here: https://openweathermap.org
-        OPENWEATHERMAP_API_KEY = os.environ.get('OPENWEATHERMAP_API_KEY')
+        OPENWEATHERMAP_API_KEY = os.environ.get("OPENWEATHERMAP_API_KEY")
         if not OPENWEATHERMAP_API_KEY:
             raise ValueError(
                 "`OPENWEATHERMAP_API_KEY` not found in environment "
@@ -48,12 +48,10 @@ class WeatherToolkit(BaseToolkit):
     def get_weather_data(
         self,
         city: str,
-        temp_units: Literal['kelvin', 'celsius', 'fahrenheit'] = 'kelvin',
-        wind_units: Literal[
-            'meters_sec', 'miles_hour', 'knots', 'beaufort'
-        ] = 'meters_sec',
-        visibility_units: Literal['meters', 'miles'] = 'meters',
-        time_units: Literal['unix', 'iso', 'date'] = 'unix',
+        temp_units: Literal["kelvin", "celsius", "fahrenheit"] = "kelvin",
+        wind_units: Literal["meters_sec", "miles_hour", "knots", "beaufort"] = "meters_sec",
+        visibility_units: Literal["meters", "miles"] = "meters",
+        time_units: Literal["unix", "iso", "date"] = "unix",
     ) -> str:
         r"""Fetch and return a comprehensive weather report for a given city
         as a string. The report includes current weather conditions,
@@ -102,8 +100,7 @@ class WeatherToolkit(BaseToolkit):
             import pyowm
         except ImportError:
             raise ImportError(
-                "Please install `pyowm` first. You can install it by running "
-                "`pip install pyowm`."
+                "Please install `pyowm` first. You can install it by running " "`pip install pyowm`."
             )
 
         OPENWEATHERMAP_API_KEY = self.get_openweathermap_api_key()
@@ -119,16 +116,16 @@ class WeatherToolkit(BaseToolkit):
 
             # Wind
             wind_data = observation.weather.wind(unit=wind_units)
-            wind_speed = wind_data.get('speed')
+            wind_speed = wind_data.get("speed")
             # 'N/A' if the degree is not available
-            wind_deg = wind_data.get('deg', 'N/A')
+            wind_deg = wind_data.get("deg", "N/A")
 
             # Visibility
             visibility_distance = observation.weather.visibility_distance
             visibility = (
                 str(visibility_distance)
-                if visibility_units == 'meters'
-                else str(observation.weather.visibility(unit='miles'))
+                if visibility_units == "meters"
+                else str(observation.weather.visibility(unit="miles"))
             )
 
             # Sunrise and Sunset
@@ -151,10 +148,7 @@ class WeatherToolkit(BaseToolkit):
             return weather_report
 
         except Exception as e:
-            error_message = (
-                f"An error occurred while fetching weather data for {city}: "
-                f"{e!s}."
-            )
+            error_message = f"An error occurred while fetching weather data for {city}: " f"{e!s}."
             return error_message
 
     def get_tools(self) -> List[FunctionTool]:

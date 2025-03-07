@@ -33,7 +33,7 @@ class CohereRerankRetriever(BaseRetriever):
         https://txt.cohere.com/rerank/
     """
 
-    @dependencies_required('cohere')
+    @dependencies_required("cohere")
     def __init__(
         self,
         model_name: str = "rerank-multilingual-v2.0",
@@ -64,8 +64,7 @@ class CohereRerankRetriever(BaseRetriever):
             self.api_key = api_key or os.environ["COHERE_API_KEY"]
         except ValueError as e:
             raise ValueError(
-                "Must pass in cohere api key or specify via COHERE_API_KEY"
-                " environment variable."
+                "Must pass in cohere api key or specify via COHERE_API_KEY" " environment variable."
             ) from e
 
         self.co = cohere.Client(self.api_key)
@@ -100,6 +99,6 @@ class CohereRerankRetriever(BaseRetriever):
         formatted_results = []
         for result in rerank_results.results:
             selected_chunk = retrieved_result[result.index]
-            selected_chunk['similarity score'] = result.relevance_score
+            selected_chunk["similarity score"] = result.relevance_score
             formatted_results.append(selected_chunk)
         return formatted_results

@@ -63,11 +63,9 @@ class DalleToolkit(BaseToolkit):
         """
         try:
             with open(image_path, "rb") as image_file:
-                return base64.b64encode(image_file.read()).decode('utf-8')
+                return base64.b64encode(image_file.read()).decode("utf-8")
         except Exception as e:
-            print(
-                f"An error occurred while converting image path to base64: {e}"
-            )
+            print(f"An error occurred while converting image path to base64: {e}")
             return ""
 
     def image_to_base64(self, image: Image.Image) -> str:
@@ -90,7 +88,7 @@ class DalleToolkit(BaseToolkit):
                 image.save(buffered_image, format="PNG")
                 buffered_image.seek(0)
                 image_bytes = buffered_image.read()
-                base64_str = base64.b64encode(image_bytes).decode('utf-8')
+                base64_str = base64.b64encode(image_bytes).decode("utf-8")
                 return base64_str
         except Exception as e:
             print(f"An error occurred: {e}")

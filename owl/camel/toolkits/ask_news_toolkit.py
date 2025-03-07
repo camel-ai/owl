@@ -19,9 +19,7 @@ from camel.toolkits import FunctionTool
 from camel.toolkits.base import BaseToolkit
 
 
-def _process_response(
-    response, return_type: str
-) -> Union[str, dict, Tuple[str, dict]]:
+def _process_response(response, return_type: str) -> Union[str, dict, Tuple[str, dict]]:
     r"""Process the response based on the specified return type.
 
     This helper method processes the API response and returns the content
@@ -115,19 +113,19 @@ class AskNewsToolkit(BaseToolkit):
         query: str,
         categories: List[
             Literal[
-                'Politics',
-                'Economy',
-                'Finance',
-                'Science',
-                'Technology',
-                'Sports',
-                'Climate',
-                'Environment',
-                'Culture',
-                'Entertainment',
-                'Business',
-                'Health',
-                'International',
+                "Politics",
+                "Economy",
+                "Finance",
+                "Science",
+                "Technology",
+                "Sports",
+                "Climate",
+                "Environment",
+                "Culture",
+                "Entertainment",
+                "Business",
+                "Health",
+                "International",
             ]
         ],
         reddit: int = 3,
@@ -202,9 +200,7 @@ class AskNewsToolkit(BaseToolkit):
                 error message if the process fails.
         """
         try:
-            response = self.asknews_client.chat.live_web_search(
-                queries=queries
-            )
+            response = self.asknews_client.chat.live_web_search(queries=queries)
 
             return _process_response(response, return_type)
 
@@ -248,32 +244,32 @@ class AskNewsToolkit(BaseToolkit):
     def query_finance(
         self,
         asset: Literal[
-            'bitcoin',
-            'ethereum',
-            'cardano',
-            'uniswap',
-            'ripple',
-            'solana',
-            'polkadot',
-            'polygon',
-            'chainlink',
-            'tether',
-            'dogecoin',
-            'monero',
-            'tron',
-            'binance',
-            'aave',
-            'tesla',
-            'microsoft',
-            'amazon',
+            "bitcoin",
+            "ethereum",
+            "cardano",
+            "uniswap",
+            "ripple",
+            "solana",
+            "polkadot",
+            "polygon",
+            "chainlink",
+            "tether",
+            "dogecoin",
+            "monero",
+            "tron",
+            "binance",
+            "aave",
+            "tesla",
+            "microsoft",
+            "amazon",
         ],
         metric: Literal[
-            'news_positive',
-            'news_negative',
-            'news_total',
-            'news_positive_weighted',
-            'news_negative_weighted',
-            'news_total_weighted',
+            "news_positive",
+            "news_negative",
+            "news_total",
+            "news_positive_weighted",
+            "news_negative_weighted",
+            "news_total_weighted",
         ] = "news_positive",
         return_type: Literal["list", "string"] = "string",
         date_from: Optional[datetime] = None,
@@ -320,8 +316,7 @@ class AskNewsToolkit(BaseToolkit):
                 )
                 descriptive_text = "\n".join(
                     [
-                        f"On {entry.datetime}, the sentiment value was "
-                        f"{entry.value}."
+                        f"On {entry.datetime}, the sentiment value was " f"{entry.value}."
                         for entry in time_series_data
                     ]
                 )
@@ -409,19 +404,19 @@ class AsyncAskNewsToolkit(BaseToolkit):
         query: str,
         categories: List[
             Literal[
-                'Politics',
-                'Economy',
-                'Finance',
-                'Science',
-                'Technology',
-                'Sports',
-                'Climate',
-                'Environment',
-                'Culture',
-                'Entertainment',
-                'Business',
-                'Health',
-                'International',
+                "Politics",
+                "Economy",
+                "Finance",
+                "Science",
+                "Technology",
+                "Sports",
+                "Climate",
+                "Environment",
+                "Culture",
+                "Entertainment",
+                "Business",
+                "Health",
+                "International",
             ]
         ],
         reddit: int = 3,
@@ -497,9 +492,7 @@ class AsyncAskNewsToolkit(BaseToolkit):
                 error message if the process fails.
         """
         try:
-            response = await self.asknews_client.chat.live_web_search(
-                queries=queries
-            )
+            response = await self.asknews_client.chat.live_web_search(queries=queries)
 
             return _process_response(response, return_type)
 
@@ -543,32 +536,32 @@ class AsyncAskNewsToolkit(BaseToolkit):
     async def query_finance(
         self,
         asset: Literal[
-            'bitcoin',
-            'ethereum',
-            'cardano',
-            'uniswap',
-            'ripple',
-            'solana',
-            'polkadot',
-            'polygon',
-            'chainlink',
-            'tether',
-            'dogecoin',
-            'monero',
-            'tron',
-            'binance',
-            'aave',
-            'tesla',
-            'microsoft',
-            'amazon',
+            "bitcoin",
+            "ethereum",
+            "cardano",
+            "uniswap",
+            "ripple",
+            "solana",
+            "polkadot",
+            "polygon",
+            "chainlink",
+            "tether",
+            "dogecoin",
+            "monero",
+            "tron",
+            "binance",
+            "aave",
+            "tesla",
+            "microsoft",
+            "amazon",
         ],
         metric: Literal[
-            'news_positive',
-            'news_negative',
-            'news_total',
-            'news_positive_weighted',
-            'news_negative_weighted',
-            'news_total_weighted',
+            "news_positive",
+            "news_negative",
+            "news_total",
+            "news_positive_weighted",
+            "news_negative_weighted",
+            "news_total_weighted",
         ] = "news_positive",
         return_type: Literal["list", "string"] = "string",
         date_from: Optional[datetime] = None,
@@ -615,8 +608,7 @@ class AsyncAskNewsToolkit(BaseToolkit):
                 )
                 descriptive_text = "\n".join(
                     [
-                        f"On {entry.datetime}, the sentiment value was "
-                        f"{entry.value}."
+                        f"On {entry.datetime}, the sentiment value was " f"{entry.value}."
                         for entry in time_series_data
                     ]
                 )

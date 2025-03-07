@@ -14,5 +14,5 @@
 from .agent_responses import ChatAgentResponse
 
 __all__ = [
-    'ChatAgentResponse',
+    "ChatAgentResponse",
 ]

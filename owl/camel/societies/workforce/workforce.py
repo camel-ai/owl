@@ -30,7 +30,7 @@ from camel.societies.workforce.prompts import (
     ASSIGN_TASK_PROMPT,
     CREATE_NODE_PROMPT,
     WF_TASK_DECOMPOSE_PROMPT,
-    WF_TASK_REPLAN_PROMPT
+    WF_TASK_REPLAN_PROMPT,
 )
 from camel.societies.workforce.role_playing_worker import RolePlayingWorker
 from camel.societies.workforce.single_agent_worker import SingleAgentWorker
@@ -92,9 +92,7 @@ class Workforce(BaseNode):
             "includes assigning tasks to a existing worker, creating "
             "a new worker for a task, etc.",
         )
-        self.coordinator_agent = ChatAgent(
-            coord_agent_sys_msg, **(coordinator_agent_kwargs or {})
-        )
+        self.coordinator_agent = ChatAgent(coord_agent_sys_msg, **(coordinator_agent_kwargs or {}))
 
         task_sys_msg = BaseMessage.make_assistant_message(
             role_name="Task Planner",
@@ -121,7 +119,7 @@ class Workforce(BaseNode):
                 content=task.content,
                 child_nodes_info=self._get_child_nodes_info(),
                 additional_info=task.additional_info,
-                failure_info=task.failure_info
+                failure_info=task.failure_info,
             )
         else:
             decompose_prompt = WF_TASK_DECOMPOSE_PROMPT.format(
@@ -164,9 +162,7 @@ class Workforce(BaseNode):
         return task
 
     @check_if_running(False)
-    def add_single_agent_worker(
-        self, description: str, worker: ChatAgent
-    ) -> Workforce:
+    def add_single_agent_worker(self, description: str, worker: ChatAgent) -> Workforce:
         r"""Add a worker node to the workforce that uses a single agent.
 
         Args:
@@ -259,17 +255,12 @@ class Workforce(BaseNode):
             if isinstance(child, Workforce):
                 additional_info = "A Workforce node"
             elif isinstance(child, SingleAgentWorker):
-                additional_info = "tools: " + (
-                    ", ".join(child.worker.func_dict.keys())
-                )
+                additional_info = "tools: " + (", ".join(child.worker.func_dict.keys()))
             elif isinstance(child, RolePlayingWorker):
                 additional_info = "A Role playing node"
             else:
                 additional_info = "Unknown node"
-            info += (
-                f"<{child.node_id}>:<{child.description}>:<"
-                f"{additional_info}>\n"
-            )
+            info += f"<{child.node_id}>:<{child.description}>:<" f"{additional_info}>\n"
         return info
 
     def _find_assignee(
@@ -295,9 +286,7 @@ class Workforce(BaseNode):
             content=prompt,
         )
 
-        response = self.coordinator_agent.step(
-            req, response_format=TaskAssignResult
-        )
+        response = self.coordinator_agent.step(req, response_format=TaskAssignResult)
         result_dict = ast.literal_eval(response.msg.content)
         task_assign_result = TaskAssignResult(**result_dict)
         return task_assign_result.assignee_id
@@ -346,9 +335,7 @@ class Workforce(BaseNode):
         print(f"{Fore.CYAN}{new_node} created.{Fore.RESET}")
 
         self._children.append(new_node)
-        self._child_listening_tasks.append(
-            asyncio.create_task(new_node.start())
-        )
+        self._child_listening_tasks.append(asyncio.create_task(new_node.start()))
         return new_node
 
     def _create_new_agent(self, role: str, sys_msg: str) -> ChatAgent:
@@ -425,7 +412,7 @@ class Workforce(BaseNode):
         # TODO: if task.failure_reason has content, then replanning, else retry
         if len(task.failure_reason) > 0:
             await self._replan_task(task)
-        
+
         # TODO: REFINE IT LATER
 
         # # Remove the failed task from the channel
@@ -440,10 +427,10 @@ class Workforce(BaseNode):
         #     self._pending_tasks.extendleft(reversed(subtasks))
         #     await self._post_ready_tasks()
         return False
-    
 
     async def _replan_task(self, failed_task: Task) -> bool:
         from copy import deepcopy
+
         logger.warning(f"Task {failed_task.id} has failed, replanning the whole task..")
 
         self._task.failure_info = f"""
@@ -470,7 +457,6 @@ class Workforce(BaseNode):
         self.set_channel(TaskChannel())
 
         await self.start()
-
 
     async def _handle_completed_task(self, task: Task) -> None:
         # archive the packet, making it into a dependency
@@ -506,9 +492,7 @@ class Workforce(BaseNode):
                 # TODO: multi-layer workforce
                 pass
             else:
-                raise ValueError(
-                    f"Task {returned_task.id} has an unexpected state."
-                )
+                raise ValueError(f"Task {returned_task.id} has an unexpected state.")
 
         # shut down the whole workforce tree
         self.stop()

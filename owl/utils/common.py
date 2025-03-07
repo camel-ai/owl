@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../")
 
 import json
@@ -11,7 +12,7 @@ from camel.toolkits import *
 
 def extract_pattern(content: str, pattern: str) -> Optional[str]:
     try:
-        _pattern = fr"<{pattern}>(.*?)</{pattern}>"
+        _pattern = rf"<{pattern}>(.*?)</{pattern}>"
         match = re.search(_pattern, content, re.DOTALL)
         if match:
             text = match.group(1)
@@ -21,14 +22,14 @@ def extract_pattern(content: str, pattern: str) -> Optional[str]:
     except Exception as e:
         logger.warning(f"Error extracting answer: {e}, current content: {content}")
         return None
-        
-        
+
+
 def extract_dict_from_str(text: str) -> Optional[Dict]:
     r"""Extract dict from LLM's outputs including "```json ```" tag."""
     text = text.replace("\\", "")
-    pattern = r'```json\s*(.*?)```'
+    pattern = r"```json\s*(.*?)```"
     match = re.search(pattern, text, re.DOTALL)
-    
+
     if match:
         json_str = match.group(1).strip()
         try:
@@ -36,7 +37,7 @@ def extract_dict_from_str(text: str) -> Optional[Dict]:
             return json.loads(json_str)
         except json.JSONDecodeError:
             return None
-    return None 
+    return None
 
 
 def process_tools(tools: List[str] | str) -> List[FunctionTool]:
@@ -49,9 +50,9 @@ def process_tools(tools: List[str] | str) -> List[FunctionTool]:
             toolkit_class: BaseToolkit = globals()[tool_name]
             if tool_name == "CodeExecutionToolkit":
                 tool_list.extend(toolkit_class(sandbox="subprocess", verbose=True).get_tools())
-            elif tool_name == 'ImageAnalysisToolkit':
+            elif tool_name == "ImageAnalysisToolkit":
                 tool_list.extend(toolkit_class(model="gpt-4o").get_tools())
-            elif tool_name == 'AudioAnalysisToolkit':
+            elif tool_name == "AudioAnalysisToolkit":
                 tool_list.extend(toolkit_class(reasoning=True).get_tools())
             elif tool_name == "WebToolkit":
                 tool_list.extend(toolkit_class(headless=True).get_tools())

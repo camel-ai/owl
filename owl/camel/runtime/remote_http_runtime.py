@@ -41,9 +41,7 @@ class RemoteHttpRuntime(BaseRuntime):
             (default::obj: `python3`)
     """
 
-    def __init__(
-        self, host: str, port: int = 8000, python_exec: str = "python3"
-    ):
+    def __init__(self, host: str, port: int = 8000, python_exec: str = "python3"):
         super().__init__()
         self.host = host
         self.port = port
@@ -108,9 +106,7 @@ class RemoteHttpRuntime(BaseRuntime):
 
             # Create a wrapper that explicitly binds `func`
             @wraps(inner_func)
-            def wrapper(
-                *args, func=func, redirect_stdout=redirect_stdout, **kwargs
-            ):
+            def wrapper(*args, func=func, redirect_stdout=redirect_stdout, **kwargs):
                 for key, value in kwargs.items():
                     if isinstance(value, BaseModel):
                         kwargs[key] = value.model_dump()

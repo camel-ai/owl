@@ -104,24 +104,16 @@ class VideoAnalysisToolkit(BaseToolkit):
     ) -> None:
         self._cleanup = download_directory is None
 
-        self._download_directory = Path(
-            download_directory or tempfile.mkdtemp()
-        ).resolve()
+        self._download_directory = Path(download_directory or tempfile.mkdtemp()).resolve()
 
-        self.video_downloader_toolkit = VideoDownloaderToolkit(
-            download_directory=str(self._download_directory)
-        )
+        self.video_downloader_toolkit = VideoDownloaderToolkit(download_directory=str(self._download_directory))
 
         try:
             self._download_directory.mkdir(parents=True, exist_ok=True)
         except FileExistsError:
-            raise ValueError(
-                f"{self._download_directory} is not a valid directory."
-            )
+            raise ValueError(f"{self._download_directory} is not a valid directory.")
         except OSError as e:
-            raise ValueError(
-                f"Error creating directory {self._download_directory}: {e}"
-            )
+            raise ValueError(f"Error creating directory {self._download_directory}: {e}")
 
         logger.info(f"Video will be downloaded to {self._download_directory}")
 
@@ -131,15 +123,11 @@ class VideoAnalysisToolkit(BaseToolkit):
             model_config_dict=QwenConfig(temperature=0.2).as_dict(),
         )
 
-        self.vl_agent = ChatAgent(
-            model=self.vl_model, output_language="English"
-        )
+        self.vl_agent = ChatAgent(model=self.vl_model, output_language="English")
 
         self.audio_models = OpenAIAudioModels()
 
-    def _extract_audio_from_video(
-        self, video_path: str, output_format: str = "mp3"
-    ) -> str:
+    def _extract_audio_from_video(self, video_path: str, output_format: str = "mp3") -> str:
         r"""Extract audio from the video.
 
         Args:
@@ -150,13 +138,9 @@ class VideoAnalysisToolkit(BaseToolkit):
         Returns:
             str: The path to the audio file."""
 
-        output_path = video_path.rsplit('.', 1)[0] + f".{output_format}"
+        output_path = video_path.rsplit(".", 1)[0] + f".{output_format}"
         try:
-            (
-                ffmpeg.input(video_path)
-                .output(output_path, vn=None, acodec="libmp3lame")
-                .run()
-            )
+            (ffmpeg.input(video_path).output(output_path, vn=None, acodec="libmp3lame").run())
             return output_path
         except ffmpeg.Error as e:
             raise RuntimeError(f"FFmpeg-Python failed: {e}")
@@ -166,9 +150,7 @@ class VideoAnalysisToolkit(BaseToolkit):
         audio_transcript = self.audio_models.speech_to_text(audio_path)
         return audio_transcript
 
-    def _extract_keyframes(
-        self, video_path: str, num_frames: int, threshold: float = 25.0
-    ) -> List[Image.Image]:
+    def _extract_keyframes(self, video_path: str, num_frames: int, threshold: float = 25.0) -> List[Image.Image]:
         r"""Extract keyframes from a video based on scene changes
         and return them as PIL.Image.Image objects.
 
@@ -230,9 +212,7 @@ class VideoAnalysisToolkit(BaseToolkit):
         is_url = all([parsed_url.scheme, parsed_url.netloc])
 
         if is_url:
-            video_path = self.video_downloader_toolkit.download_video(
-                video_path
-            )
+            video_path = self.video_downloader_toolkit.download_video(video_path)
         audio_path = self._extract_audio_from_video(video_path)
 
         video_frames = self._extract_keyframes(video_path, num_frames)

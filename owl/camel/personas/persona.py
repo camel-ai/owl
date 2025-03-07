@@ -80,13 +80,13 @@ class Persona(BaseModel):
     @classmethod
     def model_json_schema(cls):
         schema = super().schema()
-        schema['properties']['id'] = {'type': 'string', 'format': 'uuid'}
+        schema["properties"]["id"] = {"type": "string", "format": "uuid"}
         return schema
 
     def dict(self, *args, **kwargs):
         # Output: {'name': 'Alice', 'description': None, 'text_to_persona_prompt': '...', 'persona_to_persona_prompt': '...', 'id': 'f47ac10b-58cc-4372-a567-0e02b2c3d479'}  # noqa: E501
         d = super().model_dump(*args, **kwargs)
-        d['id'] = str(self.id)
+        d["id"] = str(self.id)
         return d
 
     def json(self, *args, **kwargs):

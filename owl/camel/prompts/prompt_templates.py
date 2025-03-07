@@ -32,9 +32,7 @@ class PromptTemplateGenerator:
         self,
         task_prompt_template_dict: Optional[TaskPromptTemplateDict] = None,
     ) -> None:
-        self.task_prompt_template_dict = (
-            task_prompt_template_dict or TaskPromptTemplateDict()
-        )
+        self.task_prompt_template_dict = task_prompt_template_dict or TaskPromptTemplateDict()
 
     def get_prompt_from_key(self, task_type: TaskType, key: Any) -> TextPrompt:
         r"""Generates a text prompt using the specified :obj:`task_type` and
@@ -56,8 +54,7 @@ class PromptTemplateGenerator:
 
         except KeyError:
             raise KeyError(
-                "Failed to get generate prompt template for "
-                f"task: {task_type.value} from key: {key}."
+                "Failed to get generate prompt template for " f"task: {task_type.value} from key: {key}."
             )
 
     def get_system_prompt(

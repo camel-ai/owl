@@ -50,9 +50,7 @@ class DockerRuntime(BaseRuntime):
             Docker client.
     """
 
-    def __init__(
-        self, image: str, port: int = 8000, remove: bool = True, **kwargs
-    ):
+    def __init__(self, image: str, port: int = 8000, remove: bool = True, **kwargs):
         super().__init__()
 
         import docker
@@ -72,9 +70,7 @@ class DockerRuntime(BaseRuntime):
         self.remove = remove
 
         if not self.client.images.list(name=self.image):
-            logger.warning(
-                f"Image {self.image} not found. Pulling from Docker Hub."
-            )
+            logger.warning(f"Image {self.image} not found. Pulling from Docker Hub.")
             self.client.images.pull(self.image)
 
     def mount(self, path: str, mount_path: str) -> "DockerRuntime":
@@ -159,9 +155,7 @@ class DockerRuntime(BaseRuntime):
             RuntimeError: If the container does not exist.
         """
         if not self.container:
-            raise RuntimeError(
-                "Container does not exist. Please build the container first."
-            )
+            raise RuntimeError("Container does not exist. Please build the container first.")
 
         return self.container.exec_run(**task.model_dump())
 
@@ -184,11 +178,7 @@ class DockerRuntime(BaseRuntime):
 
         mounts = []
         for local_path, mount_path in self.mounts.items():
-            mounts.append(
-                Mount(
-                    target=str(mount_path), source=str(local_path), type="bind"
-                )
-            )
+            mounts.append(Mount(target=str(mount_path), source=str(local_path), type="bind"))
 
         container_params = {
             "image": self.image,
@@ -222,17 +212,11 @@ class DockerRuntime(BaseRuntime):
             try:
                 with io.BytesIO() as tar_stream:
                     with tarfile.open(fileobj=tar_stream, mode="w") as tar:
-                        tar.add(
-                            local_path, arcname=os.path.basename(local_path)
-                        )
+                        tar.add(local_path, arcname=os.path.basename(local_path))
                     tar_stream.seek(0)
-                    self.container.put_archive(
-                        str(container_path), tar_stream.getvalue()
-                    )
+                    self.container.put_archive(str(container_path), tar_stream.getvalue())
             except docker.errors.APIError as e:
-                raise RuntimeError(
-                    f"Failed to copy file {local_path} to container: {e!s}"
-                )
+                raise RuntimeError(f"Failed to copy file {local_path} to container: {e!s}")
 
         if self.tasks:
             for task in tqdm(self.tasks, desc="Running tasks"):
@@ -278,9 +262,7 @@ class DockerRuntime(BaseRuntime):
 
             # Create a wrapper that explicitly binds `func`
             @wraps(inner_func)
-            def wrapper(
-                *args, func=func, redirect_stdout=redirect_stdout, **kwargs
-            ):
+            def wrapper(*args, func=func, redirect_stdout=redirect_stdout, **kwargs):
                 for key, value in kwargs.items():
                     if isinstance(value, BaseModel):
                         kwargs[key] = value.model_dump()
@@ -385,9 +367,7 @@ class DockerRuntime(BaseRuntime):
         """
         if not self.container:
             return self.build()
-        logger.warning(
-            "Container already exists. Returning existing container."
-        )
+        logger.warning("Container already exists. Returning existing container.")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

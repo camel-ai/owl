@@ -37,19 +37,23 @@ class PersonaHubPrompt(TextPromptDict):
             multiple related personas.
     """
 
-    TEXT_TO_PERSONA = TextPrompt("""
+    TEXT_TO_PERSONA = TextPrompt(
+        """
 Who is likely to {action} the following text? Provide a detailed and specific persona description.
 
 Text: {text}
-""")  # noqa: E501
+"""
+    )  # noqa: E501
 
-    PERSONA_TO_PERSONA = TextPrompt("""
+    PERSONA_TO_PERSONA = TextPrompt(
+        """
 Given the following persona: 
 {persona_name}
 {persona_description}
 
 Who is likely to be in a close relationship with this persona? Describe the related personas and their relationships.
-""")  # noqa: E501
+"""
+    )  # noqa: E501
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

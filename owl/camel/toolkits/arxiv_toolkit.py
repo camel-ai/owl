@@ -19,12 +19,13 @@ from camel.toolkits.function_tool import FunctionTool
 from camel.utils import dependencies_required
 from loguru import logger
 
+
 class ArxivToolkit(BaseToolkit):
     r"""A toolkit for interacting with the arXiv API to search and download
     academic papers.
     """
 
-    @dependencies_required('arxiv')
+    @dependencies_required("arxiv")
     def __init__(self) -> None:
         r"""Initializes the ArxivToolkit and sets up the arXiv client."""
         import arxiv
@@ -54,6 +55,7 @@ class ArxivToolkit(BaseToolkit):
                 query.
         """
         import arxiv
+
         logger.debug(f"Searching for papers with query: {query}")
 
         paper_ids = paper_ids or []
@@ -87,9 +89,7 @@ class ArxivToolkit(BaseToolkit):
         """
         from arxiv2text import arxiv_to_text
 
-        search_results = self._get_search_results(
-            query, paper_ids, max_results
-        )
+        search_results = self._get_search_results(query, paper_ids, max_results)
         papers_data = []
 
         for paper in search_results:
@@ -131,14 +131,10 @@ class ArxivToolkit(BaseToolkit):
         """
         logger.debug(f"Downloading papers for query: {query}")
         try:
-            search_results = self._get_search_results(
-                query, paper_ids, max_results
-            )
+            search_results = self._get_search_results(query, paper_ids, max_results)
 
             for paper in search_results:
-                paper.download_pdf(
-                    dirpath=output_dir, filename=f"{paper.title}" + ".pdf"
-                )
+                paper.download_pdf(dirpath=output_dir, filename=f"{paper.title}" + ".pdf")
             return "papers downloaded successfully"
         except Exception as e:
             return f"An error occurred: {e}"

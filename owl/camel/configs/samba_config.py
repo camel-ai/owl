@@ -70,9 +70,7 @@ class SambaVerseAPIConfig(BaseConfig):
         return config_dict
 
 
-SAMBA_VERSE_API_PARAMS = {
-    param for param in SambaVerseAPIConfig().model_fields.keys()
-}
+SAMBA_VERSE_API_PARAMS = {param for param in SambaVerseAPIConfig().model_fields.keys()}
 
 
 class SambaCloudAPIConfig(BaseConfig):
@@ -165,6 +163,4 @@ class SambaCloudAPIConfig(BaseConfig):
     tool_choice: Optional[Union[dict[str, str], str]] = None
 
 
-SAMBA_CLOUD_API_PARAMS = {
-    param for param in SambaCloudAPIConfig().model_fields.keys()
-}
+SAMBA_CLOUD_API_PARAMS = {param for param in SambaCloudAPIConfig().model_fields.keys()}

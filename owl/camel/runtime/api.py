@@ -73,10 +73,10 @@ for module_function in modules_functions:
 
             @app.post(f"/{func.get_function_name()}")
             async def dynamic_function(data: Dict, func=func):
-                redirect_stdout = data.get('redirect_stdout', False)
+                redirect_stdout = data.get("redirect_stdout", False)
                 if redirect_stdout:
                     sys.stdout = io.StringIO()
-                response_data = func.func(*data['args'], **data['kwargs'])
+                response_data = func.func(*data["args"], **data["kwargs"])
                 if redirect_stdout:
                     sys.stdout.seek(0)
                     output = sys.stdout.read()

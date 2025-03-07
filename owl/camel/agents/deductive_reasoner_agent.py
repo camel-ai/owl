@@ -227,10 +227,7 @@ square brackets)
             role_names = role_descriptions_dict.keys()
             role_with_description_prompt = (
                 "===== ROLES WITH DESCRIPTIONS =====\n"
-                + "\n".join(
-                    f"{role_name}:\n{role_descriptions_dict[role_name]}\n"
-                    for role_name in role_names
-                )
+                + "\n".join(f"{role_name}:\n{role_descriptions_dict[role_name]}\n" for role_name in role_names)
                 + "\n\n"
             )
         else:
@@ -247,23 +244,16 @@ square brackets)
             role_name="Deductive Reasoner", content=deduce
         )
 
-        response = self.step(
-            input_message=conditions_and_quality_generation_msg
-        )
+        response = self.step(input_message=conditions_and_quality_generation_msg)
 
         if response.terminated:
-            raise RuntimeError(
-                "Deduction failed. Error:\n" + f"{response.info}"
-            )
+            raise RuntimeError("Deduction failed. Error:\n" + f"{response.info}")
         msg: BaseMessage = response.msg
         logger.info(f"Message content:\n{msg.content}")
 
         # Extract the conditions from the message
         conditions_dict = {
-            f"condition {i}": cdt.replace("<", "")
-            .replace(">", "")
-            .strip()
-            .strip('\n')
+            f"condition {i}": cdt.replace("<", "").replace(">", "").strip().strip("\n")
             for i, cdt in re.findall(
                 r"condition (\d+):\s*(.+?)(?=condition \d+|- Entity)",
                 msg.content,
@@ -273,7 +263,7 @@ square brackets)
 
         # Extract the labels from the message
         labels = [
-            label.strip().strip('\n').strip("\"'")
+            label.strip().strip("\n").strip("\"'")
             for label in re.findall(
                 r"Entity/Label Recognition of Conditions:\n\[(.+?)\]",
                 msg.content,
@@ -283,19 +273,16 @@ square brackets)
 
         # Extract the quality from the message
         quality = next(
-            q.strip().strip('\n')
+            q.strip().strip("\n")
             for q in re.findall(
-                r"Quality Assessment \(\$Q\$\) \(do not use symbols\):"
-                r"\n(.+?)- Iterative",
+                r"Quality Assessment \(\$Q\$\) \(do not use symbols\):" r"\n(.+?)- Iterative",
                 msg.content,
                 re.DOTALL,
             )
         )
 
         # Convert them into JSON format
-        conditions_and_quality_json: Dict[
-            str, Union[List[str], Dict[str, str]]
-        ] = {}
+        conditions_and_quality_json: Dict[str, Union[List[str], Dict[str, str]]] = {}
         conditions_and_quality_json["conditions"] = conditions_dict
         conditions_and_quality_json["labels"] = labels
         conditions_and_quality_json["evaluate_quality"] = quality

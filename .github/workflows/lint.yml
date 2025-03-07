@@ -1,0 +1,26 @@
+name: Lint and Type Check
+
+on: [push, pull_request]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: pip install black==24.4.0 mypy==1.9.0
+
+    - name: Run Black formatting check
+      run: black . --check --diff -l 115 -t py311
+      
+    - name: Run strict type checking
+      run: mypy . --strict

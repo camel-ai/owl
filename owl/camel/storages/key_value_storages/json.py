@@ -74,9 +74,7 @@ class JsonStorage(BaseKeyValueStorage):
                 dictionary represents a unique record to be stored.
         """
         with self.json_path.open("a") as f:
-            f.writelines(
-                [json.dumps(r, cls=_CamelJSONEncoder) + "\n" for r in records]
-            )
+            f.writelines([json.dumps(r, cls=_CamelJSONEncoder) + "\n" for r in records])
 
     def load(self) -> List[Dict[str, Any]]:
         r"""Loads all stored records from the key-value storage system.
@@ -86,10 +84,7 @@ class JsonStorage(BaseKeyValueStorage):
                 represents a stored record.
         """
         with self.json_path.open("r") as f:
-            return [
-                json.loads(r, object_hook=self._json_object_hook)
-                for r in f.readlines()
-            ]
+            return [json.loads(r, object_hook=self._json_object_hook) for r in f.readlines()]
 
     def clear(self) -> None:
         r"""Removes all records from the key-value storage system."""

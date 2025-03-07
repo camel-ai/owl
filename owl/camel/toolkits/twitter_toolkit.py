@@ -91,17 +91,11 @@ def create_tweet(
 
     # Validate poll options and duration
     if (poll_options is None) != (poll_duration_minutes is None):
-        return (
-            "Error: Both `poll_options` and `poll_duration_minutes` must "
-            "be provided together or not at all."
-        )
+        return "Error: Both `poll_options` and `poll_duration_minutes` must " "be provided together or not at all."
 
     # Validate exclusive parameters
     if quote_tweet_id is not None and (poll_options or poll_duration_minutes):
-        return (
-            "Error: Cannot provide both `quote_tweet_id` and "
-            "(`poll_options` or `poll_duration_minutes`)."
-        )
+        return "Error: Cannot provide both `quote_tweet_id` and " "(`poll_options` or `poll_duration_minutes`)."
 
     payload: Dict[str, Any] = {"text": text}
 
@@ -119,10 +113,7 @@ def create_tweet(
 
     if response.status_code != HTTPStatus.CREATED:
         error_type = _handle_http_error(response)
-        return (
-            f"Request returned a(n) {error_type}: "
-            f"{response.status_code} {response.text}"
-        )
+        return f"Request returned a(n) {error_type}: " f"{response.status_code} {response.text}"
 
     json_response = response.json()
     tweet_id = json_response["data"]["id"]
@@ -167,10 +158,7 @@ def delete_tweet(tweet_id: str) -> str:
 
     if response.status_code != HTTPStatus.OK:
         error_type = _handle_http_error(response)
-        return (
-            f"Request returned a(n) {error_type}: "
-            f"{response.status_code} {response.text}"
-        )
+        return f"Request returned a(n) {error_type}: " f"{response.status_code} {response.text}"
 
     json_response = response.json()
 
@@ -178,10 +166,7 @@ def delete_tweet(tweet_id: str) -> str:
     # Defaults to False if not found.
     deleted_status = json_response.get("data", {}).get("deleted", False)
     if not deleted_status:
-        return (
-            f"The tweet with ID {tweet_id} was not deleted. "
-            "Please check the tweet ID and try again."
-        )
+        return f"The tweet with ID {tweet_id} was not deleted. " "Please check the tweet ID and try again."
 
     return f"Delete tweet {tweet_id} successful."
 
@@ -261,11 +246,7 @@ def _get_user_info(username: Optional[str] = None) -> str:
         os.getenv("TWITTER_ACCESS_TOKEN"),
         os.getenv("TWITTER_ACCESS_TOKEN_SECRET"),
     )
-    url = (
-        f"https://api.x.com/2/users/by/username/{username}"
-        if username
-        else "https://api.x.com/2/users/me"
-    )
+    url = f"https://api.x.com/2/users/by/username/{username}" if username else "https://api.x.com/2/users/me"
 
     tweet_fields = ["created_at", "text"]
     user_fields = [
@@ -293,10 +274,7 @@ def _get_user_info(username: Optional[str] = None) -> str:
 
     if response.status_code != HTTPStatus.OK:
         error_type = _handle_http_error(response)
-        return (
-            f"Request returned a(n) {error_type}: "
-            f"{response.status_code} {response.text}"
-        )
+        return f"Request returned a(n) {error_type}: " f"{response.status_code} {response.text}"
 
     json_response = response.json()
 
@@ -319,20 +297,16 @@ def _get_user_info(username: Optional[str] = None) -> str:
     for key in user_info_keys:
         if not (value := user_info.get(key)):
             continue
-        new_key = key.replace('_', ' ').capitalize()
+        new_key = key.replace("_", " ").capitalize()
         user_report_entries.append(f"{new_key}: {value}")
 
     if "created_at" in user_info:
-        created_at = datetime.datetime.strptime(
-            user_info["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
-        )
-        date_str = created_at.strftime('%B %d, %Y at %H:%M:%S')
+        created_at = datetime.datetime.strptime(user_info["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        date_str = created_at.strftime("%B %d, %Y at %H:%M:%S")
         user_report_entries.append(f"Account created at: {date_str}")
 
     protection_status = "private" if user_info["protected"] else "public"
-    user_report_entries.append(
-        f"Protected: This user's Tweets are {protection_status}"
-    )
+    user_report_entries.append(f"Protected: This user's Tweets are {protection_status}")
 
     verification_messages = {
         "blue": (
@@ -340,19 +314,15 @@ def _get_user_info(username: Optional[str] = None) -> str:
             "public figures, celebrities, or global brands"
         ),
         "business": (
-            "The user has a business verification, typically "
-            "reserved for businesses and corporations"
+            "The user has a business verification, typically " "reserved for businesses and corporations"
         ),
         "government": (
-            "The user has a government verification, typically "
-            "reserved for government officials or entities"
+            "The user has a government verification, typically " "reserved for government officials or entities"
         ),
         "none": "The user is not verified",
     }
     verification_type = user_info.get("verified_type", "none")
-    user_report_entries.append(
-        f"Verified type: {verification_messages.get(verification_type)}"
-    )
+    user_report_entries.append(f"Verified type: {verification_messages.get(verification_type)}")
 
     if "public_metrics" in user_info:
         metrics = user_info["public_metrics"]
@@ -366,14 +336,10 @@ def _get_user_info(username: Optional[str] = None) -> str:
         )
 
     if "pinned_tweet_id" in user_info:
-        user_report_entries.append(
-            f"Pinned tweet ID: {user_info['pinned_tweet_id']}"
-        )
+        user_report_entries.append(f"Pinned tweet ID: {user_info['pinned_tweet_id']}")
 
     if "created_at" in pinned_tweet and "text" in pinned_tweet:
-        tweet_created_at = datetime.datetime.strptime(
-            pinned_tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
-        )
+        tweet_created_at = datetime.datetime.strptime(pinned_tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
         user_report_entries.append(
             f"Pinned tweet information: Pinned tweet created at "
             f"{tweet_created_at.strftime('%B %d, %Y at %H:%M:%S')} "

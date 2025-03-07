@@ -20,10 +20,10 @@ from .ipython_interpreter import JupyterKernelInterpreter
 from .subprocess_interpreter import SubprocessInterpreter
 
 __all__ = [
-    'BaseInterpreter',
-    'InterpreterError',
-    'InternalPythonInterpreter',
-    'SubprocessInterpreter',
-    'DockerInterpreter',
-    'JupyterKernelInterpreter',
+    "BaseInterpreter",
+    "InterpreterError",
+    "InternalPythonInterpreter",
+    "SubprocessInterpreter",
+    "DockerInterpreter",
+    "JupyterKernelInterpreter",
 ]

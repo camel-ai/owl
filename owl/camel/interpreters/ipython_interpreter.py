@@ -74,8 +74,8 @@ class JupyterKernelInterpreter(BaseInterpreter):
     def _clean_ipython_output(output: str) -> str:
         r"""Remove ANSI escape sequences from the output."""
 
-        ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
-        return ansi_escape.sub('', output)
+        ansi_escape = re.compile(r"\x1B[@-_][0-?]*[ -/]*[@-~]")
+        return ansi_escape.sub("", output)
 
     def _execute(self, code: str, timeout: float) -> str:
         r"""Execute the code in the Jupyter kernel and return the result."""
@@ -105,8 +105,7 @@ class JupyterKernelInterpreter(BaseInterpreter):
                     outputs.append(msg_content["data"]["text/plain"])
                     if "image/png" in msg_content["data"]:
                         outputs.append(
-                            f"\n![image](data:image/png;base64,"
-                            f"{msg_content['data']['image/png']})\n"
+                            f"\n![image](data:image/png;base64," f"{msg_content['data']['image/png']})\n"
                         )
             except queue.Empty:
                 outputs.append("Time out")
@@ -163,6 +162,4 @@ class JupyterKernelInterpreter(BaseInterpreter):
             RuntimeError: Always raised because `JupyterKernelInterpreter`
                 does not support updating the action space.
         """
-        raise RuntimeError(
-            "SubprocessInterpreter doesn't support " "`action_space`."
-        )
+        raise RuntimeError("SubprocessInterpreter doesn't support " "`action_space`.")

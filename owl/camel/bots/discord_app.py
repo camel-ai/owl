@@ -37,7 +37,7 @@ class DiscordApp:
         token (Optional[str]): The Discord bot token used for authentication.
     """
 
-    @dependencies_required('discord')
+    @dependencies_required("discord")
     def __init__(
         self,
         channel_ids: Optional[List[int]] = None,
@@ -58,7 +58,7 @@ class DiscordApp:
             ValueError: If the `DISCORD_TOKEN` is not found in environment
                 variables.
         """
-        self.token = token or os.getenv('DISCORD_TOKEN')
+        self.token = token or os.getenv("DISCORD_TOKEN")
         self.channel_ids = channel_ids
 
         if not self.token:
@@ -101,9 +101,9 @@ class DiscordApp:
         When the bot is ready and logged into Discord, it prints a message
         displaying the bot's username.
         """
-        logger.info(f'We have logged in as {self._client.user}')
+        logger.info(f"We have logged in as {self._client.user}")
 
-    async def on_message(self, message: 'Message') -> None:
+    async def on_message(self, message: "Message") -> None:
         r"""Event handler for processing incoming messages.
 
         This method is called whenever a new message is received by the bot. It
@@ -126,9 +126,7 @@ class DiscordApp:
             return
 
         # Only respond to messages that mention the bot
-        if not self._client.user or not self._client.user.mentioned_in(
-            message
-        ):
+        if not self._client.user or not self._client.user.mentioned_in(message):
             return
 
         logger.info(f"Received message: {message.content}")

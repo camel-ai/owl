@@ -52,9 +52,7 @@ def get_media_source_text(block: dict) -> str:
     source = (
         block_content.get("external", {}).get("url")
         or block_content.get("file", {}).get("url")
-        or block_content.get(
-            "url", "[Missing case for media block types]: " + block_type
-        )
+        or block_content.get("url", "[Missing case for media block types]: " + block_type)
     )
 
     # Extract caption if available
@@ -116,9 +114,7 @@ class NotionToolkit(BaseToolkit):
             {
                 "type": user["type"],
                 "name": user["name"],
-                "workspace": user.get(user.get("type"), {}).get(
-                    "workspace_name", ""
-                ),
+                "workspace": user.get(user.get("type"), {}).get("workspace_name", ""),
             }
             for user in all_users_info
         ]
@@ -155,9 +151,7 @@ class NotionToolkit(BaseToolkit):
                 "title": next(
                     (
                         title.get("text", {}).get("content")
-                        for title in page["properties"]
-                        .get("title", {})
-                        .get("title", [])
+                        for title in page["properties"].get("title", {}).get("title", [])
                         if title["type"] == "text"
                     ),
                     None,
@@ -184,9 +178,7 @@ class NotionToolkit(BaseToolkit):
         while True:
             response = cast(
                 dict,
-                self.notion_client.blocks.children.list(
-                    block_id=block_id, start_cursor=cursor
-                ),
+                self.notion_client.blocks.children.list(block_id=block_id, start_cursor=cursor),
             )
             blocks.extend(response["results"])
 
@@ -195,9 +187,7 @@ class NotionToolkit(BaseToolkit):
 
             cursor = response["next_cursor"]
 
-        block_text_content = " ".join(
-            [self.get_text_from_block(sub_block) for sub_block in blocks]
-        )
+        block_text_content = " ".join([self.get_text_from_block(sub_block) for sub_block in blocks])
 
         return block_text_content
 
@@ -213,9 +203,7 @@ class NotionToolkit(BaseToolkit):
         # Get rich text for supported block types
         if block.get(block.get("type"), {}).get("rich_text"):
             # Empty string if it's an empty line
-            text = get_plain_text_from_rich_text(
-                block[block["type"]]["rich_text"]
-            )
+            text = get_plain_text_from_rich_text(block[block["type"]]["rich_text"])
         else:
             # Handle block types by case
             block_type = block.get("type")
@@ -244,10 +232,7 @@ class NotionToolkit(BaseToolkit):
                         """
                     )
                 else:
-                    text = (
-                        "Source sync block that another"
-                        + "blocked is synced with."
-                    )
+                    text = "Source sync block that another" + "blocked is synced with."
             elif block_type == "table":
                 text = f"Table width: {block['table']['table_width']}"
                 # Fetch children for full table data

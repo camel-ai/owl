@@ -145,9 +145,7 @@ class OpenAITokenCounter(BaseTokenCounter):
             num_tokens += self.tokens_per_message
             for key, value in message.items():
                 if not isinstance(value, list):
-                    num_tokens += len(
-                        self.encoding.encode(str(value), disallowed_special=())
-                    )
+                    num_tokens += len(self.encoding.encode(str(value), disallowed_special=()))
                 else:
                     for item in value:
                         if item["type"] == "text":
@@ -167,20 +165,14 @@ class OpenAITokenCounter(BaseTokenCounter):
                             image_prefix: Optional[str] = None
                             for image_type in list(OpenAIImageType):
                                 # Find the correct image format
-                                image_prefix = image_prefix_format.format(
-                                    image_type.value
-                                )
+                                image_prefix = image_prefix_format.format(image_type.value)
                                 if image_prefix in image_str:
                                     break
                             assert isinstance(image_prefix, str)
                             encoded_image = image_str.split(image_prefix)[1]
-                            image_bytes = BytesIO(
-                                base64.b64decode(encoded_image)
-                            )
+                            image_bytes = BytesIO(base64.b64decode(encoded_image))
                             image = Image.open(image_bytes)
-                            num_tokens += self._count_tokens_from_image(
-                                image, OpenAIVisionDetailType(detail)
-                            )
+                            num_tokens += self._count_tokens_from_image(image, OpenAIVisionDetailType(detail))
                 if key == "name":
                     num_tokens += self.tokens_per_name
 
@@ -188,9 +180,7 @@ class OpenAITokenCounter(BaseTokenCounter):
         num_tokens += 3
         return num_tokens
 
-    def _count_tokens_from_image(
-        self, image: Image.Image, detail: OpenAIVisionDetailType
-    ) -> int:
+    def _count_tokens_from_image(self, image: Image.Image, detail: OpenAIVisionDetailType) -> int:
         r"""Count image tokens for OpenAI vision model. An :obj:`"auto"`
         resolution model will be treated as :obj:`"high"`. All images with
         :obj:`"low"` detail cost 85 tokens each. Images with :obj:`"high"` detail
@@ -229,7 +219,7 @@ class OpenAITokenCounter(BaseTokenCounter):
 
 
 class AnthropicTokenCounter(BaseTokenCounter):
-    @dependencies_required('anthropic')
+    @dependencies_required("anthropic")
     def __init__(self, model: str):
         r"""Constructor for the token counter for Anthropic models.
 
@@ -241,7 +231,7 @@ class AnthropicTokenCounter(BaseTokenCounter):
         self.client = Anthropic()
         self.model = model
 
-    @dependencies_required('anthropic')
+    @dependencies_required("anthropic")
     def count_tokens_from_messages(self, messages: List[OpenAIMessage]) -> int:
         r"""Count number of tokens in the provided message list using
         loaded tokenizer specific for this type of model.
@@ -292,11 +282,11 @@ class GeminiTokenCounter(BaseTokenCounter):
         """
         converted_messages = []
         for message in messages:
-            role = message.get('role')
-            if role == 'assistant':
-                role_to_gemini = 'model'
+            role = message.get("role")
+            if role == "assistant":
+                role_to_gemini = "model"
             else:
-                role_to_gemini = 'user'
+                role_to_gemini = "user"
             converted_message = {
                 "role": role_to_gemini,
                 "parts": message.get("content"),
@@ -404,9 +394,7 @@ class MistralTokenCounter(BaseTokenCounter):
             total_tokens += len(tokens)
         return total_tokens
 
-    def _convert_response_from_openai_to_mistral(
-        self, openai_msg: OpenAIMessage
-    ) -> ChatCompletionRequest:
+    def _convert_response_from_openai_to_mistral(self, openai_msg: OpenAIMessage) -> ChatCompletionRequest:
         r"""Convert an OpenAI message to a Mistral ChatCompletionRequest.
 
         Args:

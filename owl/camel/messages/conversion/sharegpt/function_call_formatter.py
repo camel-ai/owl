@@ -19,8 +19,8 @@ from camel.messages.conversion import (
     ToolResponse,
 )
 
-CallT = TypeVar('CallT', bound=ToolCall, covariant=True)
-ResponseT = TypeVar('ResponseT', bound=ToolResponse, covariant=True)
+CallT = TypeVar("CallT", bound=ToolCall, covariant=True)
+ResponseT = TypeVar("ResponseT", bound=ToolResponse, covariant=True)
 
 
 class FunctionCallFormatter(ABC, Generic[CallT, ResponseT]):
@@ -37,9 +37,7 @@ class FunctionCallFormatter(ABC, Generic[CallT, ResponseT]):
         pass
 
     @abstractmethod
-    def format_tool_call(
-        self, content: str, func_name: str, args: Dict[str, Any]
-    ) -> str:
+    def format_tool_call(self, content: str, func_name: str, args: Dict[str, Any]) -> str:
         r"""Format a function call into a message string"""
         pass
 

@@ -32,9 +32,7 @@ class VisionLanguageEmbedding(BaseEmbedding[Union[str, Image.Image]]):
         RuntimeError: If an unsupported model type is specified.
     """
 
-    def __init__(
-        self, model_name: str = "openai/clip-vit-base-patch32"
-    ) -> None:
+    def __init__(self, model_name: str = "openai/clip-vit-base-patch32") -> None:
         r"""Initializes the: obj: `VisionLanguageEmbedding` class with a
         specified model and return the dimension of embeddings.
 
@@ -54,9 +52,7 @@ class VisionLanguageEmbedding(BaseEmbedding[Union[str, Image.Image]]):
         self.valid_model_kwargs = []
 
         try:
-            self.valid_processor_kwargs = (
-                self.processor.image_processor._valid_processor_keys
-            )
+            self.valid_processor_kwargs = self.processor.image_processor._valid_processor_keys
             self.valid_model_kwargs = [
                 "pixel_values",
                 "return_dict",
@@ -67,9 +63,7 @@ class VisionLanguageEmbedding(BaseEmbedding[Union[str, Image.Image]]):
             pass
         self.dim: Optional[int] = None
 
-    def embed_list(
-        self, objs: List[Union[Image.Image, str]], **kwargs: Any
-    ) -> List[List[float]]:
+    def embed_list(self, objs: List[Union[Image.Image, str]], **kwargs: Any) -> List[List[float]]:
         """Generates embeddings for the given images or texts.
 
         Args:
@@ -90,11 +84,9 @@ class VisionLanguageEmbedding(BaseEmbedding[Union[str, Image.Image]]):
         if not objs:
             raise ValueError("Input objs list is empty.")
 
-        image_processor_kwargs: Optional[dict] = kwargs.get(
-            'image_processor_kwargs', {}
-        )
-        tokenizer_kwargs: Optional[dict] = kwargs.get('tokenizer_kwargs', {})
-        model_kwargs: Optional[dict] = kwargs.get('model_kwargs', {})
+        image_processor_kwargs: Optional[dict] = kwargs.get("image_processor_kwargs", {})
+        tokenizer_kwargs: Optional[dict] = kwargs.get("tokenizer_kwargs", {})
+        model_kwargs: Optional[dict] = kwargs.get("model_kwargs", {})
 
         result_list = []
         for obj in objs:
@@ -106,11 +98,7 @@ class VisionLanguageEmbedding(BaseEmbedding[Union[str, Image.Image]]):
                     **image_processor_kwargs,
                 )
                 image_feature = (
-                    self.model.get_image_features(
-                        **image_input, **model_kwargs
-                    )
-                    .squeeze(dim=0)
-                    .tolist()
+                    self.model.get_image_features(**image_input, **model_kwargs).squeeze(dim=0).tolist()
                 )
                 result_list.append(image_feature)
             elif isinstance(obj, str):
@@ -120,11 +108,7 @@ class VisionLanguageEmbedding(BaseEmbedding[Union[str, Image.Image]]):
                     padding=True,
                     **tokenizer_kwargs,
                 )
-                text_feature = (
-                    self.model.get_text_features(**text_input, **model_kwargs)
-                    .squeeze(dim=0)
-                    .tolist()
-                )
+                text_feature = self.model.get_text_features(**text_input, **model_kwargs).squeeze(dim=0).tolist()
                 result_list.append(text_feature)
             else:
                 raise ValueError("Input type is not image nor text.")
@@ -143,7 +127,7 @@ class VisionLanguageEmbedding(BaseEmbedding[Union[str, Image.Image]]):
             int: The dimensionality of the embedding for the current model.
         """
         if self.dim is None:
-            text = 'dimension'
+            text = "dimension"
             inputs = self.processor(text=[text], return_tensors="pt")
             self.dim = self.model.get_text_features(**inputs).shape[1]
         return self.dim

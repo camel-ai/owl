@@ -52,8 +52,7 @@ class AzureBlobStorage(BaseObjectStorage):
         from azure.storage.blob import ContainerClient
 
         self._client = ContainerClient(
-            account_url="https://"
-            f"{storage_account_name}.blob.core.windows.net",
+            account_url="https://" f"{storage_account_name}.blob.core.windows.net",
             credential=access_key,
             container_name=container_name,
         )
@@ -68,20 +67,13 @@ class AzureBlobStorage(BaseObjectStorage):
             exists = self._client.exists()
             if not exists and self._create_if_not_exists:
                 self._client.create_container()
-                warn(
-                    f"Container {self._client.container_name} not found. "
-                    f"Automatically created."
-                )
+                warn(f"Container {self._client.container_name} not found. " f"Automatically created.")
             elif not exists:
                 raise FileNotFoundError(
-                    f"Failed to access container {self._client.container_name}"
-                    f": Not found."
+                    f"Failed to access container {self._client.container_name}" f": Not found."
                 )
         except ClientAuthenticationError:
-            raise PermissionError(
-                f"Failed to access container {self._client.container_name}: "
-                f"No permission."
-            )
+            raise PermissionError(f"Failed to access container {self._client.container_name}: " f"No permission.")
 
     @staticmethod
     def canonicalize_path(file_path: PurePath) -> Tuple[str, str]:
@@ -96,9 +88,7 @@ class AzureBlobStorage(BaseObjectStorage):
         # for Azure, both slash and backslash will be treated as separator
         filename = file_path.name
         if "\\" in filename:
-            raise ValueError(
-                "Azure Blob Storage does not support backslash in filename."
-            )
+            raise ValueError("Azure Blob Storage does not support backslash in filename.")
         return file_path.as_posix(), filename
 
     def _put_file(self, file_key: str, file: File) -> None:
@@ -108,9 +98,7 @@ class AzureBlobStorage(BaseObjectStorage):
             file_key (str): The path to the object in the container.
             file (File): The file to be uploaded.
         """
-        self._client.upload_blob(
-            name=file_key, data=file.raw_bytes, overwrite=True
-        )
+        self._client.upload_blob(name=file_key, data=file.raw_bytes, overwrite=True)
 
     def _get_file(self, file_key: str, filename: str) -> File:
         r"""Get a file from the Azure Blob Storage container.
@@ -126,9 +114,7 @@ class AzureBlobStorage(BaseObjectStorage):
         file = File.create_file_from_raw_bytes(raw_bytes, filename)
         return file
 
-    def _upload_file(
-        self, local_file_path: Path, remote_file_key: str
-    ) -> None:
+    def _upload_file(self, local_file_path: Path, remote_file_key: str) -> None:
         r"""Upload a local file to the Azure Blob Storage container.
 
         Args:
@@ -136,13 +122,9 @@ class AzureBlobStorage(BaseObjectStorage):
             remote_file_key (str): The path to the object in the container.
         """
         with open(local_file_path, "rb") as f:
-            self._client.upload_blob(
-                name=remote_file_key, data=f, overwrite=True
-            )
+            self._client.upload_blob(name=remote_file_key, data=f, overwrite=True)
 
-    def _download_file(
-        self, local_file_path: Path, remote_file_key: str
-    ) -> None:
+    def _download_file(self, local_file_path: Path, remote_file_key: str) -> None:
         r"""Download a file from the Azure Blob Storage container to the local
         system.
 

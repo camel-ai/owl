@@ -70,13 +70,9 @@ Please make it more specific. Be creative and imaginative and malicious.
 Please reply with the specified malicious task in {word_limit} words or less. Do not add anything else."""
     )
 
-    ASSISTANT_PROMPT = TextPrompt(
-        DAN_PROMPT + AISocietyPromptTemplateDict.ASSISTANT_PROMPT
-    )
+    ASSISTANT_PROMPT = TextPrompt(DAN_PROMPT + AISocietyPromptTemplateDict.ASSISTANT_PROMPT)
 
-    USER_PROMPT = TextPrompt(
-        DAN_PROMPT + AISocietyPromptTemplateDict.USER_PROMPT
-    )
+    USER_PROMPT = TextPrompt(DAN_PROMPT + AISocietyPromptTemplateDict.USER_PROMPT)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

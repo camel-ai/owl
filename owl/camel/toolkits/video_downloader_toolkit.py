@@ -58,8 +58,8 @@ def _capture_screenshot(video_file: str, timestamp: float) -> Image.Image:
     try:
         out, _ = (
             ffmpeg.input(video_file, ss=timestamp)
-            .filter('scale', 320, -1)
-            .output('pipe:', vframes=1, format='image2', vcodec='png')
+            .filter("scale", 320, -1)
+            .output("pipe:", vframes=1, format="image2", vcodec="png")
             .run(capture_stdout=True, capture_stderr=True)
         )
     except ffmpeg.Error as e:
@@ -90,20 +90,14 @@ class VideoDownloaderToolkit(BaseToolkit):
         self._cleanup = download_directory is None
         self._cookies_path = cookies_path
 
-        self._download_directory = Path(
-            download_directory or tempfile.mkdtemp()
-        ).resolve()
+        self._download_directory = Path(download_directory or tempfile.mkdtemp()).resolve()
 
         try:
             self._download_directory.mkdir(parents=True, exist_ok=True)
         except FileExistsError:
-            raise ValueError(
-                f"{self._download_directory} is not a valid directory."
-            )
+            raise ValueError(f"{self._download_directory} is not a valid directory.")
         except OSError as e:
-            raise ValueError(
-                f"Error creating directory {self._download_directory}: {e}"
-            )
+            raise ValueError(f"Error creating directory {self._download_directory}: {e}")
 
         logger.info(f"Video will be downloaded to {self._download_directory}")
 
@@ -131,10 +125,10 @@ class VideoDownloaderToolkit(BaseToolkit):
 
         video_template = self._download_directory / "%(title)s.%(ext)s"
         ydl_opts = {
-            'format': 'bestvideo+bestaudio/best',
-            'outtmpl': str(video_template),
-            'force_generic_extractor': True,
-            'cookiefile': self._cookies_path,
+            "format": "bestvideo+bestaudio/best",
+            "outtmpl": str(video_template),
+            "force_generic_extractor": True,
+            "cookiefile": self._cookies_path,
         }
 
         try:
@@ -164,14 +158,12 @@ class VideoDownloaderToolkit(BaseToolkit):
             video_path = self.download_video(video_path)
         video_file = video_path
 
-        with open(video_file, 'rb') as f:
+        with open(video_file, "rb") as f:
             video_bytes = f.read()
 
         return video_bytes
 
-    def get_video_screenshots(
-        self, video_path: str, amount: int
-    ) -> List[Image.Image]:
+    def get_video_screenshots(self, video_path: str, amount: int) -> List[Image.Image]:
         r"""Capture screenshots from the video at specified timestamps or by
         dividing the video into equal parts if an integer is provided.
 
@@ -193,7 +185,7 @@ class VideoDownloaderToolkit(BaseToolkit):
         # Get the video length
         try:
             probe = ffmpeg.probe(video_file)
-            video_length = float(probe['format']['duration'])
+            video_length = float(probe["format"]["duration"])
         except ffmpeg.Error as e:
             raise RuntimeError(f"Failed to determine video length: {e.stderr}")
 

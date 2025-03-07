@@ -39,43 +39,33 @@ def update_license_in_file(
     start_line_start_with: str,
     end_line_start_with: str,
 ) -> bool:
-    with open(
-        file_path, 'r', encoding='utf-8'
-    ) as f:  # for windows compatibility
+    with open(file_path, "r", encoding="utf-8") as f:  # for windows compatibility
         content = f.read()
 
-    with open(license_template_path, 'r', encoding='utf-8') as f:
+    with open(license_template_path, "r", encoding="utf-8") as f:
         new_license = f.read().strip()
 
-    maybe_existing_licenses = re.findall(
-        r'^#.*?(?=\n)', content, re.MULTILINE | re.DOTALL
-    )
-    start_index = fine_license_start_line(
-        maybe_existing_licenses, start_line_start_with
-    )
-    end_index = find_license_end_line(
-        maybe_existing_licenses, end_line_start_with
-    )
+    maybe_existing_licenses = re.findall(r"^#.*?(?=\n)", content, re.MULTILINE | re.DOTALL)
+    start_index = fine_license_start_line(maybe_existing_licenses, start_line_start_with)
+    end_index = find_license_end_line(maybe_existing_licenses, end_line_start_with)
     if start_index is not None and end_index is not None:
-        maybe_existing_licenses = maybe_existing_licenses[
-            start_index : end_index + 1
-        ]
+        maybe_existing_licenses = maybe_existing_licenses[start_index : end_index + 1]
     else:
         maybe_existing_licenses = None
     if maybe_existing_licenses:
-        maybe_old_licenses = '\n'.join(maybe_existing_licenses)
+        maybe_old_licenses = "\n".join(maybe_existing_licenses)
         if maybe_old_licenses.strip() != new_license.strip():
             replaced_content = content.replace(maybe_old_licenses, new_license)
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 f.write(replaced_content)
-            print(f'Replaced license in {file_path}')
+            print(f"Replaced license in {file_path}")
             return True
         else:
             return False
     else:
-        with open(file_path, 'w') as f:
-            f.write(new_license + '\n' + content)
-        print(f'Added license to {file_path}')
+        with open(file_path, "w") as f:
+            f.write(new_license + "\n" + content)
+        print(f"Added license to {file_path}")
         return True
 
 
@@ -87,16 +77,16 @@ def update_license_in_directory(
 ) -> None:
     # Check if directory exists
     if not os.path.isdir(directory_path):
-        raise NotADirectoryError(f'{directory_path} is not a directory')
+        raise NotADirectoryError(f"{directory_path} is not a directory")
     # Check if license template exists
     if not os.path.isfile(license_template_path):
-        raise FileNotFoundError(f'{license_template_path} not found')
+        raise FileNotFoundError(f"{license_template_path} not found")
 
     file_count = 0
     for py_files in Path(directory_path).rglob("*.py"):
-        if py_files.name.startswith('.'):
+        if py_files.name.startswith("."):
             continue
-        if any(part.startswith('.') for part in py_files.parts):
+        if any(part.startswith(".") for part in py_files.parts):
             continue
         if update_license_in_file(
             py_files,
@@ -106,10 +96,10 @@ def update_license_in_directory(
         ):
             file_count += 1
 
-    print(f'License updated in {file_count} files')
+    print(f"License updated in {file_count} files")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) < 3:
         print(
             "Usage from command line: "

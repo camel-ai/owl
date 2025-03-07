@@ -38,11 +38,9 @@ class MeshyToolkit(BaseToolkit):
         r"""Initializes the MeshyToolkit with the API key from the
         environment.
         """
-        self.api_key = os.getenv('MESHY_API_KEY')
+        self.api_key = os.getenv("MESHY_API_KEY")
 
-    def generate_3d_preview(
-        self, prompt: str, art_style: str, negative_prompt: str
-    ) -> Dict[str, Any]:
+    def generate_3d_preview(self, prompt: str, art_style: str, negative_prompt: str) -> Dict[str, Any]:
         r"""Generates a 3D preview using the Meshy API.
 
         Args:
@@ -134,9 +132,7 @@ class MeshyToolkit(BaseToolkit):
 
         while True:
             if time.time() - start_time > timeout:
-                raise TimeoutError(
-                    f"Task {task_id} timed out after {timeout} seconds"
-                )
+                raise TimeoutError(f"Task {task_id} timed out after {timeout} seconds")
 
             response = self.get_task_status(task_id)
             status = response.get("status")  # Direct access to status field
@@ -154,9 +150,7 @@ class MeshyToolkit(BaseToolkit):
 
             time.sleep(polling_interval)
 
-    def generate_3d_model_complete(
-        self, prompt: str, art_style: str, negative_prompt: str
-    ) -> Dict[str, Any]:
+    def generate_3d_model_complete(self, prompt: str, art_style: str, negative_prompt: str) -> Dict[str, Any]:
         r"""Generates a complete 3D model by handling preview and refinement
         stages
 
@@ -169,9 +163,7 @@ class MeshyToolkit(BaseToolkit):
             Dict[str, Any]: The final refined 3D model response.
         """
         # Generate preview
-        preview_response = self.generate_3d_preview(
-            prompt, art_style, negative_prompt
-        )
+        preview_response = self.generate_3d_preview(prompt, art_style, negative_prompt)
         preview_task_id = str(preview_response.get("result"))
 
         # Wait for preview completion

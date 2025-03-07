@@ -82,12 +82,8 @@ class BaseMessage:
         meta_dict: Optional[Dict[str, str]] = None,
         video_bytes: Optional[bytes] = None,
         image_list: Optional[List[Image.Image]] = None,
-        image_detail: Union[
-            OpenAIVisionDetailType, str
-        ] = OpenAIVisionDetailType.AUTO,
-        video_detail: Union[
-            OpenAIVisionDetailType, str
-        ] = OpenAIVisionDetailType.LOW,
+        image_detail: Union[OpenAIVisionDetailType, str] = OpenAIVisionDetailType.AUTO,
+        video_detail: Union[OpenAIVisionDetailType, str] = OpenAIVisionDetailType.LOW,
     ) -> "BaseMessage":
         r"""Create a new user message.
 
@@ -127,12 +123,8 @@ class BaseMessage:
         meta_dict: Optional[Dict[str, str]] = None,
         video_bytes: Optional[bytes] = None,
         image_list: Optional[List[Image.Image]] = None,
-        image_detail: Union[
-            OpenAIVisionDetailType, str
-        ] = OpenAIVisionDetailType.AUTO,
-        video_detail: Union[
-            OpenAIVisionDetailType, str
-        ] = OpenAIVisionDetailType.LOW,
+        image_detail: Union[OpenAIVisionDetailType, str] = OpenAIVisionDetailType.AUTO,
+        video_detail: Union[OpenAIVisionDetailType, str] = OpenAIVisionDetailType.LOW,
     ) -> "BaseMessage":
         r"""Create a new assistant message.
 
@@ -195,10 +187,7 @@ class BaseMessage:
         elif isinstance(other, str):
             combined_content = self.content.__add__(other)
         else:
-            raise TypeError(
-                f"Unsupported operand type(s) for +: '{type(self)}' and "
-                f"'{type(other)}'"
-            )
+            raise TypeError(f"Unsupported operand type(s) for +: '{type(self)}' and " f"'{type(other)}'")
         return self.create_new_instance(combined_content)
 
     def __mul__(self, other: Any) -> Union["BaseMessage", Any]:
@@ -214,10 +203,7 @@ class BaseMessage:
             multiplied_content = self.content.__mul__(other)
             return self.create_new_instance(multiplied_content)
         else:
-            raise TypeError(
-                f"Unsupported operand type(s) for *: '{type(self)}' and "
-                f"'{type(other)}'"
-            )
+            raise TypeError(f"Unsupported operand type(s) for *: '{type(self)}' and " f"'{type(other)}'")
 
     def __len__(self) -> int:
         r"""Length operator override for :obj:`BaseMessage`.
@@ -256,9 +242,7 @@ class BaseMessage:
         idx = 0
         start_idx = 0
         while idx < len(lines):
-            while idx < len(lines) and (
-                not lines[idx].lstrip().startswith("```")
-            ):
+            while idx < len(lines) and (not lines[idx].lstrip().startswith("```")):
                 idx += 1
             text = "\n".join(lines[start_idx:idx]).strip()
             text_prompts.append(TextPrompt(text))
@@ -316,9 +300,7 @@ class BaseMessage:
         # Check if this is a function-related message
         if message.from_ == "gpt":
             func_info = function_format.extract_tool_calls(message.value)
-            if (
-                func_info and len(func_info) == 1
-            ):  # TODO: Handle multiple tool calls
+            if func_info and len(func_info) == 1:  # TODO: Handle multiple tool calls
                 # Including cleaned content is useful to
                 # remind consumers of non-considered content
                 clean_content = re.sub(
@@ -435,15 +417,10 @@ class BaseMessage:
 
                 image_type: str = image.format.lower()
                 if image_type not in OpenAIImageType:
-                    raise ValueError(
-                        f"Image type {image.format} "
-                        f"is not supported by OpenAI vision model"
-                    )
+                    raise ValueError(f"Image type {image.format} " f"is not supported by OpenAI vision model")
                 with io.BytesIO() as buffer:
                     image.save(fp=buffer, format=image.format)
-                    encoded_image = base64.b64encode(buffer.getvalue()).decode(
-                        "utf-8"
-                    )
+                    encoded_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
                 image_prefix = f"data:image/{image_type};base64,"
                 hybird_content.append(
                     {
@@ -461,16 +438,11 @@ class BaseMessage:
             base64Frames: List[str] = []
             frame_count = 0
             # read video bytes
-            video = iio.imiter(
-                self.video_bytes, plugin=Constants.VIDEO_DEFAULT_PLUG_PYAV
-            )
+            video = iio.imiter(self.video_bytes, plugin=Constants.VIDEO_DEFAULT_PLUG_PYAV)
 
             for frame in video:
                 frame_count += 1
-                if (
-                    frame_count % Constants.VIDEO_IMAGE_EXTRACTION_INTERVAL
-                    == 0
-                ):
+                if frame_count % Constants.VIDEO_IMAGE_EXTRACTION_INTERVAL == 0:
                     # convert frame to numpy array
                     frame_array = np.asarray(frame)
                     frame_image = Image.fromarray(frame_array)
@@ -489,9 +461,7 @@ class BaseMessage:
                         image_format = OpenAIImageType.JPEG.value
                         image_format = image_format.upper()
                         resized_img.save(fp=buffer, format=image_format)
-                        encoded_image = base64.b64encode(
-                            buffer.getvalue()
-                        ).decode("utf-8")
+                        encoded_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
                     base64Frames.append(encoded_image)
 

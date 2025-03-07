@@ -73,9 +73,7 @@ class RolePlayingWorker(Worker):
         self.user_agent_kwargs = user_agent_kwargs
         self.chat_history = []
 
-    async def _process_task(
-        self, task: Task, dependencies: List[Task]
-    ) -> TaskState:
+    async def _process_task(self, task: Task, dependencies: List[Task]) -> TaskState:
         r"""Processes a task leveraging its dependencies through role-playing.
 
         This method orchestrates a role-playing session between an AI
@@ -113,48 +111,34 @@ class RolePlayingWorker(Worker):
         chat_history = []
         while n < self.chat_turn_limit:
             n += 1
-            assistant_response, user_response = role_play_session.step(
-                input_msg
-            )
+            assistant_response, user_response = role_play_session.step(input_msg)
 
             if assistant_response.terminated:
-                reason = assistant_response.info['termination_reasons']
-                print(
-                    f"{Fore.GREEN}AI Assistant terminated. Reason: "
-                    f"{reason}.{Fore.RESET}"
-                )
+                reason = assistant_response.info["termination_reasons"]
+                print(f"{Fore.GREEN}AI Assistant terminated. Reason: " f"{reason}.{Fore.RESET}")
                 break
 
             if user_response.terminated:
-                reason = user_response.info['termination_reasons']
-                print(
-                    f"{Fore.GREEN}AI User terminated. Reason: {reason}."
-                    f"{Fore.RESET}"
-                )
+                reason = user_response.info["termination_reasons"]
+                print(f"{Fore.GREEN}AI User terminated. Reason: {reason}." f"{Fore.RESET}")
                 break
 
             print_text_animated(
-                f"{Fore.BLUE}AI User:\n\n{user_response.msg.content}"
-                f"{Fore.RESET}\n",
+                f"{Fore.BLUE}AI User:\n\n{user_response.msg.content}" f"{Fore.RESET}\n",
                 delay=0.005,
             )
             chat_history.append(f"AI User: {user_response.msg.content}")
 
-            print_text_animated(
-                f"{Fore.GREEN}AI Assistant:{Fore.RESET}", delay=0.005
-            )
+            print_text_animated(f"{Fore.GREEN}AI Assistant:{Fore.RESET}", delay=0.005)
 
-            for func_record in assistant_response.info['tool_calls']:
+            for func_record in assistant_response.info["tool_calls"]:
                 print(func_record)
 
             print_text_animated(
-                f"\n{Fore.GREEN}{assistant_response.msg.content}"
-                f"{Fore.RESET}\n",
+                f"\n{Fore.GREEN}{assistant_response.msg.content}" f"{Fore.RESET}\n",
                 delay=0.005,
             )
-            chat_history.append(
-                f"AI Assistant: {assistant_response.msg.content}"
-            )
+            chat_history.append(f"AI Assistant: {assistant_response.msg.content}")
 
             if "CAMEL_TASK_DONE" in user_response.msg.content:
                 break

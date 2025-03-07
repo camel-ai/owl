@@ -70,8 +70,7 @@ class Packet:
 
     def __repr__(self):
         return (
-            f"Packet(publisher_id={self.publisher_id}, assignee_id="
-            f"{self.assignee_id}, status={self.status})"
+            f"Packet(publisher_id={self.publisher_id}, assignee_id=" f"{self.assignee_id}, status={self.status})"
         )
 
 
@@ -106,16 +105,11 @@ class TaskChannel:
             while True:
                 for task_id in self._task_id_list:
                     packet = self._task_dict[task_id]
-                    if (
-                        packet.status == PacketStatus.SENT
-                        and packet.assignee_id == assignee_id
-                    ):
+                    if packet.status == PacketStatus.SENT and packet.assignee_id == assignee_id:
                         return packet.task
                 await self._condition.wait()
 
-    async def post_task(
-        self, task: Task, publisher_id: str, assignee_id: str
-    ) -> None:
+    async def post_task(self, task: Task, publisher_id: str, assignee_id: str) -> None:
         r"""Send a task to the channel with specified publisher and assignee,
         along with the dependency of the task."""
         async with self._condition:
@@ -124,16 +118,12 @@ class TaskChannel:
             self._task_dict[packet.task.id] = packet
             self._condition.notify_all()
 
-    async def post_dependency(
-        self, dependency: Task, publisher_id: str
-    ) -> None:
+    async def post_dependency(self, dependency: Task, publisher_id: str) -> None:
         r"""Post a dependency to the channel. A dependency is a task that is
         archived, and will be referenced by other tasks."""
         async with self._condition:
             self._task_id_list.append(dependency.id)
-            packet = Packet(
-                dependency, publisher_id, status=PacketStatus.ARCHIVED
-            )
+            packet = Packet(dependency, publisher_id, status=PacketStatus.ARCHIVED)
             self._task_dict[packet.task.id] = packet
             self._condition.notify_all()
 
@@ -179,4 +169,4 @@ class TaskChannel:
     async def get_channel_debug_info(self) -> str:
         r"""Get the debug information of the channel."""
         async with self._condition:
-            return str(self._task_dict) + '\n' + str(self._task_id_list)
+            return str(self._task_dict) + "\n" + str(self._task_id_list)

@@ -130,6 +130,7 @@ mypy>=1.5.1
 toml>=0.10.2
 pre-commit>=3.0.0
 gradio>=3.0.0
+black==24.4.2
 
 # Type stubs
 types-Pillow

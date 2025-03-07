@@ -76,9 +76,7 @@ class FunctionCallingMessage(BaseMessage):
 
     def to_sharegpt(
         self,
-        function_format: Optional[
-            FunctionCallFormatter[ToolCall, ToolResponse]
-        ] = None,
+        function_format: Optional[FunctionCallFormatter[ToolCall, ToolResponse]] = None,
     ) -> ShareGPTMessage:
         r"""Convert FunctionCallingMessage to ShareGPT message.
 
@@ -150,8 +148,7 @@ class FunctionCallingMessage(BaseMessage):
         """
         if not self.func_name:
             raise ValueError(
-                "Invalid request for converting into function message"
-                " due to missing function name."
+                "Invalid request for converting into function message" " due to missing function name."
             )
 
         result_content = str(self.result)

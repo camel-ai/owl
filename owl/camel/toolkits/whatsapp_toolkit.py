@@ -61,9 +61,7 @@ class WhatsAppToolkit(BaseToolkit):
                 "WHATSAPP_PHONE_NUMBER_ID environment variables."
             )
 
-    def send_message(
-        self, to: str, message: str
-    ) -> Union[Dict[str, Any], str]:
+    def send_message(self, to: str, message: str) -> Union[Dict[str, Any], str]:
         r"""Sends a text message to a specified WhatsApp number.
 
         Args:
@@ -109,10 +107,7 @@ class WhatsAppToolkit(BaseToolkit):
                 template information if successful, or an error message string
                 if failed.
         """
-        url = (
-            f"{self.base_url}/{self.version}/{self.phone_number_id}"
-            "/message_templates"
-        )
+        url = f"{self.base_url}/{self.version}/{self.phone_number_id}" "/message_templates"
         headers = {"Authorization": f"Bearer {self.access_token}"}
 
         try:
@@ -136,17 +131,9 @@ class WhatsAppToolkit(BaseToolkit):
                 profile information if successful, or an error message string
                 if failed.
         """
-        url = (
-            f"{self.base_url}/{self.version}/{self.phone_number_id}"
-            "/whatsapp_business_profile"
-        )
+        url = f"{self.base_url}/{self.version}/{self.phone_number_id}" "/whatsapp_business_profile"
         headers = {"Authorization": f"Bearer {self.access_token}"}
-        params = {
-            "fields": (
-                "about,address,description,email,profile_picture_url,"
-                "websites,vertical"
-            )
-        }
+        params = {"fields": ("about,address,description,email,profile_picture_url," "websites,vertical")}
 
         try:
             response = retry_request(

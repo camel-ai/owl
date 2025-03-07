@@ -124,10 +124,7 @@ def get_openai_tool_schema(func: Callable) -> Dict[str, Any]:
         param_kind = p.kind
         param_annotation = p.annotation
         # Variable parameters are not supported
-        if (
-            param_kind == Parameter.VAR_POSITIONAL
-            or param_kind == Parameter.VAR_KEYWORD
-        ):
+        if param_kind == Parameter.VAR_POSITIONAL or param_kind == Parameter.VAR_KEYWORD:
             continue
         # If the parameter type is not specified, it defaults to typing.Any
         if param_annotation is Parameter.empty:
@@ -153,9 +150,7 @@ def get_openai_tool_schema(func: Callable) -> Dict[str, Any]:
 
     docstring = parse(func.__doc__ or "")
     for param in docstring.params:
-        if (name := param.arg_name) in parameters_dict["properties"] and (
-            description := param.description
-        ):
+        if (name := param.arg_name) in parameters_dict["properties"] and (description := param.description):
             parameters_dict["properties"][name]["description"] = description
 
     short_description = docstring.short_description or ""
@@ -197,7 +192,7 @@ def generate_docstring(
         str: The generated docstring.
     """
     # Create the docstring prompt
-    docstring_prompt = '''
+    docstring_prompt = """
     **Role**: Generate professional Python docstrings conforming to 
     PEP 8/PEP 257.
 
@@ -230,7 +225,7 @@ def generate_docstring(
 
     **Task**: Generate a docstring for the function below.
 
-    '''
+    """
     # Initialize assistant with system message and model
     assistant_sys_msg = "You are a helpful assistant."
     docstring_assistant = ChatAgent(assistant_sys_msg, model=model)
@@ -289,9 +284,7 @@ class FunctionTool:
         synthesize_output_format: Optional[Type[BaseModel]] = None,
     ) -> None:
         self.func = func
-        self.openai_tool_schema = openai_tool_schema or get_openai_tool_schema(
-            func
-        )
+        self.openai_tool_schema = openai_tool_schema or get_openai_tool_schema(func)
         self.synthesize_output = synthesize_output
         self.synthesize_output_model = synthesize_output_model
         if synthesize_output and synthesize_output_model is None:
@@ -308,16 +301,16 @@ class FunctionTool:
         return_annotation = inspect.signature(self.func).return_annotation
         if synthesize_output_format is not None:
             self.synthesize_output_format = synthesize_output_format
-        elif isinstance(return_annotation, type) and issubclass(
-            return_annotation, BaseModel
-        ):
+        elif isinstance(return_annotation, type) and issubclass(return_annotation, BaseModel):
             self.synthesize_output_format = return_annotation
 
         self.synthesize_schema_model = synthesize_schema_model
         if synthesize_schema:
             if openai_tool_schema:
-                logger.warning("""The user-defined OpenAI tool schema will be
-                              overridden by the schema assistant model.""")
+                logger.warning(
+                    """The user-defined OpenAI tool schema will be
+                              overridden by the schema assistant model."""
+                )
             if self.synthesize_schema_model is None:
                 self.synthesize_schema_model = ModelFactory.create(
                     model_platform=ModelPlatformType.DEFAULT,
@@ -328,16 +321,11 @@ class FunctionTool:
                     f"Use `{self.synthesize_schema_model.model_type}` to "
                     "synthesize the schema."
                 )
-            schema = self.synthesize_openai_tool_schema(
-                synthesize_schema_max_retries
-            )
+            schema = self.synthesize_openai_tool_schema(synthesize_schema_max_retries)
             if schema:
                 self.openai_tool_schema = schema
             else:
-                raise ValueError(
-                    f"Failed to synthesize a valid schema for "
-                    f"{self.func.__name__}."
-                )
+                raise ValueError(f"Failed to synthesize a valid schema for " f"{self.func.__name__}.")
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         if self.synthesize_output:
@@ -381,9 +369,11 @@ class FunctionTool:
 
         # Check the function description, if no description then raise warming
         if not openai_tool_schema["function"].get("description"):
-            warnings.warn(f"""Function description is missing for 
+            warnings.warn(
+                f"""Function description is missing for 
                           {openai_tool_schema['function']['name']}. This may 
-                          affect the quality of tool calling.""")
+                          affect the quality of tool calling."""
+            )
 
         # Validate whether parameters
         # meet the JSON Schema reference specifications.
@@ -402,9 +392,11 @@ class FunctionTool:
         for param_name in properties.keys():
             param_dict = properties[param_name]
             if "description" not in param_dict:
-                warnings.warn(f"""Parameter description is missing for 
+                warnings.warn(
+                    f"""Parameter description is missing for 
                             {param_dict}. This may affect the quality of tool 
-                            calling.""")
+                            calling."""
+                )
 
     def get_openai_tool_schema(self) -> Dict[str, Any]:
         r"""Gets the OpenAI tool schema for this function.
@@ -501,9 +493,7 @@ class FunctionTool:
             str: The description of the specified parameter.
         """
         self.validate_openai_tool_schema(self.openai_tool_schema)
-        return self.openai_tool_schema["function"]["parameters"]["properties"][
-            param_name
-        ]["description"]
+        return self.openai_tool_schema["function"]["parameters"]["properties"][param_name]["description"]
 
     def set_paramter_description(
         self,
@@ -518,9 +508,7 @@ class FunctionTool:
                 for.
             description (str): The description for the parameter.
         """
-        self.openai_tool_schema["function"]["parameters"]["properties"][
-            param_name
-        ]["description"] = description
+        self.openai_tool_schema["function"]["parameters"]["properties"][param_name]["description"] = description
 
     def get_parameter(self, param_name: str) -> Dict[str, Any]:
         r"""Gets the schema for a specific parameter from the function schema.
@@ -532,9 +520,7 @@ class FunctionTool:
             Dict[str, Any]: The schema of the specified parameter.
         """
         self.validate_openai_tool_schema(self.openai_tool_schema)
-        return self.openai_tool_schema["function"]["parameters"]["properties"][
-            param_name
-        ]
+        return self.openai_tool_schema["function"]["parameters"]["properties"][param_name]
 
     def set_parameter(self, param_name: str, value: Dict[str, Any]):
         r"""Sets the schema for a specific parameter in the function schema.
@@ -547,9 +533,7 @@ class FunctionTool:
             JSONValidator.check_schema(value)
         except SchemaError as e:
             raise e
-        self.openai_tool_schema["function"]["parameters"]["properties"][
-            param_name
-        ] = value
+        self.openai_tool_schema["function"]["parameters"]["properties"][param_name] = value
 
     def synthesize_openai_tool_schema(
         self,
@@ -584,9 +568,7 @@ class FunctionTool:
         while retries <= max_retries:
             try:
                 # Generate the docstring and the schema
-                docstring = generate_docstring(
-                    code, self.synthesize_schema_model
-                )
+                docstring = generate_docstring(code, self.synthesize_schema_model)
                 self.func.__doc__ = docstring
                 schema = get_openai_tool_schema(self.func)
                 # Validate the schema
@@ -633,17 +615,11 @@ class FunctionTool:
         if self.func.__doc__ is not None:
             function_string = textwrap.dedent(function_string)
             tree = ast.parse(function_string)
-            func_node = (
-                tree.body[0]
-                if isinstance(tree.body[0], ast.FunctionDef)
-                else None
-            )
+            func_node = tree.body[0] if isinstance(tree.body[0], ast.FunctionDef) else None
             if func_node:
                 existing_docstring = ast.get_docstring(func_node)
                 if existing_docstring != self.func.__doc__:
-                    func_node.body[0] = ast.Expr(
-                        value=ast.Constant(value=self.func.__doc__, kind=None)
-                    )
+                    func_node.body[0] = ast.Expr(value=ast.Constant(value=self.func.__doc__, kind=None))
                     function_string = ast.unparse(tree)
 
         # Append the args and kwargs information to the function string

@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import json
+
 # import logging
 import re
 import uuid
@@ -107,11 +108,7 @@ class FunctionCallingRecord(BaseModel):
         Returns:
             str: Modified string to represent the function calling.
         """
-        return (
-            f"Function Execution: {self.func_name}\n"
-            f"\tArgs: {self.args}\n"
-            f"\tResult: {self.result}"
-        )
+        return f"Function Execution: {self.func_name}\n" f"\tArgs: {self.args}\n" f"\tResult: {self.result}"
 
     def as_dict(self) -> dict[str, Any]:
         r"""Returns the function calling record as a dictionary.
@@ -160,9 +157,7 @@ class ChatAgent(BaseAgent):
     def __init__(
         self,
         system_message: Optional[Union[BaseMessage, str]] = None,
-        model: Optional[
-            Union[BaseModelBackend, List[BaseModelBackend]]
-        ] = None,
+        model: Optional[Union[BaseModelBackend, List[BaseModelBackend]]] = None,
         memory: Optional[AgentMemory] = None,
         message_window_size: Optional[int] = None,
         token_limit: Optional[int] = None,
@@ -173,25 +168,22 @@ class ChatAgent(BaseAgent):
         scheduling_strategy: str = "round_robin",
     ) -> None:
         from copy import deepcopy
+
         if isinstance(system_message, str):
-            system_message = BaseMessage.make_assistant_message(
-                role_name='Assistant', content=system_message
-            )
+            system_message = BaseMessage.make_assistant_message(role_name="Assistant", content=system_message)
 
         self.orig_sys_message: Optional[BaseMessage] = system_message
         self._system_message: Optional[BaseMessage] = system_message
-        self.role_name: str = (
-            getattr(system_message, 'role_name', None) or "assistant"
-        )
-        self.role_type: RoleType = (
-            getattr(system_message, 'role_type', None) or RoleType.ASSISTANT
-        )
+        self.role_name: str = getattr(system_message, "role_name", None) or "assistant"
+        self.role_type: RoleType = getattr(system_message, "role_type", None) or RoleType.ASSISTANT
         self.model_backend = ModelManager(
-            model
-            if model is not None
-            else ModelFactory.create(
-                model_platform=ModelPlatformType.DEFAULT,
-                model_type=ModelType.DEFAULT,
+            (
+                model
+                if model is not None
+                else ModelFactory.create(
+                    model_platform=ModelPlatformType.DEFAULT,
+                    model_type=ModelType.DEFAULT,
+                )
             ),
             scheduling_strategy=scheduling_strategy,
         )
@@ -202,12 +194,8 @@ class ChatAgent(BaseAgent):
         external_tools = external_tools or []
         tools = tools or []
         all_tools = tools + external_tools
-        self.external_tool_names = [
-            tool.get_function_name() for tool in external_tools
-        ]
-        self.func_dict = {
-            tool.get_function_name(): tool.func for tool in all_tools
-        }
+        self.external_tool_names = [tool.get_function_name() for tool in external_tools]
+        self.func_dict = {tool.get_function_name(): tool.func for tool in all_tools}
         self.tool_dict = {tool.get_function_name(): tool for tool in all_tools}
         self._all_tools = all_tools
 
@@ -217,13 +205,12 @@ class ChatAgent(BaseAgent):
             # logger.warning(
             #     "Overriding the configured tools in `BaseModelBackend` with the tools from `ChatAgent`."
             # )
-            tool_schema_list = [
-                tool.get_openai_tool_schema() for tool in all_tools
-            ]
-            self.model_backend.model_config_dict['tools'] = tool_schema_list
+            tool_schema_list = [tool.get_openai_tool_schema() for tool in all_tools]
+            self.model_backend.model_config_dict["tools"] = tool_schema_list
             self.tool_schema_list = tool_schema_list
-            
+
         from copy import deepcopy
+
         self.model_config_dict = deepcopy(self.model_backend.model_config_dict)
 
         self.model_token_limit = token_limit or self.model_backend.token_limit
@@ -231,9 +218,7 @@ class ChatAgent(BaseAgent):
             self.model_backend.token_counter,
             self.model_token_limit,
         )
-        self.memory: AgentMemory = memory or ChatHistoryMemory(
-            context_creator, window_size=message_window_size
-        )
+        self.memory: AgentMemory = memory or ChatHistoryMemory(context_creator, window_size=message_window_size)
 
         self.output_language: Optional[str] = output_language
         if self.output_language is not None:
@@ -259,9 +244,9 @@ class ChatAgent(BaseAgent):
         tool_prompts = []
 
         for tool in tool_schema_list:
-            tool_info = tool['function']
-            tool_name = tool_info['name']
-            tool_description = tool_info['description']
+            tool_info = tool["function"]
+            tool_name = tool_info["name"]
+            tool_description = tool_info["description"]
             tool_json = json.dumps(tool_info, indent=4)
 
             prompt = f"Use the function '{tool_name}' to '{tool_description}':\n{tool_json}\n"
@@ -356,9 +341,7 @@ class ChatAgent(BaseAgent):
         """
         return len(self.func_dict) > 0
 
-    def update_memory(
-        self, message: BaseMessage, role: OpenAIBackendRole
-    ) -> None:
+    def update_memory(self, message: BaseMessage, role: OpenAIBackendRole) -> None:
         r"""Updates the agent memory with a new message.
 
         Args:
@@ -366,9 +349,7 @@ class ChatAgent(BaseAgent):
                 messages.
             role (OpenAIBackendRole): The backend role type.
         """
-        self.memory.write_record(
-            MemoryRecord(message=message, role_at_backend=role)
-        )
+        self.memory.write_record(MemoryRecord(message=message, role_at_backend=role))
 
     def set_output_language(self, output_language: str) -> BaseMessage:
         r"""Sets the output language for the system message. This method
@@ -383,15 +364,10 @@ class ChatAgent(BaseAgent):
             BaseMessage: The updated system message object.
         """
         self.output_language = output_language
-        language_prompt = (
-            "\nRegardless of the input language, "
-            f"you must output text in {output_language}."
-        )
+        language_prompt = "\nRegardless of the input language, " f"you must output text in {output_language}."
         if self.orig_sys_message is not None:
             content = self.orig_sys_message.content + language_prompt
-            self._system_message = self.orig_sys_message.create_new_instance(
-                content
-            )
+            self._system_message = self.orig_sys_message.create_new_instance(content)
         else:
             self._system_message = BaseMessage.make_assistant_message(
                 role_name="Assistant",
@@ -458,25 +434,21 @@ class ChatAgent(BaseAgent):
             self.memory.write_record(system_record)
         else:
             self.memory.clear()
-    
+
     def _transform_function_calling_format(self, openai_messages: List[dict]):
         r"""Used in deepseek-chat backend. It can modify function calling records' format to match the deepseek-chat backend's format."""
         from copy import deepcopy
+
         _messages = deepcopy(openai_messages)
         modified_messages = []
         for message in _messages:
-            if message['role'] == 'function':
-                new_message = {
-                    'role': 'tool',
-                    'tool_call_id': message['name'],
-                    'content': message['content']
-                }
+            if message["role"] == "function":
+                new_message = {"role": "tool", "tool_call_id": message["name"], "content": message["content"]}
                 modified_messages.append(new_message)
             else:
                 modified_messages.append(message)
 
         return modified_messages
-
 
     def record_message(self, message: BaseMessage) -> None:
         r"""Records the externally provided message into the agent memory as if
@@ -515,27 +487,20 @@ class ChatAgent(BaseAgent):
                 and information about the chat session.
         """
         from copy import deepcopy
+
         self.model_backend.model_config_dict = deepcopy(self.model_config_dict)
         self.tool_dict = {tool.get_function_name(): tool for tool in self._all_tools}
-        if (
-            self.model_backend.model_config_dict.get("response_format")
-            and response_format
-        ):
+        if self.model_backend.model_config_dict.get("response_format") and response_format:
             raise ValueError(
                 "The `response_format` parameter cannot be set both in "
                 "the model configuration and in the ChatAgent step."
             )
 
         if isinstance(input_message, str):
-            input_message = BaseMessage.make_user_message(
-                role_name='User', content=input_message
-            )
+            input_message = BaseMessage.make_user_message(role_name="User", content=input_message)
 
         if "llama" in self.model_type.lower():
-            if (
-                self.model_backend.model_config_dict.get("tools", None)
-                and not self.tool_prompt_added
-            ):
+            if self.model_backend.model_config_dict.get("tools", None) and not self.tool_prompt_added:
                 tool_prompt = self._generate_tool_prompt(self.tool_schema_list)
 
                 tool_sys_msg = BaseMessage.make_assistant_message(
@@ -554,9 +519,7 @@ class ChatAgent(BaseAgent):
                 try:
                     openai_messages, num_tokens = self.memory.get_context()
                 except RuntimeError as e:
-                    return self._step_token_exceed(
-                        e.args[1], tool_call_records, "max_tokens_exceeded"
-                    )
+                    return self._step_token_exceed(e.args[1], tool_call_records, "max_tokens_exceeded")
                 (
                     response,
                     output_messages,
@@ -581,9 +544,7 @@ class ChatAgent(BaseAgent):
                     ChatCompletionMessageToolCall(
                         id=str(uuid.uuid4()),
                         function=Function(
-                            arguments=str(parsed_content["arguments"]).replace(
-                                "'", '"'
-                            ),
+                            arguments=str(parsed_content["arguments"]).replace("'", '"'),
                             name=str(parsed_content["function"]),
                         ),
                         type="function",
@@ -611,9 +572,7 @@ class ChatAgent(BaseAgent):
                     )
 
                 # Normal function calling
-                tool_call_records.append(
-                    self._step_tool_call_and_update(response)
-                )
+                tool_call_records.append(self._step_tool_call_and_update(response))
 
             if response_format is not None:
                 (
@@ -645,9 +604,7 @@ class ChatAgent(BaseAgent):
                     "to record the selected message manually."
                 )
 
-            return ChatAgentResponse(
-                msgs=output_messages, terminated=self.terminated, info=info
-            )
+            return ChatAgentResponse(msgs=output_messages, terminated=self.terminated, info=info)
 
         else:
             self.update_memory(input_message, OpenAIBackendRole.USER)
@@ -659,9 +616,7 @@ class ChatAgent(BaseAgent):
                 try:
                     openai_messages, num_tokens = self.memory.get_context()
                 except RuntimeError as e:
-                    return self._step_token_exceed(
-                        e.args[1], tool_call_records, "max_tokens_exceeded"
-                    )
+                    return self._step_token_exceed(e.args[1], tool_call_records, "max_tokens_exceeded")
 
                 (
                     response,
@@ -701,14 +656,9 @@ class ChatAgent(BaseAgent):
                     )
 
                 # Normal function calling
-                tool_call_records.append(
-                    self._step_tool_call_and_update(response)
-                )
+                tool_call_records.append(self._step_tool_call_and_update(response))
 
-            if (
-                response_format is not None
-                and self.model_type.support_native_tool_calling
-            ):
+            if response_format is not None and self.model_type.support_native_tool_calling:
                 (
                     output_messages,
                     finish_reasons,
@@ -738,9 +688,7 @@ class ChatAgent(BaseAgent):
                     "to record the selected message manually."
                 )
 
-            return ChatAgentResponse(
-                msgs=output_messages, terminated=self.terminated, info=info
-            )
+            return ChatAgentResponse(msgs=output_messages, terminated=self.terminated, info=info)
 
             # except Exception as e:
             #     logger.error(e)
@@ -773,9 +721,7 @@ class ChatAgent(BaseAgent):
                 and information about the chat session.
         """
         if isinstance(input_message, str):
-            input_message = BaseMessage.make_user_message(
-                role_name='User', content=input_message
-            )
+            input_message = BaseMessage.make_user_message(role_name="User", content=input_message)
 
         self.update_memory(input_message, OpenAIBackendRole.USER)
 
@@ -784,9 +730,7 @@ class ChatAgent(BaseAgent):
             try:
                 openai_messages, num_tokens = self.memory.get_context()
             except RuntimeError as e:
-                return self._step_token_exceed(
-                    e.args[1], tool_call_records, "max_tokens_exceeded"
-                )
+                return self._step_token_exceed(e.args[1], tool_call_records, "max_tokens_exceeded")
 
             (
                 response,
@@ -816,19 +760,12 @@ class ChatAgent(BaseAgent):
                     num_tokens,
                     tool_call_request,
                 )
-                return ChatAgentResponse(
-                    msgs=output_messages, terminated=self.terminated, info=info
-                )
+                return ChatAgentResponse(msgs=output_messages, terminated=self.terminated, info=info)
 
             # Normal function calling
-            tool_call_records.append(
-                await self._step_tool_call_and_update_async(response)
-            )
+            tool_call_records.append(await self._step_tool_call_and_update_async(response))
 
-        if (
-            response_format is not None
-            and self.model_type.support_native_tool_calling
-        ):
+        if response_format is not None and self.model_type.support_native_tool_calling:
             (
                 output_messages,
                 finish_reasons,
@@ -858,13 +795,9 @@ class ChatAgent(BaseAgent):
                 "record the selected message manually."
             )
 
-        return ChatAgentResponse(
-            msgs=output_messages, terminated=self.terminated, info=info
-        )
+        return ChatAgentResponse(msgs=output_messages, terminated=self.terminated, info=info)
 
-    def _step_tool_call_and_update(
-        self, response: ChatCompletion
-    ) -> FunctionCallingRecord:
+    def _step_tool_call_and_update(self, response: ChatCompletion) -> FunctionCallingRecord:
         r"""Processes a function call within the chat completion response,
         records the function call in the provided list of tool calls and
         updates the memory of the current agent.
@@ -878,9 +811,7 @@ class ChatAgent(BaseAgent):
         """
 
         # Perform function calling
-        func_assistant_msg, func_result_msg, tool_call_record = (
-            self.step_tool_call(response)
-        )
+        func_assistant_msg, func_result_msg, tool_call_record = self.step_tool_call(response)
 
         # Update the messages
         self.update_memory(func_assistant_msg, OpenAIBackendRole.ASSISTANT)
@@ -888,9 +819,7 @@ class ChatAgent(BaseAgent):
 
         return tool_call_record
 
-    async def _step_tool_call_and_update_async(
-        self, response: ChatCompletion
-    ) -> FunctionCallingRecord:
+    async def _step_tool_call_and_update_async(self, response: ChatCompletion) -> FunctionCallingRecord:
         (
             func_assistant_msg,
             func_result_msg,
@@ -902,9 +831,7 @@ class ChatAgent(BaseAgent):
 
         return func_record
 
-    def _structure_output_with_function(
-        self, response_format: Type[BaseModel]
-    ) -> Tuple[
+    def _structure_output_with_function(self, response_format: Type[BaseModel]) -> Tuple[
         List[BaseMessage],
         List[str],
         Dict[str, int],
@@ -940,9 +867,7 @@ class ChatAgent(BaseAgent):
         self.func_dict = {func.get_function_name(): func.func}
         self.tool_dict = {func.get_function_name(): func}
         self.model_backend.model_config_dict = original_model_dict.copy()
-        self.model_backend.model_config_dict["tools"] = [
-            func.get_openai_tool_schema()
-        ]
+        self.model_backend.model_config_dict["tools"] = [func.get_openai_tool_schema()]
         self.model_backend.model_config_dict["tool_choice"] = "required"
 
         openai_messages, num_tokens = self.memory.get_context()
@@ -957,9 +882,7 @@ class ChatAgent(BaseAgent):
         if isinstance(response, ChatCompletion):
             tool_call_record = self._step_tool_call_and_update(response)
         else:
-            raise ValueError(
-                "Structured output is not supported for stream responses."
-            )
+            raise ValueError("Structured output is not supported for stream responses.")
 
         for base_message_item in output_messages:
             base_message_item.content = str(tool_call_record.result)
@@ -1006,8 +929,7 @@ class ChatAgent(BaseAgent):
                 continue
         if not response:
             raise ModelProcessingError(
-                "Unable to process messages: none of the provided models "
-                "run succesfully."
+                "Unable to process messages: none of the provided models " "run succesfully."
             )
 
         # logger.debug(
@@ -1017,12 +939,10 @@ class ChatAgent(BaseAgent):
         # )
 
         if isinstance(response, ChatCompletion):
-            output_messages, finish_reasons, usage_dict, response_id = (
-                self.handle_batch_response(response)
-            )
+            output_messages, finish_reasons, usage_dict, response_id = self.handle_batch_response(response)
         else:
-            output_messages, finish_reasons, usage_dict, response_id = (
-                self.handle_stream_response(response, num_tokens)
+            output_messages, finish_reasons, usage_dict, response_id = self.handle_stream_response(
+                response, num_tokens
             )
         return (
             response,
@@ -1075,17 +995,10 @@ class ChatAgent(BaseAgent):
             termination, the agent's state is updated accordingly, and the
             termination reason is recorded.
         """
-        termination = [
-            terminator.is_terminated(output_messages)
-            for terminator in self.response_terminators
-        ]
+        termination = [terminator.is_terminated(output_messages) for terminator in self.response_terminators]
         # Terminate the agent if any of the terminator terminates
         self.terminated, termination_reason = next(
-            (
-                (terminated, termination_reason)
-                for terminated, termination_reason in termination
-                if terminated
-            ),
+            ((terminated, termination_reason) for terminated, termination_reason in termination if terminated),
             (False, None),
         )
         # For now only retain the first termination reason
@@ -1122,7 +1035,7 @@ class ChatAgent(BaseAgent):
                 role_type=self.role_type,
                 meta_dict=dict(),
                 content=choice.message.content or "",
-                parsed=getattr(choice.message, 'parsed', None),
+                parsed=getattr(choice.message, "parsed", None),
             )
             # Process log probabilities and append to the message meta information
             if choice.logprobs is not None:
@@ -1148,14 +1061,8 @@ class ChatAgent(BaseAgent):
             # Append the processed chat message to output
             output_messages.append(chat_message)
 
-        finish_reasons = [
-            str(choice.finish_reason) for choice in response.choices
-        ]
-        usage = (
-            self._safe_model_dump(response.usage)
-            if response.usage is not None
-            else {}
-        )
+        finish_reasons = [str(choice.finish_reason) for choice in response.choices]
+        usage = self._safe_model_dump(response.usage) if response.usage is not None else {}
         return (
             output_messages,
             finish_reasons,
@@ -1176,10 +1083,10 @@ class ChatAgent(BaseAgent):
             dict: A dictionary representation of the Pydantic model.
         """
         # Check if the `model_dump` method exists (Pydantic v2)
-        if hasattr(obj, 'model_dump'):
+        if hasattr(obj, "model_dump"):
             return obj.model_dump()
         # Fallback to `dict()` method (Pydantic v1)
-        elif hasattr(obj, 'dict'):
+        elif hasattr(obj, "dict"):
             return obj.dict()
         else:
             raise TypeError("The object is not a Pydantic model")
@@ -1223,9 +1130,7 @@ class ChatAgent(BaseAgent):
                         content=content_dict[index],
                     )
                     output_messages.append(chat_message)
-        finish_reasons = [
-            finish_reasons_dict[i] for i in range(len(finish_reasons_dict))
-        ]
+        finish_reasons = [finish_reasons_dict[i] for i in range(len(finish_reasons_dict))]
         usage_dict = self.get_usage_dict(output_messages, prompt_tokens)
         return output_messages, finish_reasons, usage_dict, response_id
 
@@ -1268,9 +1173,7 @@ class ChatAgent(BaseAgent):
     def step_tool_call(
         self,
         response: ChatCompletion,
-    ) -> Tuple[
-        FunctionCallingMessage, FunctionCallingMessage, FunctionCallingRecord
-    ]:
+    ) -> Tuple[FunctionCallingMessage, FunctionCallingMessage, FunctionCallingRecord]:
         r"""Execute the function with arguments following the model's response.
 
         Args:
@@ -1323,17 +1226,13 @@ class ChatAgent(BaseAgent):
         )
 
         # Record information about this function call
-        func_record = FunctionCallingRecord(
-            func_name=func_name, args=args, result=result
-        )
+        func_record = FunctionCallingRecord(func_name=func_name, args=args, result=result)
         return assist_msg, func_msg, func_record
 
     async def step_tool_call_async(
         self,
         response: ChatCompletion,
-    ) -> Tuple[
-        FunctionCallingMessage, FunctionCallingMessage, FunctionCallingRecord
-    ]:
+    ) -> Tuple[FunctionCallingMessage, FunctionCallingMessage, FunctionCallingRecord]:
         r"""Execute the async function with arguments following the model's
         response.
 
@@ -1375,14 +1274,10 @@ class ChatAgent(BaseAgent):
         )
 
         # Record information about this function call
-        func_record = FunctionCallingRecord(
-            func_name=func_name, args=args, result=result
-        )
+        func_record = FunctionCallingRecord(func_name=func_name, args=args, result=result)
         return assist_msg, func_msg, func_record
 
-    def get_usage_dict(
-        self, output_messages: List[BaseMessage], prompt_tokens: int
-    ) -> Dict[str, int]:
+    def get_usage_dict(self, output_messages: List[BaseMessage], prompt_tokens: int) -> Dict[str, int]:
         r"""Get usage dictionary when using the stream mode.
 
         Args:
@@ -1418,6 +1313,4 @@ class ChatAgent(BaseAgent):
         Returns:
             str: The string representation of the :obj:`ChatAgent`.
         """
-        return (
-            f"ChatAgent({self.role_name}, {self.role_type}, {self.model_type})"
-        )
+        return f"ChatAgent({self.role_name}, {self.role_type}, {self.model_type})"

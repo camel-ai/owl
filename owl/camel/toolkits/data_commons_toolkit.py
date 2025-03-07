@@ -64,22 +64,16 @@ class DataCommonsToolkit(BaseToolkit):
         try:
             results = datacommons.query(query_string)
 
-            processed_results = [
-                {key: value for key, value in row.items()} for row in results
-            ]
+            processed_results = [{key: value for key, value in row.items()} for row in results]
 
             return processed_results
 
         except Exception as e:
-            logger.error(
-                f"An error occurred while querying Data Commons: {e!s}"
-            )
+            logger.error(f"An error occurred while querying Data Commons: {e!s}")
             return None
 
     @staticmethod
-    def get_triples(
-        dcids: Union[str, List[str]], limit: int = 500
-    ) -> Optional[Dict[str, List[tuple]]]:
+    def get_triples(dcids: Union[str, List[str]], limit: int = 500) -> Optional[Dict[str, List[tuple]]]:
         r"""Retrieve triples associated with nodes.
 
         Args:
@@ -161,15 +155,11 @@ class DataCommonsToolkit(BaseToolkit):
             )
             return result
         except Exception as e:
-            logger.error(
-                f"An error occurred while querying Data Commons: {e!s}"
-            )
+            logger.error(f"An error occurred while querying Data Commons: {e!s}")
             return None
 
     @staticmethod
-    def get_property_labels(
-        dcids: Union[str, List[str]], out: bool = True
-    ) -> Optional[Dict[str, List[str]]]:
+    def get_property_labels(dcids: Union[str, List[str]], out: bool = True) -> Optional[Dict[str, List[str]]]:
         r"""Retrieves and analyzes property labels for given DCIDs.
 
         Args:
@@ -190,9 +180,7 @@ class DataCommonsToolkit(BaseToolkit):
             result = datacommons.get_property_labels(dcids, out=out)
             return result
         except Exception as e:
-            logger.error(
-                f"An error occurred while analyzing property labels: {e!s}"
-            )
+            logger.error(f"An error occurred while analyzing property labels: {e!s}")
             return None
 
     @staticmethod
@@ -228,21 +216,15 @@ class DataCommonsToolkit(BaseToolkit):
         import datacommons
 
         try:
-            result = datacommons.get_property_values(
-                dcids, prop, out, value_type, limit
-            )
+            result = datacommons.get_property_values(dcids, prop, out, value_type, limit)
             return result
 
         except Exception as e:
-            logger.error(
-                f"An error occurred while analyzing property values: {e!s}"
-            )
+            logger.error(f"An error occurred while analyzing property values: {e!s}")
             return None
 
     @staticmethod
-    def get_places_in(
-        dcids: list, place_type: str
-    ) -> Optional[Dict[str, Any]]:
+    def get_places_in(dcids: list, place_type: str) -> Optional[Dict[str, Any]]:
         r"""Retrieves places within a given place type.
 
         Args:
@@ -263,10 +245,7 @@ class DataCommonsToolkit(BaseToolkit):
             return result
 
         except Exception as e:
-            logger.error(
-                "An error occurred while retrieving places in a given place "
-                f"type: {e!s}"
-            )
+            logger.error("An error occurred while retrieving places in a given place " f"type: {e!s}")
             return None
 
     @staticmethod
@@ -320,10 +299,7 @@ class DataCommonsToolkit(BaseToolkit):
             return result
 
         except Exception as e:
-            logger.error(
-                "An error occurred while retrieving the value of a "
-                f"statistical variable: {e!s}"
-            )
+            logger.error("An error occurred while retrieving the value of a " f"statistical variable: {e!s}")
             return None
 
     @staticmethod
@@ -353,8 +329,5 @@ class DataCommonsToolkit(BaseToolkit):
             return result
 
         except Exception as e:
-            logger.error(
-                "An error occurred while retrieving the value of a "
-                f"statistical variable: {e!s}"
-            )
+            logger.error("An error occurred while retrieving the value of a " f"statistical variable: {e!s}")
             return None

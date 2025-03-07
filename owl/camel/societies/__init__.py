@@ -15,6 +15,6 @@ from .babyagi_playing import BabyAGI
 from .role_playing import RolePlaying
 
 __all__ = [
-    'RolePlaying',
-    'BabyAGI',
+    "RolePlaying",
+    "BabyAGI",
 ]

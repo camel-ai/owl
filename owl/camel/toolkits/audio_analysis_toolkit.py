@@ -34,13 +34,12 @@ class AudioAnalysisToolkit(BaseToolkit):
     """
 
     def __init__(self, cache_dir: Optional[str] = None, reasoning: bool = False):
-        self.cache_dir = 'tmp/'
+        self.cache_dir = "tmp/"
         if cache_dir:
             self.cache_dir = cache_dir
 
         self.client = openai.OpenAI()
         self.reasoning = reasoning
-
 
     def ask_question_about_audio(self, audio_path: str, question: str) -> str:
         r"""Ask any question about the audio and get the answer using
@@ -67,12 +66,12 @@ class AudioAnalysisToolkit(BaseToolkit):
             res = requests.get(audio_path)
             res.raise_for_status()
             audio_data = res.content
-            encoded_string = base64.b64encode(audio_data).decode('utf-8')
+            encoded_string = base64.b64encode(audio_data).decode("utf-8")
         else:
             with open(audio_path, "rb") as audio_file:
                 audio_data = audio_file.read()
             audio_file.close()
-            encoded_string = base64.b64encode(audio_data).decode('utf-8')
+            encoded_string = base64.b64encode(audio_data).decode("utf-8")
 
         file_suffix = os.path.splitext(audio_path)[1]
         file_format = file_suffix[1:]
@@ -80,10 +79,7 @@ class AudioAnalysisToolkit(BaseToolkit):
         if self.reasoning:
             text_prompt = f"Transcribe all the content in the speech into text."
 
-            transcription = self.client.audio.transcriptions.create(
-                model="whisper-1",
-                file=open(audio_path, "rb")
-            )
+            transcription = self.client.audio.transcriptions.create(model="whisper-1", file=open(audio_path, "rb"))
 
             transcript = transcription.text
 
@@ -95,17 +91,17 @@ class AudioAnalysisToolkit(BaseToolkit):
             """
             reasoning_completion = self.client.chat.completions.create(
                 # model="gpt-4o-audio-preview",
-                model = "o3-mini",
+                model="o3-mini",
                 messages=[
                     {
                         "role": "user",
                         "content": reasoning_prompt,
-                    }]
+                    }
+                ],
             )
 
             reasoning_result = reasoning_completion.choices[0].message.content
             return str(reasoning_result)
-
 
         else:
             text_prompt = f"""Answer the following question based on the given \
@@ -113,7 +109,7 @@ class AudioAnalysisToolkit(BaseToolkit):
 
             completion = self.client.chat.completions.create(
                 # model="gpt-4o-audio-preview",
-                model = "gpt-4o-mini-audio-preview",
+                model="gpt-4o-mini-audio-preview",
                 messages=[
                     {
                         "role": "system",

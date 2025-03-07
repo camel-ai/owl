@@ -53,8 +53,7 @@ class UnifiedModelType(str):
         r"""Returns the token limit for the model. Here we set the default
         value as `999_999_999` if it's not provided from `model_config_dict`"""
         logging.warning(
-            "Invalid or missing `max_tokens` in `model_config_dict`. "
-            "Defaulting to 999_999_999 tokens."
+            "Invalid or missing `max_tokens` in `model_config_dict`. " "Defaulting to 999_999_999 tokens."
         )
         return 999_999_999
 

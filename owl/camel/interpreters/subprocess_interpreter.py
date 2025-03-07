@@ -104,13 +104,9 @@ class SubprocessInterpreter(BaseInterpreter):
         if not file.is_file():
             raise RuntimeError(f"{file} is not a file.")
         code_type = self._check_code_type(code_type)
-        cmd = shlex.split(
-            self._CODE_EXECUTE_CMD_MAPPING[code_type].format(file_name=str(file))
-        )
+        cmd = shlex.split(self._CODE_EXECUTE_CMD_MAPPING[code_type].format(file_name=str(file)))
 
-        proc = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-        )
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         stdout, stderr = proc.communicate()
         if self.print_stdout and stdout:
             print("======stdout======")
@@ -148,9 +144,7 @@ class SubprocessInterpreter(BaseInterpreter):
         code_type = self._check_code_type(code_type)
 
         if self.require_confirm:
-            logger.info(
-                f"The following {code_type} code will run on your " "computer: {code}"
-            )
+            logger.info(f"The following {code_type} code will run on your " "computer: {code}")
             while True:
                 choice = input("Running code? [Y/n]:").lower()
                 if choice in ["y", "yes", "ye", ""]:
@@ -162,9 +156,7 @@ class SubprocessInterpreter(BaseInterpreter):
                         "further code execution."
                     )
 
-        temp_file_path = self._create_temp_file(
-            code=code, extension=self._CODE_EXTENSION_MAPPING[code_type]
-        )
+        temp_file_path = self._create_temp_file(code=code, extension=self._CODE_EXTENSION_MAPPING[code_type])
 
         result = self.run_file(temp_file_path, code_type)
 
@@ -172,19 +164,17 @@ class SubprocessInterpreter(BaseInterpreter):
         return result
 
     def _create_temp_file(self, code: str, extension: str) -> Path:
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix=f".{extension}"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=f".{extension}") as f:
             f.write(code)
             name = f.name
         return Path(name)
-    
+
     # def _create_temp_file(self, code: str, extension: str) -> Path:
     #     # generate a random file name
     #     import datetime
-        
+
     #     current_time = datetime.datetime.now().strftime("%d%H%M%S")
-        
+
     #     temp_file_path = os.path.join("tmp", f"{current_time}.{extension}")
     #     with open(temp_file_path, "w", encoding='utf-8') as f:
     #         f.write(code)
@@ -192,7 +182,6 @@ class SubprocessInterpreter(BaseInterpreter):
     #     f.flush()
     #     breakpoint()
     #     return Path(temp_file_path)
-    
 
     def _check_code_type(self, code_type: str) -> str:
         if code_type not in self._CODE_TYPE_MAPPING:

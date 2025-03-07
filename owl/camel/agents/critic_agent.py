@@ -125,8 +125,7 @@ class CriticAgent(ChatAgent):
             critic_msg = critic_response.msg
             if self.verbose:
                 print_text_animated(
-                    self.logger_color + "\n> Critic response: "
-                    f"\x1b[3m{critic_msg.content}\x1b[0m\n"
+                    self.logger_color + "\n> Critic response: " f"\x1b[3m{critic_msg.content}\x1b[0m\n"
                 )
             choice = self.parse_critic(critic_msg)
 
@@ -137,8 +136,7 @@ class CriticAgent(ChatAgent):
                     role_name=input_message.role_name,
                     role_type=input_message.role_type,
                     meta_dict=input_message.meta_dict,
-                    content="> Invalid choice. Please choose again.\n"
-                    + msg_content,
+                    content="> Invalid choice. Please choose again.\n" + msg_content,
                 )
                 i += 1
         warnings.warn(
@@ -186,9 +184,7 @@ class CriticAgent(ChatAgent):
 
         flatten_options = self.flatten_options(input_messages)
         if self.verbose:
-            print_text_animated(
-                self.logger_color + f"\x1b[3m{flatten_options}\x1b[0m\n"
-            )
+            print_text_animated(self.logger_color + f"\x1b[3m{flatten_options}\x1b[0m\n")
         input_msg = meta_chat_message.create_new_instance(flatten_options)
 
         option = self.get_option(input_msg)

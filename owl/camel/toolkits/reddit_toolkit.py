@@ -108,10 +108,7 @@ class RedditToolkit(BaseToolkit):
                 String warming if credentials are not set.
         """
         if not all([self.client_id, self.client_secret, self.user_agent]):
-            return (
-                "Reddit API credentials are not set. "
-                "Please set the environment variables."
-            )
+            return "Reddit API credentials are not set. " "Please set the environment variables."
 
         subreddit = self._retry_request(self.reddit.subreddit, subreddit_name)
         top_posts = self._retry_request(subreddit.top, limit=post_limit)
@@ -122,9 +119,7 @@ class RedditToolkit(BaseToolkit):
                 "Post Title": post.title,
                 "Comments": [
                     {"Comment Body": comment.body, "Upvotes": comment.score}
-                    for comment in self._retry_request(
-                        lambda post=post: list(post.comments)
-                    )[:comment_limit]
+                    for comment in self._retry_request(lambda post=post: list(post.comments))[:comment_limit]
                 ],
             }
             data.append(post_data)
@@ -132,9 +127,7 @@ class RedditToolkit(BaseToolkit):
 
         return data
 
-    def perform_sentiment_analysis(
-        self, data: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def perform_sentiment_analysis(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         r"""Performs sentiment analysis on the comments collected from Reddit
         posts.
 
@@ -150,9 +143,7 @@ class RedditToolkit(BaseToolkit):
 
         for item in data:
             # Sentiment analysis should be done on 'Comment Body'
-            item["Sentiment Score"] = TextBlob(
-                item["Comment Body"]
-            ).sentiment.polarity
+            item["Sentiment Score"] = TextBlob(item["Comment Body"]).sentiment.polarity
 
         return data
 
@@ -184,28 +175,18 @@ class RedditToolkit(BaseToolkit):
                 if success. String warming if credentials are not set.
         """
         if not all([self.client_id, self.client_secret, self.user_agent]):
-            return (
-                "Reddit API credentials are not set. "
-                "Please set the environment variables."
-            )
+            return "Reddit API credentials are not set. " "Please set the environment variables."
 
         data = []
 
         for subreddit_name in subreddits:
-            subreddit = self._retry_request(
-                self.reddit.subreddit, subreddit_name
-            )
+            subreddit = self._retry_request(self.reddit.subreddit, subreddit_name)
             top_posts = self._retry_request(subreddit.top, limit=post_limit)
 
             for post in top_posts:
-                for comment in self._retry_request(
-                    lambda post=post: list(post.comments)
-                )[:comment_limit]:
+                for comment in self._retry_request(lambda post=post: list(post.comments))[:comment_limit]:
                     # Print comment body for debugging
-                    if any(
-                        keyword.lower() in comment.body.lower()
-                        for keyword in keywords
-                    ):
+                    if any(keyword.lower() in comment.body.lower() for keyword in keywords):
                         comment_data = {
                             "Subreddit": subreddit_name,
                             "Post Title": post.title,

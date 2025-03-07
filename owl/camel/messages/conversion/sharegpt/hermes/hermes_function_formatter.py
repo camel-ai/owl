@@ -36,9 +36,7 @@ class HermesToolCall(ToolCall):
     pass
 
 
-class HermesFunctionFormatter(
-    FunctionCallFormatter[HermesToolCall, HermesToolResponse]
-):
+class HermesFunctionFormatter(FunctionCallFormatter[HermesToolCall, HermesToolResponse]):
     r"""Hermes-style function calling format implementation with validation"""
 
     def extract_tool_calls(self, message: str) -> List[HermesToolCall]:
@@ -65,9 +63,7 @@ class HermesFunctionFormatter(
 
         return tool_calls
 
-    def extract_tool_response(
-        self, message: str
-    ) -> Optional[HermesToolResponse]:
+    def extract_tool_response(self, message: str) -> Optional[HermesToolResponse]:
         r"""Extracts a single tool response from the provided message string.
 
         Args:
@@ -91,9 +87,7 @@ class HermesFunctionFormatter(
                 return None
         return None
 
-    def format_tool_call(
-        self, content: str, func_name: str, args: Dict[str, Any]
-    ) -> str:
+    def format_tool_call(self, content: str, func_name: str, args: Dict[str, Any]) -> str:
         r"""Formats a tool call message with the given content, function name,
         and arguments.
 

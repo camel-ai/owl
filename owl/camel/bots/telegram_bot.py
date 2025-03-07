@@ -33,7 +33,7 @@ class TelegramBot:
         telegram_token (str, optional): The bot token.
     """
 
-    @dependencies_required('telebot')
+    @dependencies_required("telebot")
     def __init__(
         self,
         chat_agent: ChatAgent,
@@ -42,11 +42,10 @@ class TelegramBot:
         self.chat_agent = chat_agent
 
         if not telegram_token:
-            self.token = os.getenv('TELEGRAM_TOKEN')
+            self.token = os.getenv("TELEGRAM_TOKEN")
             if not self.token:
                 raise ValueError(
-                    "`TELEGRAM_TOKEN` not found in environment variables. "
-                    "Get it from t.me/BotFather."
+                    "`TELEGRAM_TOKEN` not found in environment variables. " "Get it from t.me/BotFather."
                 )
         else:
             self.token = telegram_token
@@ -63,7 +62,7 @@ class TelegramBot:
         print("Telegram bot is running...")
         self.bot.infinity_polling()
 
-    def on_message(self, message: 'Message') -> None:
+    def on_message(self, message: "Message") -> None:
         r"""Handles incoming messages from the user.
 
         Args:
@@ -74,9 +73,7 @@ class TelegramBot:
         if not message.text:
             return
 
-        user_msg = BaseMessage.make_user_message(
-            role_name="User", content=message.text
-        )
+        user_msg = BaseMessage.make_user_message(role_name="User", content=message.text)
         assistant_response = self.chat_agent.step(user_msg)
 
         self.bot.reply_to(message, assistant_response.msg.content)

@@ -52,9 +52,7 @@ class VectorDBQuery(BaseModel):
     top_k: int = 1
     """The number of top similar vectors to retrieve from the database."""
 
-    def __init__(
-        self, query_vector: List[float], top_k: int, **kwargs: Any
-    ) -> None:
+    def __init__(self, query_vector: List[float], top_k: int, **kwargs: Any) -> None:
         """Pass in query_vector and tok_k as positional arg.
         Args:
             query_vector (List[float]): The numerical representation of the
@@ -207,8 +205,4 @@ class BaseVectorStorage(ABC):
                 from the storage based on similarity to the query vector.
         """
         results = self.query(VectorDBQuery(query_vector=vector, top_k=top_k))
-        return [
-            result.record.payload
-            for result in results
-            if result.record.payload is not None
-        ]
+        return [result.record.payload for result in results if result.record.payload is not None]

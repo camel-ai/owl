@@ -54,7 +54,7 @@ class JinaURLReader:
         timeout: int = 30,
         **kwargs: Any,
     ) -> None:
-        api_key = api_key or os.getenv('JINA_API_KEY')
+        api_key = api_key or os.getenv("JINA_API_KEY")
         if not api_key:
             warn(
                 "JINA_API_KEY not set. This will result in a low rate limit "

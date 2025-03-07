@@ -104,8 +104,7 @@ class RolePlaying:
     ) -> None:
         if model is not None:
             logger.warning(
-                "Model provided globally is set for all agents if not"
-                " already specified in agent_kwargs."
+                "Model provided globally is set for all agents if not" " already specified in agent_kwargs."
             )
 
         self.with_task_specify = with_task_specify
@@ -203,8 +202,8 @@ class RolePlaying:
             task_specify_meta_dict.update(extend_task_specify_meta_dict or {})
             if self.model is not None:
                 if task_specify_agent_kwargs is None:
-                    task_specify_agent_kwargs = {'model': self.model}
-                elif 'model' not in task_specify_agent_kwargs:
+                    task_specify_agent_kwargs = {"model": self.model}
+                elif "model" not in task_specify_agent_kwargs:
                     task_specify_agent_kwargs.update(dict(model=self.model))
             task_specify_agent = TaskSpecifyAgent(
                 task_type=self.task_type,
@@ -237,17 +236,15 @@ class RolePlaying:
         if self.with_task_planner:
             if self.model is not None:
                 if task_planner_agent_kwargs is None:
-                    task_planner_agent_kwargs = {'model': self.model}
-                elif 'model' not in task_planner_agent_kwargs:
+                    task_planner_agent_kwargs = {"model": self.model}
+                elif "model" not in task_planner_agent_kwargs:
                     task_planner_agent_kwargs.update(dict(model=self.model))
             task_planner_agent = TaskPlannerAgent(
                 output_language=output_language,
                 **(task_planner_agent_kwargs or {}),
             )
             self.planned_task_prompt = task_planner_agent.run(self.task_prompt)
-            self.task_prompt = (
-                f"{self.task_prompt}\n" f"{self.planned_task_prompt}"
-            )
+            self.task_prompt = f"{self.task_prompt}\n" f"{self.planned_task_prompt}"
         else:
             self.planned_task_prompt = None
 
@@ -298,14 +295,12 @@ class RolePlaying:
                 )
             ]
 
-        init_assistant_sys_msg, init_user_sys_msg = (
-            sys_msg_generator.from_dicts(
-                meta_dicts=sys_msg_meta_dicts,
-                role_tuples=[
-                    (assistant_role_name, RoleType.ASSISTANT),
-                    (user_role_name, RoleType.USER),
-                ],
-            )
+        init_assistant_sys_msg, init_user_sys_msg = sys_msg_generator.from_dicts(
+            meta_dicts=sys_msg_meta_dicts,
+            role_tuples=[
+                (assistant_role_name, RoleType.ASSISTANT),
+                (user_role_name, RoleType.USER),
+            ],
         )
         return init_assistant_sys_msg, init_user_sys_msg, sys_msg_meta_dicts
 
@@ -333,12 +328,12 @@ class RolePlaying:
         """
         if self.model is not None:
             if assistant_agent_kwargs is None:
-                assistant_agent_kwargs = {'model': self.model}
-            elif 'model' not in assistant_agent_kwargs:
+                assistant_agent_kwargs = {"model": self.model}
+            elif "model" not in assistant_agent_kwargs:
                 assistant_agent_kwargs.update(dict(model=self.model))
             if user_agent_kwargs is None:
-                user_agent_kwargs = {'model': self.model}
-            elif 'model' not in user_agent_kwargs:
+                user_agent_kwargs = {"model": self.model}
+            elif "model" not in user_agent_kwargs:
                 user_agent_kwargs.update(dict(model=self.model))
 
         self.assistant_agent = ChatAgent(
@@ -383,9 +378,7 @@ class RolePlaying:
             if critic_role_name.lower() == "human":
                 self.critic = Human(**(critic_kwargs or {}))
             else:
-                critic_criteria = (
-                    critic_criteria or "improving the task performance"
-                )
+                critic_criteria = critic_criteria or "improving the task performance"
                 critic_msg_meta_dict = dict(
                     critic_role=critic_role_name,
                     criteria=critic_criteria,
@@ -397,8 +390,8 @@ class RolePlaying:
                 )
                 if self.model is not None:
                     if critic_kwargs is None:
-                        critic_kwargs = {'model': self.model}
-                    elif 'model' not in critic_kwargs:
+                        critic_kwargs = {"model": self.model}
+                    elif "model" not in critic_kwargs:
                         critic_kwargs.update(dict(model=self.model))
                 self.critic = CriticAgent(
                     self.critic_sys_msg,
@@ -425,10 +418,7 @@ class RolePlaying:
         if len(messages) == 0:
             raise ValueError("No messages to process.")
         if len(messages) > 1 and not self.with_critic_in_the_loop:
-            raise ValueError(
-                "Got than one message to process. "
-                f"Num of messages: {len(messages)}."
-            )
+            raise ValueError("Got than one message to process. " f"Num of messages: {len(messages)}.")
         elif self.with_critic_in_the_loop and self.critic is not None:
             critic_response = self.critic.reduce_step(messages)
             processed_msg = critic_response.msg
@@ -453,16 +443,14 @@ class RolePlaying:
         self.assistant_agent.reset()
         self.user_agent.reset()
         default_init_msg_content = (
-            "Now start to give me instructions one by one. "
-            "Only reply with Instruction and Input."
+            "Now start to give me instructions one by one. " "Only reply with Instruction and Input."
         )
         if init_msg_content is None:
             init_msg_content = default_init_msg_content
 
         # Initialize a message sent by the assistant
         init_msg = BaseMessage.make_assistant_message(
-            role_name=getattr(self.assistant_sys_msg, 'role_name', None)
-            or "assistant",
+            role_name=getattr(self.assistant_sys_msg, "role_name", None) or "assistant",
             content=init_msg_content,
         )
 
@@ -508,10 +496,7 @@ class RolePlaying:
         # To prevent recording the same memory more than once (once in chat
         # step and once in role play), and the model generates only one
         # response when multi-response support is enabled.
-        if (
-            'n' in self.user_agent.model_config_dict.keys()
-            and self.user_agent.model_config_dict['n'] > 1
-        ):
+        if "n" in self.user_agent.model_config_dict.keys() and self.user_agent.model_config_dict["n"] > 1:
             self.user_agent.record_message(user_msg)
 
         assistant_response = self.assistant_agent.step(user_msg)
@@ -522,9 +507,7 @@ class RolePlaying:
                     terminated=assistant_response.terminated,
                     info=assistant_response.info,
                 ),
-                ChatAgentResponse(
-                    msgs=[user_msg], terminated=False, info=user_response.info
-                ),
+                ChatAgentResponse(msgs=[user_msg], terminated=False, info=user_response.info),
             )
         assistant_msg = self._reduce_message_options(assistant_response.msgs)
 
@@ -532,8 +515,8 @@ class RolePlaying:
         # step and once in role play), and the model generates only one
         # response when multi-response support is enabled.
         if (
-            'n' in self.assistant_agent.model_config_dict.keys()
-            and self.assistant_agent.model_config_dict['n'] > 1
+            "n" in self.assistant_agent.model_config_dict.keys()
+            and self.assistant_agent.model_config_dict["n"] > 1
         ):
             self.assistant_agent.record_message(assistant_msg)
 

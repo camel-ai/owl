@@ -92,15 +92,13 @@ class OpenAISchemaConverter(BaseConverter):
         if not isinstance(output_schema, type):
             output_schema = get_pydantic_model(output_schema)
         elif not issubclass(output_schema, BaseModel):
-            raise ValueError(
-                f"Expected a BaseModel, got {type(output_schema)}"
-            )
+            raise ValueError(f"Expected a BaseModel, got {type(output_schema)}")
 
         self.model_config_dict["response_format"] = output_schema
         response = self._client.beta.chat.completions.parse(
             messages=[
-                {'role': 'system', 'content': prompt},
-                {'role': 'user', 'content': content},
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": content},
             ],
             model=self.model_type,
             **self.model_config_dict,
@@ -109,8 +107,6 @@ class OpenAISchemaConverter(BaseConverter):
         message = response.choices[0].message
 
         if not isinstance(message.parsed, output_schema):
-            raise ValueError(
-                f"Expected a {output_schema}, got {type(message.parsed)}."
-            )
+            raise ValueError(f"Expected a {output_schema}, got {type(message.parsed)}.")
 
         return message.parsed

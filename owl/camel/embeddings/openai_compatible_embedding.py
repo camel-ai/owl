@@ -41,9 +41,7 @@ class OpenAICompatibleEmbedding(BaseEmbedding[str]):
         self.model_type = model_type
         self.output_dim: Optional[int] = None
 
-        self._api_key = api_key or os.environ.get(
-            "OPENAI_COMPATIBILIY_API_KEY"
-        )
+        self._api_key = api_key or os.environ.get("OPENAI_COMPATIBILIY_API_KEY")
         self._url = url or os.environ.get("OPENAI_COMPATIBILIY_API_BASE_URL")
         self._client = OpenAI(
             timeout=60,
@@ -84,8 +82,5 @@ class OpenAICompatibleEmbedding(BaseEmbedding[str]):
             int: The dimensionality of the embedding for the current model.
         """
         if self.output_dim is None:
-            raise ValueError(
-                "Output dimension is not yet determined. Call "
-                "'embed_list' first."
-            )
+            raise ValueError("Output dimension is not yet determined. Call " "'embed_list' first.")
         return self.output_dim

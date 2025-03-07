@@ -78,18 +78,11 @@ class GoogleCloudStorage(BaseObjectStorage):
             exists = self._client.exists()
             if not exists and self.create_if_not_exists:
                 self._client.create()
-                warn(
-                    f"Bucket {self._client.name} not found. Automatically "
-                    f"created."
-                )
+                warn(f"Bucket {self._client.name} not found. Automatically " f"created.")
             elif not exists:
-                raise FileNotFoundError(
-                    f"Failed to access bucket {self._client.name}: Not found."
-                )
+                raise FileNotFoundError(f"Failed to access bucket {self._client.name}: Not found.")
         except InvalidOperation:
-            raise PermissionError(
-                f"Failed to access bucket {self._client.name}: No permission."
-            )
+            raise PermissionError(f"Failed to access bucket {self._client.name}: No permission.")
 
     def _put_file(self, file_key: str, file: File) -> None:
         r"""Put a file to the GCloud bucket.
@@ -113,31 +106,23 @@ class GoogleCloudStorage(BaseObjectStorage):
         raw_bytes = self._client.get_blob(file_key).download_as_bytes()
         return File.create_file_from_raw_bytes(raw_bytes, filename)
 
-    def _upload_file(
-        self, local_file_path: Path, remote_file_key: str
-    ) -> None:
+    def _upload_file(self, local_file_path: Path, remote_file_key: str) -> None:
         r"""Upload a local file to the GCloud bucket.
 
         Args:
             local_file_path (Path): The path to the local file to be uploaded.
             remote_file_key (str): The path to the object in the bucket.
         """
-        self._client.blob(remote_file_key).upload_from_filename(
-            local_file_path
-        )
+        self._client.blob(remote_file_key).upload_from_filename(local_file_path)
 
-    def _download_file(
-        self, local_file_path: Path, remote_file_key: str
-    ) -> None:
+    def _download_file(self, local_file_path: Path, remote_file_key: str) -> None:
         r"""Download a file from the GCloud bucket to the local system.
 
         Args:
             local_file_path (Path): The path to the local file to be saved.
             remote_file_key (str): The key of the object in the bucket.
         """
-        self._client.get_blob(remote_file_key).download_to_filename(
-            local_file_path
-        )
+        self._client.get_blob(remote_file_key).download_to_filename(local_file_path)
 
     def _object_exists(self, file_key: str) -> bool:
         r"""

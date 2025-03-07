@@ -40,7 +40,7 @@ class ModelType(UnifiedModelType, Enum):
     O3_MINI = "o3-mini"
 
     GLM_4 = "glm-4"
-    GLM_4V = 'glm-4v'
+    GLM_4V = "glm-4v"
     GLM_3_TURBO = "glm-3-turbo"
 
     # Groq platform models

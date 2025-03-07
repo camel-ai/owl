@@ -17,17 +17,17 @@ import os
 import sys
 
 # Create a private logger
-_logger = logging.getLogger('camel')
+_logger = logging.getLogger("camel")
 
 
 def _configure_library_logging():
-    if os.environ.get('CAMEL_LOGGING_DISABLED', 'False').lower() == 'true':
+    if os.environ.get("CAMEL_LOGGING_DISABLED", "False").lower() == "true":
         return
 
     if not logging.root.handlers and not _logger.handlers:
         logging.basicConfig(
-            level=os.environ.get('LOGLEVEL', 'INFO').upper(),
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            level=os.environ.get("LOGLEVEL", "INFO").upper(),
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             stream=sys.stdout,
         )
         logging.setLoggerClass(logging.Logger)
@@ -43,13 +43,10 @@ def disable_logging():
     effectively disabling all log messages, and adds a NullHandler to
     suppress any potential warnings about no handlers being found.
     """
-    os.environ['CAMEL_LOGGING_DISABLED'] = 'true'
+    os.environ["CAMEL_LOGGING_DISABLED"] = "true"
     _logger.setLevel(logging.CRITICAL + 1)
     # Avoid adding multiple NullHandlers
-    if not any(
-        isinstance(handler, logging.NullHandler)
-        for handler in _logger.handlers
-    ):
+    if not any(isinstance(handler, logging.NullHandler) for handler in _logger.handlers):
         _logger.addHandler(logging.NullHandler())
     _logger.debug("Logging has been disabled.")
 
@@ -62,7 +59,7 @@ def enable_logging():
     If the logging is already configured,
         this function does not change its configuration.
     """
-    os.environ['CAMEL_LOGGING_DISABLED'] = 'false'
+    os.environ["CAMEL_LOGGING_DISABLED"] = "false"
     _configure_library_logging()
 
 
@@ -78,18 +75,13 @@ def set_log_level(level):
     Raises:
         ValueError: If the provided level is not a valid logging level.
     """
-    valid_levels = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+    valid_levels = ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     if isinstance(level, str):
         if level.upper() not in valid_levels:
-            raise ValueError(
-                f"Invalid logging level."
-                f" Choose from: {', '.join(valid_levels)}"
-            )
+            raise ValueError(f"Invalid logging level." f" Choose from: {', '.join(valid_levels)}")
         level = level.upper()
     elif not isinstance(level, int):
-        raise ValueError(
-            "Logging level must be an option from the logging module."
-        )
+        raise ValueError("Logging level must be an option from the logging module.")
 
     _logger.setLevel(level)
     _logger.debug(f"Logging level set to: {logging.getLevelName(level)}")
@@ -104,9 +96,9 @@ def get_logger(name):
     Returns:
         logging.Logger: A logger instance with the name 'camel.{name}'.
     """
-    return logging.getLogger(f'camel.{name}')
+    return logging.getLogger(f"camel.{name}")
 
 
 # Lazy configuration: Only configure logging if explicitly enabled.
-if os.environ.get('CAMEL_LOGGING_DISABLED', 'False').strip().lower() != 'true':
+if os.environ.get("CAMEL_LOGGING_DISABLED", "False").strip().lower() != "true":
     _configure_library_logging()

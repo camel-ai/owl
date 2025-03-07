@@ -41,9 +41,7 @@ class CodeExecutionToolkit(BaseToolkit):
 
     def __init__(
         self,
-        sandbox: Literal[
-            "internal_python", "jupyter", "docker", "subprocess"
-        ] = "internal_python",
+        sandbox: Literal["internal_python", "jupyter", "docker", "subprocess"] = "internal_python",
         verbose: bool = False,
         unsafe_mode: bool = False,
         import_white_list: Optional[List[str]] = None,
@@ -85,9 +83,7 @@ class CodeExecutionToolkit(BaseToolkit):
                 print_stderr=self.verbose,
             )
         else:
-            raise RuntimeError(
-                f"The sandbox type `{sandbox}` is not supported."
-            )
+            raise RuntimeError(f"The sandbox type `{sandbox}` is not supported.")
 
     def execute_code(self, code: str) -> str:
         r"""Execute the given codes. Codes should be complete and runnable (like running a script), and need to explicitly use the print statement to get the output.
@@ -99,6 +95,7 @@ class CodeExecutionToolkit(BaseToolkit):
             str: The text output of the given codes.
         """
         from loguru import logger
+
         logger.debug(f"calling execute_code with code: {code}")
         output = self.interpreter.run(code, "python")
         # ruff: noqa: E501
@@ -106,7 +103,6 @@ class CodeExecutionToolkit(BaseToolkit):
         if self.verbose:
             print(content)
         return content
-    
 
     def execute_code_file(self, file_path: str) -> str:
         r"""Execute the code from a file.
@@ -119,14 +115,13 @@ class CodeExecutionToolkit(BaseToolkit):
         """
         if not os.path.exists(file_path):
             return f"File not found: {file_path}"
-            
+
         if not file_path.endswith(".py"):
             return f"File is not a Python file: {file_path}"
 
         with open(file_path, "r") as file:
             code = file.read()
         return self.execute_code(code)
-
 
     def get_tools(self) -> List[FunctionTool]:
         r"""Returns a list of FunctionTool objects representing the
@@ -139,4 +134,4 @@ class CodeExecutionToolkit(BaseToolkit):
         return [
             FunctionTool(self.execute_code),
             # FunctionTool(self.execute_code_file)
-            ]
+        ]

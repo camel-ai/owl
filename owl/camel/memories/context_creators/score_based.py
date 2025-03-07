@@ -43,9 +43,7 @@ class ScoreBasedContextCreator(BaseContextCreator):
             generated context.
     """
 
-    def __init__(
-        self, token_counter: BaseTokenCounter, token_limit: int
-    ) -> None:
+    def __init__(self, token_counter: BaseTokenCounter, token_limit: int) -> None:
         self._token_counter = token_counter
         self._token_limit = token_limit
 
@@ -104,31 +102,23 @@ class ScoreBasedContextCreator(BaseContextCreator):
             return self._create_output(context_units)
 
         # Sort by score
-        context_units = sorted(
-            context_units, key=lambda unit: unit.record.score
-        )
+        context_units = sorted(context_units, key=lambda unit: unit.record.score)
 
         # Remove the least score messages until total token number is smaller
         # than token limit
         truncate_idx = None
         for i, unit in enumerate(context_units):
             if unit.record.score == 1:
-                raise RuntimeError(
-                    "Cannot create context: exceed token limit.", total_tokens
-                )
+                raise RuntimeError("Cannot create context: exceed token limit.", total_tokens)
             total_tokens -= unit.num_tokens
             if total_tokens <= self.token_limit:
                 truncate_idx = i
                 break
         if truncate_idx is None:
-            raise RuntimeError(
-                "Cannot create context: exceed token limit.", total_tokens
-            )
+            raise RuntimeError("Cannot create context: exceed token limit.", total_tokens)
         return self._create_output(context_units[truncate_idx + 1 :])
 
-    def _create_output(
-        self, context_units: List[_ContextUnit]
-    ) -> Tuple[List[OpenAIMessage], int]:
+    def _create_output(self, context_units: List[_ContextUnit]) -> Tuple[List[OpenAIMessage], int]:
         r"""Helper method to generate output from context units.
 
         This method converts the provided context units into a format suitable
@@ -136,7 +126,6 @@ class ScoreBasedContextCreator(BaseContextCreator):
         representing the total token count.
         """
         context_units = sorted(context_units, key=lambda unit: unit.idx)
-        return [
-            unit.record.memory_record.to_openai_message()
-            for unit in context_units
-        ], sum([unit.num_tokens for unit in context_units])
+        return [unit.record.memory_record.to_openai_message() for unit in context_units], sum(
+            [unit.num_tokens for unit in context_units]
+        )

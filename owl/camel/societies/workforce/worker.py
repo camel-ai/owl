@@ -46,9 +46,7 @@ class Worker(BaseNode, ABC):
         return f"Worker node {self.node_id} ({self.description})"
 
     @abstractmethod
-    async def _process_task(
-        self, task: Task, dependencies: List[Task]
-    ) -> TaskState:
+    async def _process_task(self, task: Task, dependencies: List[Task]) -> TaskState:
         r"""Processes a task based on its dependencies.
 
         Returns:
@@ -64,8 +62,7 @@ class Worker(BaseNode, ABC):
     @staticmethod
     def _get_dep_tasks_info(dependencies: List[Task]) -> str:
         result_lines = [
-            f"id: {dep_task.id}, content: {dep_task.content}. "
-            f"result: {dep_task.result}."
+            f"id: {dep_task.id}, content: {dep_task.content}. " f"result: {dep_task.result}."
             for dep_task in dependencies
         ]
         result_str = "\n".join(result_lines)
@@ -89,16 +86,10 @@ class Worker(BaseNode, ABC):
         while True:
             # Get the earliest task assigned to this node
             task = await self._get_assigned_task()
-            print(
-                f"{Fore.YELLOW}{self} get task {task.id}: {task.content}"
-                f"{Fore.RESET}"
-            )
+            print(f"{Fore.YELLOW}{self} get task {task.id}: {task.content}" f"{Fore.RESET}")
             # Get the Task instance of dependencies
             dependency_ids = await self._channel.get_dependency_ids()
-            task_dependencies = [
-                await self._channel.get_task_by_id(dep_id)
-                for dep_id in dependency_ids
-            ]
+            task_dependencies = [await self._channel.get_task_by_id(dep_id) for dep_id in dependency_ids]
 
             # Process the task
             task_state = await self._process_task(task, task_dependencies)

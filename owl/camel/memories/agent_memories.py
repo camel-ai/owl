@@ -150,9 +150,7 @@ class LongtermAgentMemory(AgentMemory):
                 the chat history and the vector database.
         """
         chat_history = self.chat_history_block.retrieve()
-        vector_db_retrieve = self.vector_db_block.retrieve(
-            self._current_topic, self.retrieve_limit
-        )
+        vector_db_retrieve = self.vector_db_block.retrieve(self._current_topic, self.retrieve_limit)
         return chat_history[:1] + vector_db_retrieve + chat_history[1:]
 
     def write_records(self, records: List[MemoryRecord]) -> None:

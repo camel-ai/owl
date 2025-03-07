@@ -29,10 +29,7 @@ class TokenLimitTerminator(BaseTerminator):
 
     def _validate(self):
         if self.token_limit <= 0:
-            raise ValueError(
-                f"`token_limit` should be a "
-                f"value larger than 0, got {self.token_limit}."
-            )
+            raise ValueError(f"`token_limit` should be a " f"value larger than 0, got {self.token_limit}.")
 
     def is_terminated(self, num_tokens: int) -> Tuple[bool, Optional[str]]:
         r"""Whether terminate the agent by checking number of

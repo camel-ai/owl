@@ -119,23 +119,19 @@ class RoleAssignmentAgent(ChatAgent):
         role_descriptions = [
             desc.replace("<|", "").replace("|>", "")
             for desc in re.findall(
-                r"Associated competencies, characteristics, "
-                r"duties and workflows: (.+?) End.",
+                r"Associated competencies, characteristics, " r"duties and workflows: (.+?) End.",
                 msg.content,
                 re.DOTALL,
             )
         ]
 
         if len(role_names) != num_roles or len(role_descriptions) != num_roles:
-            raise RuntimeError(
-                "Got None or insufficient information of roles."
-            )
+            raise RuntimeError("Got None or insufficient information of roles.")
         if terminated:
             raise RuntimeError("Role assignment failed.")
 
         role_descriptions_dict = {
-            role_name: description
-            for role_name, description in zip(role_names, role_descriptions)
+            role_name: description for role_name, description in zip(role_names, role_descriptions)
         }
 
         return role_descriptions_dict

@@ -57,7 +57,7 @@ class SlackApp:
             store for handling OAuth installations.
     """
 
-    @dependencies_required('slack_bolt')
+    @dependencies_required("slack_bolt")
     def __init__(
         self,
         token: Optional[str] = None,
@@ -91,15 +91,9 @@ class SlackApp:
 
         self.token: Optional[str] = token or os.getenv("SLACK_TOKEN")
         self.scopes: Optional[str] = scopes or os.getenv("SLACK_SCOPES")
-        self.signing_secret: Optional[str] = signing_secret or os.getenv(
-            "SLACK_SIGNING_SECRET"
-        )
-        self.client_id: Optional[str] = client_id or os.getenv(
-            "SLACK_CLIENT_ID"
-        )
-        self.client_secret: Optional[str] = client_secret or os.getenv(
-            "SLACK_CLIENT_SECRET"
-        )
+        self.signing_secret: Optional[str] = signing_secret or os.getenv("SLACK_SIGNING_SECRET")
+        self.client_id: Optional[str] = client_id or os.getenv("SLACK_CLIENT_ID")
+        self.client_secret: Optional[str] = client_secret or os.getenv("SLACK_CLIENT_SECRET")
 
         if not all([self.token, self.scopes, self.signing_secret]):
             raise ValueError(
@@ -163,9 +157,7 @@ class SlackApp:
         """
         self._app.start(port=port, path=path, host=host)
 
-    async def handle_request(
-        self, request: requests.Request
-    ) -> responses.Response:
+    async def handle_request(self, request: requests.Request) -> responses.Response:
         r"""Handles incoming requests from Slack through the request handler.
 
         Args:
@@ -237,9 +229,7 @@ class SlackApp:
 
         logger.info(f"Received message: {event_profile.text}")
 
-    def mention_me(
-        self, context: "AsyncBoltContext", body: SlackEventBody
-    ) -> bool:
+    def mention_me(self, context: "AsyncBoltContext", body: SlackEventBody) -> bool:
         r"""Check if the bot is mentioned in the message.
 
         Args:

@@ -55,10 +55,7 @@ class BaseConfig(ABC, BaseModel):
 
             for tool in tools:
                 if not isinstance(tool, FunctionTool):
-                    raise ValueError(
-                        f"The tool {tool} should "
-                        "be an instance of `FunctionTool`."
-                    )
+                    raise ValueError(f"The tool {tool} should " "be an instance of `FunctionTool`.")
         return tools
 
     def as_dict(self) -> dict[str, Any]:
@@ -80,10 +77,7 @@ class BaseConfig(ABC, BaseModel):
             tools_schema = []
             for tool in self.tools:
                 if not isinstance(tool, FunctionTool):
-                    raise ValueError(
-                        f"The tool {tool} should "
-                        "be an instance of `FunctionTool`."
-                    )
+                    raise ValueError(f"The tool {tool} should " "be an instance of `FunctionTool`.")
                 tools_schema.append(tool.get_openai_tool_schema())
         config_dict["tools"] = tools_schema
         return config_dict

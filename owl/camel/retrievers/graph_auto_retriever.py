@@ -22,4 +22,3 @@ from camel.utils import Constants
 
 if TYPE_CHECKING:
     from unstructured.documents.elements import Element
-

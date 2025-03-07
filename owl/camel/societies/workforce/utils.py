@@ -20,33 +20,22 @@ from pydantic import BaseModel, Field
 class WorkerConf(BaseModel):
     r"""The configuration of a worker."""
 
-    role: str = Field(
-        description="The role of the agent working in the work node."
-    )
-    sys_msg: str = Field(
-        description="The system message that will be sent to the agent in "
-        "the node."
-    )
-    description: str = Field(
-        description="The description of the new work node itself."
-    )
+    role: str = Field(description="The role of the agent working in the work node.")
+    sys_msg: str = Field(description="The system message that will be sent to the agent in " "the node.")
+    description: str = Field(description="The description of the new work node itself.")
 
 
 class TaskResult(BaseModel):
     r"""The result of a task."""
 
     content: str = Field(description="The result of the task.")
-    failed: bool = Field(
-        description="Flag indicating whether the task processing failed."
-    )
+    failed: bool = Field(description="Flag indicating whether the task processing failed.")
 
 
 class TaskAssignResult(BaseModel):
     r"""The result of task assignment."""
 
-    assignee_id: str = Field(
-        description="The ID of the workforce that is assigned to the task."
-    )
+    assignee_id: str = Field(description="The ID of the workforce that is assigned to the task.")
 
 
 def check_if_running(running: bool) -> Callable:

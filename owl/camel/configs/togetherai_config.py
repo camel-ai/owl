@@ -102,6 +102,4 @@ class TogetherAIConfig(BaseConfig):
         return config_dict
 
 
-TOGETHERAI_API_PARAMS = {
-    param for param in TogetherAIConfig.model_fields.keys()
-}
+TOGETHERAI_API_PARAMS = {param for param in TogetherAIConfig.model_fields.keys()}

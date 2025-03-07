@@ -34,9 +34,7 @@ class BaseDatasetManager(ABC):
         pass
 
     @abstractmethod
-    def list_datasets(
-        self, username: str, limit: int = 100, **kwargs: Any
-    ) -> List[str]:
+    def list_datasets(self, username: str, limit: int = 100, **kwargs: Any) -> List[str]:
         r"""Lists all datasets for the current user.
 
         Args:

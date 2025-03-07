@@ -74,5 +74,7 @@ class GraphElement(BaseModel):
 
     def __post_init__(self):
         if "Element" not in globals():
-            raise ImportError("""The 'unstructured' package is required to use
-                              the 'source' attribute.""")
+            raise ImportError(
+                """The 'unstructured' package is required to use
+                              the 'source' attribute."""
+            )

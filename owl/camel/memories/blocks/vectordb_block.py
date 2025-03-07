@@ -67,9 +67,7 @@ class VectorDBBlock(MemoryBlock):
                 vector database based on similarity to :obj:`current_state`.
         """
         query_vector = self.embedding.embed(keyword)
-        results = self.storage.query(
-            VectorDBQuery(query_vector=query_vector, top_k=limit)
-        )
+        results = self.storage.query(VectorDBQuery(query_vector=query_vector, top_k=limit))
         return [
             ContextRecord(
                 memory_record=MemoryRecord.from_dict(result.record.payload),

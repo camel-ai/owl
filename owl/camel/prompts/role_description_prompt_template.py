@@ -34,19 +34,17 @@ class RoleDescriptionPromptTemplateDict(AISocietyPromptTemplateDict):
             for giving instructions to the AI assistant.
     """
 
-    ROLE_DESCRIPTION_PROMPT = TextPrompt("""===== ROLES WITH DESCRIPTION =====
+    ROLE_DESCRIPTION_PROMPT = TextPrompt(
+        """===== ROLES WITH DESCRIPTION =====
 {user_role} and {assistant_role} are collaborating to complete a task: {task}.
 Competencies, characteristics, duties and workflows of {user_role} to complete the task: {user_description}
 {assistant_role}'s competencies, characteristics, duties and workflows to complete the task: {assistant_description}
-""")
-
-    ASSISTANT_PROMPT = TextPrompt(
-        ROLE_DESCRIPTION_PROMPT + AISocietyPromptTemplateDict.ASSISTANT_PROMPT
+"""
     )
 
-    USER_PROMPT = TextPrompt(
-        ROLE_DESCRIPTION_PROMPT + AISocietyPromptTemplateDict.USER_PROMPT
-    )
+    ASSISTANT_PROMPT = TextPrompt(ROLE_DESCRIPTION_PROMPT + AISocietyPromptTemplateDict.ASSISTANT_PROMPT)
+
+    USER_PROMPT = TextPrompt(ROLE_DESCRIPTION_PROMPT + AISocietyPromptTemplateDict.USER_PROMPT)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

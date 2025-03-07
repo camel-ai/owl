@@ -46,31 +46,21 @@ def handle_googlemaps_exceptions(
             )
         except ImportError:
             raise ImportError(
-                "Please install `googlemaps` first. You can install "
-                "it by running `pip install googlemaps`."
+                "Please install `googlemaps` first. You can install " "it by running `pip install googlemaps`."
             )
 
         try:
             return func(*args, **kwargs)
         except ApiError as e:
-            return (
-                'An exception returned by the remote API. '
-                f'Status: {e.status}, Message: {e.message}'
-            )
+            return "An exception returned by the remote API. " f"Status: {e.status}, Message: {e.message}"
         except HTTPError as e:
-            return (
-                'An unexpected HTTP error occurred. '
-                f'Status Code: {e.status_code}'
-            )
+            return "An unexpected HTTP error occurred. " f"Status Code: {e.status_code}"
         except Timeout:
-            return 'The request timed out.'
+            return "The request timed out."
         except TransportError as e:
-            return (
-                'Something went wrong while trying to execute the '
-                f'request. Details: {e.base_exception}'
-            )
+            return "Something went wrong while trying to execute the " f"request. Details: {e.base_exception}"
         except Exception as e:
-            return f'An unexpected error occurred: {e}'
+            return f"An unexpected error occurred: {e}"
 
     return wrapper
 
@@ -100,11 +90,11 @@ class GoogleMapsToolkit(BaseToolkit):
     and fetching timezone information using the Google Maps API.
     """
 
-    @dependencies_required('googlemaps')
+    @dependencies_required("googlemaps")
     def __init__(self) -> None:
         import googlemaps
 
-        api_key = os.environ.get('GOOGLE_API_KEY')
+        api_key = os.environ.get("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError(
                 "`GOOGLE_API_KEY` not found in environment variables. "
@@ -151,13 +141,11 @@ class GoogleMapsToolkit(BaseToolkit):
         )  # Always False as per requirements
 
         # Check if the result contains an error
-        if 'error' in addressvalidation_result:
-            error_info = addressvalidation_result['error']
-            error_message = error_info.get(
-                'message', 'An unknown error occurred'
-            )
-            error_status = error_info.get('status', 'UNKNOWN_STATUS')
-            error_code = error_info.get('code', 'UNKNOWN_CODE')
+        if "error" in addressvalidation_result:
+            error_info = addressvalidation_result["error"]
+            error_message = error_info.get("message", "An unknown error occurred")
+            error_status = error_info.get("status", "UNKNOWN_STATUS")
+            error_code = error_info.get("code", "UNKNOWN_CODE")
             return (
                 f"Address validation failed with error: {error_message} "
                 f"Status: {error_status}, Code: {error_code}"
@@ -165,26 +153,20 @@ class GoogleMapsToolkit(BaseToolkit):
 
         # Assuming the successful response structure
         # includes a 'result' key
-        result = addressvalidation_result['result']
-        verdict = result.get('verdict', {})
-        address_info = result.get('address', {})
-        geocode = result.get('geocode', {})
-        metadata = result.get('metadata', {})
+        result = addressvalidation_result["result"]
+        verdict = result.get("verdict", {})
+        address_info = result.get("address", {})
+        geocode = result.get("geocode", {})
+        metadata = result.get("metadata", {})
 
         # Construct the descriptive string
-        address_complete = (
-            "Yes" if verdict.get('addressComplete', False) else "No"
-        )
-        formatted_address = address_info.get(
-            'formattedAddress', 'Not available'
-        )
-        location = geocode.get('location', {})
-        latitude = location.get('latitude', 'Not available')
-        longitude = location.get('longitude', 'Not available')
+        address_complete = "Yes" if verdict.get("addressComplete", False) else "No"
+        formatted_address = address_info.get("formattedAddress", "Not available")
+        location = geocode.get("location", {})
+        latitude = location.get("latitude", "Not available")
+        longitude = location.get("longitude", "Not available")
         true_metadata_types = [key for key, value in metadata.items() if value]
-        true_metadata_types_str = (
-            ', '.join(true_metadata_types) if true_metadata_types else 'None'
-        )
+        true_metadata_types_str = ", ".join(true_metadata_types) if true_metadata_types else "None"
 
         description = (
             f"Address completion status: {address_complete}. "
@@ -219,9 +201,9 @@ class GoogleMapsToolkit(BaseToolkit):
         # Extract the elevation data from the first
         # (and presumably only) result
         if elevation_result:
-            elevation = elevation_result[0]['elevation']
-            location = elevation_result[0]['location']
-            resolution = elevation_result[0]['resolution']
+            elevation = elevation_result[0]["elevation"]
+            location = elevation_result[0]["location"]
+            resolution = elevation_result[0]["resolution"]
 
             # Format the elevation data into a natural language description
             description = (
@@ -231,9 +213,7 @@ class GoogleMapsToolkit(BaseToolkit):
                 f"with a data resolution of {resolution:.2f} meters."
             )
         else:
-            description = (
-                "Elevation data is not available for the given location."
-            )
+            description = "Elevation data is not available for the given location."
 
         return description
 
@@ -259,21 +239,15 @@ class GoogleMapsToolkit(BaseToolkit):
         timezone_dict = self.gmaps.timezone((lat, lng))
 
         # Extract necessary information
-        dst_offset = timezone_dict[
-            'dstOffset'
-        ]  # Daylight Saving Time offset in seconds
-        raw_offset = timezone_dict[
-            'rawOffset'
-        ]  # Standard time offset in seconds
-        timezone_id = timezone_dict['timeZoneId']
-        timezone_name = timezone_dict['timeZoneName']
+        dst_offset = timezone_dict["dstOffset"]  # Daylight Saving Time offset in seconds
+        raw_offset = timezone_dict["rawOffset"]  # Standard time offset in seconds
+        timezone_id = timezone_dict["timeZoneId"]
+        timezone_name = timezone_dict["timeZoneName"]
 
         raw_offset_str = _format_offset_to_natural_language(raw_offset)
         dst_offset_str = _format_offset_to_natural_language(dst_offset)
         total_offset_seconds = dst_offset + raw_offset
-        total_offset_str = _format_offset_to_natural_language(
-            total_offset_seconds
-        )
+        total_offset_str = _format_offset_to_natural_language(total_offset_seconds)
 
         # Create a natural language description
         description = (

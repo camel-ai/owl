@@ -68,22 +68,15 @@ class SlackToolkit(BaseToolkit):
                 `pip install slack_sdk`."
             ) from e
         if not slack_token:
-            slack_token = os.environ.get("SLACK_BOT_TOKEN") or os.environ.get(
-                "SLACK_USER_TOKEN"
-            )
+            slack_token = os.environ.get("SLACK_BOT_TOKEN") or os.environ.get("SLACK_USER_TOKEN")
             if not slack_token:
-                raise KeyError(
-                    "SLACK_BOT_TOKEN or SLACK_USER_TOKEN environment "
-                    "variable not set."
-                )
+                raise KeyError("SLACK_BOT_TOKEN or SLACK_USER_TOKEN environment " "variable not set.")
 
         client = WebClient(token=slack_token, ssl=ssl)
         logger.info("Slack login successful.")
         return client
 
-    def create_slack_channel(
-        self, name: str, is_private: Optional[bool] = True
-    ) -> str:
+    def create_slack_channel(self, name: str, is_private: Optional[bool] = True) -> str:
         r"""Creates a new slack channel, either public or private.
 
         Args:
@@ -103,9 +96,7 @@ class SlackToolkit(BaseToolkit):
 
         try:
             slack_client = self._login_slack()
-            response = slack_client.conversations_create(
-                name=name, is_private=is_private
-            )
+            response = slack_client.conversations_create(name=name, is_private=is_private)
             channel_id = response["channel"]["id"]
             response = slack_client.conversations_archive(channel=channel_id)
             return str(response)
@@ -177,15 +168,9 @@ class SlackToolkit(BaseToolkit):
             conversations = response["channels"]
             # Filtering conversations and extracting required information
             filtered_result = [
-                {
-                    key: conversation[key]
-                    for key in ("id", "name", "created", "num_members")
-                }
+                {key: conversation[key] for key in ("id", "name", "created", "num_members")}
                 for conversation in conversations
-                if all(
-                    key in conversation
-                    for key in ("id", "name", "created", "num_members")
-                )
+                if all(key in conversation for key in ("id", "name", "created", "num_members"))
             ]
             return json.dumps(filtered_result, ensure_ascii=False)
         except SlackApiError as e:
@@ -246,13 +231,9 @@ class SlackToolkit(BaseToolkit):
         try:
             slack_client = self._login_slack()
             if user:
-                response = slack_client.chat_postEphemeral(
-                    channel=channel_id, text=message, user=user
-                )
+                response = slack_client.chat_postEphemeral(channel=channel_id, text=message, user=user)
             else:
-                response = slack_client.chat_postMessage(
-                    channel=channel_id, text=message
-                )
+                response = slack_client.chat_postMessage(channel=channel_id, text=message)
             return str(response)
         except SlackApiError as e:
             return f"Error creating conversation: {e.response['error']}"
@@ -279,9 +260,7 @@ class SlackToolkit(BaseToolkit):
 
         try:
             slack_client = self._login_slack()
-            response = slack_client.chat_delete(
-                channel=channel_id, ts=time_stamp
-            )
+            response = slack_client.chat_delete(channel=channel_id, ts=time_stamp)
             return str(response)
         except SlackApiError as e:
             return f"Error creating conversation: {e.response['error']}"

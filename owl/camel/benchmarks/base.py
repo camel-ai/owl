@@ -33,9 +33,7 @@ class BaseBenchmark(ABC):
             processing. :(default: :obj:`1`)
     """
 
-    def __init__(
-        self, name: str, data_dir: str, save_to: str, processes: int = 1
-    ):
+    def __init__(self, name: str, data_dir: str, save_to: str, processes: int = 1):
         r"""Initialize the benchmark.
 
         Args:
@@ -51,14 +49,10 @@ class BaseBenchmark(ABC):
         self.processes = processes
         self.save_to = save_to
         if not self.data_dir.exists():
-            logger.info(
-                f"Data directory {data_dir} does not exist. Creating it."
-            )
+            logger.info(f"Data directory {data_dir} does not exist. Creating it.")
             self.data_dir.mkdir(parents=True, exist_ok=True)
         if not self.data_dir.is_dir():
-            raise NotADirectoryError(
-                f"Data directory {data_dir} is not a directory"
-            )
+            raise NotADirectoryError(f"Data directory {data_dir} is not a directory")
         self._data: Dict[str, List[Dict[str, Any]]] = dict()
         self._results: List[Dict[str, Any]] = []
 

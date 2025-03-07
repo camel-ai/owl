@@ -54,10 +54,7 @@ class RedisStorage(BaseKeyValueStorage):
         try:
             import redis.asyncio as aredis
         except ImportError as exc:
-            logger.error(
-                "Please install `redis` first. You can install it by "
-                "running `pip install redis`."
-            )
+            logger.error("Please install `redis` first. You can install it by " "running `pip install redis`.")
             raise exc
 
         self._client: Optional[aredis.Redis] = None
@@ -98,9 +95,7 @@ class RedisStorage(BaseKeyValueStorage):
         """
         return self._client
 
-    def save(
-        self, records: List[Dict[str, Any]], expire: Optional[int] = None
-    ) -> None:
+    def save(self, records: List[Dict[str, Any]], expire: Optional[int] = None) -> None:
         r"""Saves a batch of records to the key-value storage system."""
         try:
             self._run_async(self._async_save(records, expire))
@@ -127,9 +122,7 @@ class RedisStorage(BaseKeyValueStorage):
         except Exception as e:
             logger.error(f"Error in clear: {e}")
 
-    async def _async_save(
-        self, records: List[Dict[str, Any]], expire: Optional[int] = None
-    ) -> None:
+    async def _async_save(self, records: List[Dict[str, Any]], expire: Optional[int] = None) -> None:
         if self._client is None:
             raise ValueError("Redis client is not initialized")
         try:

@@ -21,10 +21,10 @@ from .models import (
 from .slack_app import SlackApp
 
 __all__ = [
-    'SlackApp',
-    'SlackAppMentionEventBody',
-    'SlackAppMentionEventProfile',
-    'SlackAuthProfile',
-    'SlackEventBody',
-    'SlackEventProfile',
+    "SlackApp",
+    "SlackAppMentionEventBody",
+    "SlackAppMentionEventProfile",
+    "SlackAuthProfile",
+    "SlackEventBody",
+    "SlackEventProfile",
 ]

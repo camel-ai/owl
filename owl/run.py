@@ -20,46 +20,45 @@ def construct_society(question: str) -> OwlRolePlaying:
 
     user_role_name = "user"
     assistant_role_name = "assistant"
-    
+
     user_model = ModelFactory.create(
         model_platform=ModelPlatformType.OPENAI,
         model_type=ModelType.GPT_4O,
-        model_config_dict=ChatGPTConfig(temperature=0, top_p=1).as_dict(), # [Optional] the config for model
+        model_config_dict=ChatGPTConfig(temperature=0, top_p=1).as_dict(),  # [Optional] the config for model
     )
 
     assistant_model = ModelFactory.create(
         model_platform=ModelPlatformType.OPENAI,
         model_type=ModelType.GPT_4O,
-        model_config_dict=ChatGPTConfig(temperature=0, top_p=1).as_dict(), # [Optional] the config for model
+        model_config_dict=ChatGPTConfig(temperature=0, top_p=1).as_dict(),  # [Optional] the config for model
     )
- 
-    
+
     user_tools = []
     assistant_tools = [
         "WebToolkit",
-        'DocumentProcessingToolkit', 
-        'VideoAnalysisToolkit', 
-        'CodeExecutionToolkit', 
-        'ImageAnalysisToolkit', 
-        'AudioAnalysisToolkit', 
+        "DocumentProcessingToolkit",
+        "VideoAnalysisToolkit",
+        "CodeExecutionToolkit",
+        "ImageAnalysisToolkit",
+        "AudioAnalysisToolkit",
         "SearchToolkit",
         "ExcelToolkit",
-        ]
+    ]
 
-    user_role_name = 'user'
+    user_role_name = "user"
     user_agent_kwargs = {
-        'model': user_model,
-        'tools': process_tools(user_tools),
+        "model": user_model,
+        "tools": process_tools(user_tools),
     }
-    assistant_role_name = 'assistant'
+    assistant_role_name = "assistant"
     assistant_agent_kwargs = {
-        'model': assistant_model,
-        'tools': process_tools(assistant_tools),
+        "model": assistant_model,
+        "tools": process_tools(assistant_tools),
     }
-    
+
     task_kwargs = {
-        'task_prompt': question,
-        'with_task_specify': False,
+        "task_prompt": question,
+        "with_task_specify": False,
     }
 
     society = OwlRolePlaying(
@@ -69,7 +68,7 @@ def construct_society(question: str) -> OwlRolePlaying:
         assistant_role_name=assistant_role_name,
         assistant_agent_kwargs=assistant_agent_kwargs,
     )
-    
+
     return society
 
 
@@ -80,8 +79,3 @@ society = construct_society(question)
 answer, chat_history, token_count = run_society(society)
 
 logger.success(f"Answer: {answer}")
-
-
-
-
-

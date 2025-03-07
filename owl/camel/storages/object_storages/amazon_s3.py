@@ -58,14 +58,9 @@ class AmazonS3Storage(BaseObjectStorage):
         self._create_if_not_exists = create_if_not_exists
 
         aws_key_id = access_key_id or os.getenv("AWS_ACCESS_KEY_ID")
-        aws_secret_key = secret_access_key or os.getenv(
-            "AWS_SECRET_ACCESS_KEY"
-        )
+        aws_secret_key = secret_access_key or os.getenv("AWS_SECRET_ACCESS_KEY")
         if not all([aws_key_id, aws_secret_key]) and not anonymous:
-            warn(
-                "AWS access key not configured. Local credentials will be "
-                "used."
-            )
+            warn("AWS access key not configured. Local credentials will be " "used.")
             # Make all the empty values None
             aws_key_id = None
             aws_secret_key = None
@@ -83,9 +78,7 @@ class AmazonS3Storage(BaseObjectStorage):
                 aws_secret_access_key=aws_secret_key,
             )
         else:
-            self._client = session.create_client(
-                "s3", config=Config(signature_version=UNSIGNED)
-            )
+            self._client = session.create_client("s3", config=Config(signature_version=UNSIGNED))
 
         self._prepare_and_check()
 
@@ -96,24 +89,15 @@ class AmazonS3Storage(BaseObjectStorage):
         try:
             self._client.head_bucket(Bucket=self._bucket_name)
         except ClientError as e:
-            error_code = e.response['Error']['Code']
-            if error_code == '403':
-                raise PermissionError(
-                    f"Failed to access bucket {self._bucket_name}: "
-                    f"No permission."
-                )
-            elif error_code == '404':
+            error_code = e.response["Error"]["Code"]
+            if error_code == "403":
+                raise PermissionError(f"Failed to access bucket {self._bucket_name}: " f"No permission.")
+            elif error_code == "404":
                 if self._create_if_not_exists:
                     self._client.create_bucket(Bucket=self._bucket_name)
-                    warn(
-                        f"Bucket {self._bucket_name} not found. Automatically "
-                        f"created."
-                    )
+                    warn(f"Bucket {self._bucket_name} not found. Automatically " f"created.")
                 else:
-                    raise FileNotFoundError(
-                        f"Failed to access bucket {self._bucket_name}: Not "
-                        f"found."
-                    )
+                    raise FileNotFoundError(f"Failed to access bucket {self._bucket_name}: Not " f"found.")
             else:
                 raise e
         except NoCredentialsError as e:
@@ -138,9 +122,7 @@ class AmazonS3Storage(BaseObjectStorage):
             file_key (str): The path to the object in the bucket.
             file (File): The file to be uploaded.
         """
-        self._client.put_object(
-            Bucket=self._bucket_name, Key=file_key, Body=file.raw_bytes
-        )
+        self._client.put_object(Bucket=self._bucket_name, Key=file_key, Body=file.raw_bytes)
 
     def _get_file(self, file_key: str, filename: str) -> File:
         r"""Get a file from the Amazon S3 bucket.
@@ -152,15 +134,11 @@ class AmazonS3Storage(BaseObjectStorage):
         Returns:
             File: The object from the S3 bucket.
         """
-        response = self._client.get_object(
-            Bucket=self._bucket_name, Key=file_key
-        )
+        response = self._client.get_object(Bucket=self._bucket_name, Key=file_key)
         raw_bytes = response["Body"].read()
         return File.create_file_from_raw_bytes(raw_bytes, filename)
 
-    def _upload_file(
-        self, local_file_path: Path, remote_file_key: str
-    ) -> None:
+    def _upload_file(self, local_file_path: Path, remote_file_key: str) -> None:
         r"""Upload a local file to the Amazon S3 bucket.
 
         Args:
@@ -168,9 +146,7 @@ class AmazonS3Storage(BaseObjectStorage):
             remote_file_key (str): The path to the object in the bucket.
         """
         with open(local_file_path, "rb") as f:
-            self._client.put_object(
-                Bucket=self._bucket_name, Key=remote_file_key, Body=f
-            )
+            self._client.put_object(Bucket=self._bucket_name, Key=remote_file_key, Body=f)
 
     def _download_file(
         self,

@@ -36,7 +36,5 @@ def sync_funcs_to_async(funcs: list[FunctionTool]) -> list[FunctionTool]:
         def async_callable(*args, **kwargs):
             return asyncio.to_thread(sync_func, *args, **kwargs)  # noqa: B023
 
-        async_funcs.append(
-            FunctionTool(async_callable, deepcopy(func.openai_tool_schema))
-        )
+        async_funcs.append(FunctionTool(async_callable, deepcopy(func.openai_tool_schema)))
     return async_funcs

@@ -68,9 +68,9 @@ class SearchAgent(ChatAgent):
         self.reset()
 
         summary_prompt = TextPrompt(
-            '''Gather information from this text that relative to the
+            """Gather information from this text that relative to the
             question, but do not directly answer the question.\nquestion:
-            {query}\ntext '''
+            {query}\ntext """
         )
         summary_prompt = summary_prompt.format(query=query)
         # Max length of each chunk
@@ -89,10 +89,10 @@ class SearchAgent(ChatAgent):
 
         # Final summarization
         final_prompt = TextPrompt(
-            '''Here are some summarized texts which split from one text. Using
+            """Here are some summarized texts which split from one text. Using
             the information to answer the question. If can't find the answer,
             you must answer "I can not find the answer to the query" and
-            explain why.\n Query:\n{query}.\n\nText:\n'''
+            explain why.\n Query:\n{query}.\n\nText:\n"""
         )
         final_prompt = final_prompt.format(query=query)
         prompt = final_prompt + results

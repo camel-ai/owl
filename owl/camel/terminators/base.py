@@ -37,9 +37,7 @@ class ResponseTerminator(BaseTerminator):
     r"""A terminator that terminates the conversation based on the response."""
 
     @abstractmethod
-    def is_terminated(
-        self, messages: List[BaseMessage]
-    ) -> Tuple[bool, Optional[str]]:
+    def is_terminated(self, messages: List[BaseMessage]) -> Tuple[bool, Optional[str]]:
         pass
 
     @abstractmethod

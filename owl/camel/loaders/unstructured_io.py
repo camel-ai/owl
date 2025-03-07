@@ -24,9 +24,11 @@ from typing import (
     Tuple,
     Union,
 )
+
 if TYPE_CHECKING:
     from unstructured.documents.elements import Element
 import pdb
+
 
 class UnstructuredIO:
     r"""A class to handle various functionalities provided by the
@@ -122,6 +124,7 @@ class UnstructuredIO:
         from urllib.parse import urlparse
 
         from unstructured.partition.auto import partition
+
         # Check if the input is a URL
         parsed_url = urlparse(input_path)
         # pdb.set_trace()
@@ -140,9 +143,7 @@ class UnstructuredIO:
         else:
             # Check if the file exists
             if not os.path.exists(input_path):
-                raise FileNotFoundError(
-                    f"The file {input_path} was not found."
-                )
+                raise FileNotFoundError(f"The file {input_path} was not found.")
 
             # Read the file
             try:
@@ -154,9 +155,7 @@ class UnstructuredIO:
                 return None
 
     @staticmethod
-    def parse_bytes(
-        file: IO[bytes], **kwargs: Any
-    ) -> Union[List["Element"], None]:
+    def parse_bytes(file: IO[bytes], **kwargs: Any) -> Union[List["Element"], None]:
         r"""Parses a bytes stream and converts its contents into elements.
 
         Args:
@@ -278,14 +277,9 @@ class UnstructuredIO:
         cleaned_text = text
         for func_name, params in clean_options:
             if func_name in cleaning_functions:
-                cleaned_text = cleaning_functions[func_name](
-                    cleaned_text, **params
-                )
+                cleaned_text = cleaning_functions[func_name](cleaned_text, **params)
             else:
-                raise ValueError(
-                    f"'{func_name}' is not a valid function in "
-                    "`Unstructured IO`."
-                )
+                raise ValueError(f"'{func_name}' is not a valid function in " "`Unstructured IO`.")
 
         return cleaned_text
 
@@ -293,15 +287,15 @@ class UnstructuredIO:
     def extract_data_from_text(
         text: str,
         extract_type: Literal[
-            'extract_datetimetz',
-            'extract_email_address',
-            'extract_ip_address',
-            'extract_ip_address_name',
-            'extract_mapi_id',
-            'extract_ordered_bullets',
-            'extract_text_after',
-            'extract_text_before',
-            'extract_us_phone_number',
+            "extract_datetimetz",
+            "extract_email_address",
+            "extract_ip_address",
+            "extract_ip_address_name",
+            "extract_mapi_id",
+            "extract_ordered_bullets",
+            "extract_text_after",
+            "extract_text_before",
+            "extract_us_phone_number",
         ],
         **kwargs,
     ) -> Any:
@@ -359,17 +353,17 @@ class UnstructuredIO:
     def stage_elements(
         elements: List[Any],
         stage_type: Literal[
-            'convert_to_csv',
-            'convert_to_dataframe',
-            'convert_to_dict',
-            'dict_to_elements',
-            'stage_csv_for_prodigy',
-            'stage_for_prodigy',
-            'stage_for_baseplate',
-            'stage_for_datasaur',
-            'stage_for_label_box',
-            'stage_for_label_studio',
-            'stage_for_weaviate',
+            "convert_to_csv",
+            "convert_to_dataframe",
+            "convert_to_dict",
+            "dict_to_elements",
+            "stage_csv_for_prodigy",
+            "stage_for_prodigy",
+            "stage_for_baseplate",
+            "stage_for_datasaur",
+            "stage_for_label_box",
+            "stage_for_label_studio",
+            "stage_for_weaviate",
         ],
         **kwargs,
     ) -> Union[str, List[Dict], Any]:
@@ -419,18 +413,12 @@ class UnstructuredIO:
             "convert_to_dataframe": base.convert_to_dataframe,
             "convert_to_dict": base.convert_to_dict,
             "dict_to_elements": base.dict_to_elements,
-            "stage_csv_for_prodigy": lambda els,
-            **kw: prodigy.stage_csv_for_prodigy(els, kw.get('metadata', [])),
-            "stage_for_prodigy": lambda els, **kw: prodigy.stage_for_prodigy(
-                els, kw.get('metadata', [])
-            ),
+            "stage_csv_for_prodigy": lambda els, **kw: prodigy.stage_csv_for_prodigy(els, kw.get("metadata", [])),
+            "stage_for_prodigy": lambda els, **kw: prodigy.stage_for_prodigy(els, kw.get("metadata", [])),
             "stage_for_baseplate": baseplate.stage_for_baseplate,
-            "stage_for_datasaur": lambda els,
-            **kw: datasaur.stage_for_datasaur(els, kw.get('entities', [])),
-            "stage_for_label_box": lambda els,
-            **kw: label_box.stage_for_label_box(els, **kw),
-            "stage_for_label_studio": lambda els,
-            **kw: label_studio.stage_for_label_studio(els, **kw),
+            "stage_for_datasaur": lambda els, **kw: datasaur.stage_for_datasaur(els, kw.get("entities", [])),
+            "stage_for_label_box": lambda els, **kw: label_box.stage_for_label_box(els, **kw),
+            "stage_for_label_studio": lambda els, **kw: label_studio.stage_for_label_studio(els, **kw),
             "stage_for_weaviate": weaviate.stage_for_weaviate,
         }
 
@@ -440,9 +428,7 @@ class UnstructuredIO:
         return staging_functions[stage_type](elements, **kwargs)
 
     @staticmethod
-    def chunk_elements(
-        elements: List["Element"], chunk_type: str, **kwargs
-    ) -> List["Element"]:
+    def chunk_elements(elements: List["Element"], chunk_type: str, **kwargs) -> List["Element"]:
         r"""Chunks elements by titles.
 
         Args:

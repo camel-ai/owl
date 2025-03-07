@@ -161,9 +161,7 @@ class KnowledgeGraphAgent(ChatAgent):
         self.element = element
 
         knowledge_graph_prompt = TextPrompt(text_prompt)
-        knowledge_graph_generation = knowledge_graph_prompt.format(
-            task=str(element)
-        )
+        knowledge_graph_generation = knowledge_graph_prompt.format(task=str(element))
 
         knowledge_graph_generation_msg = BaseMessage.make_user_message(
             role_name="Graphify", content=knowledge_graph_generation
@@ -187,11 +185,7 @@ class KnowledgeGraphAgent(ChatAgent):
         Returns:
             bool: True if the object is a valid Node, False otherwise.
         """
-        return (
-            isinstance(node, Node)
-            and isinstance(node.id, (str, int))
-            and isinstance(node.type, str)
-        )
+        return isinstance(node, Node) and isinstance(node.id, (str, int)) and isinstance(node.type, str)
 
     def _validate_relationship(self, relationship: Relationship) -> bool:
         r"""Validate if the object is a valid Relationship.
@@ -233,7 +227,7 @@ class KnowledgeGraphAgent(ChatAgent):
         # Extract nodes
         for match in re.finditer(node_pattern, input_string):
             id, type = match.groups()
-            properties = {'source': 'agent_created'}
+            properties = {"source": "agent_created"}
             if id not in nodes:
                 node = Node(id=id, type=type, properties=properties)
                 if self._validate_node(node):
@@ -242,13 +236,11 @@ class KnowledgeGraphAgent(ChatAgent):
         # Extract relationships
         for match in re.finditer(rel_pattern, input_string):
             subj_id, subj_type, obj_id, obj_type, rel_type = match.groups()
-            properties = {'source': 'agent_created'}
+            properties = {"source": "agent_created"}
             if subj_id in nodes and obj_id in nodes:
                 subj = nodes[subj_id]
                 obj = nodes[obj_id]
-                relationship = Relationship(
-                    subj=subj, obj=obj, type=rel_type, properties=properties
-                )
+                relationship = Relationship(subj=subj, obj=obj, type=rel_type, properties=properties)
                 if self._validate_relationship(relationship):
                     relationships.append(relationship)
 

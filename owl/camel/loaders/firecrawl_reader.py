@@ -94,18 +94,14 @@ class Firecrawl:
         try:
             crawl_result = self.app.crawl_url(
                 url,
-                {'formats': ['markdown']},
+                {"formats": ["markdown"]},
             )
             if not isinstance(crawl_result, list):
                 raise ValueError("Unexpected response format")
-            markdown_contents = [
-                result.get('markdown', '') for result in crawl_result
-            ]
-            return '\n'.join(markdown_contents)
+            markdown_contents = [result.get("markdown", "") for result in crawl_result]
+            return "\n".join(markdown_contents)
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to crawl the URL and retrieve markdown: {e}"
-            )
+            raise RuntimeError(f"Failed to crawl the URL and retrieve markdown: {e}")
 
     def check_crawl_job(self, job_id: str) -> Dict:
         r"""Check the status of a crawl job.
@@ -172,17 +168,15 @@ class Firecrawl:
             data = self.app.scrape_url(
                 url,
                 {
-                    'formats': ['extract'],
-                    'extract': {'schema': response_format.model_json_schema()},
+                    "formats": ["extract"],
+                    "extract": {"schema": response_format.model_json_schema()},
                 },
             )
             return data.get("extract", {})
         except Exception as e:
             raise RuntimeError(f"Failed to perform structured scrape: {e}")
 
-    def map_site(
-        self, url: str, params: Optional[Dict[str, Any]] = None
-    ) -> list:
+    def map_site(self, url: str, params: Optional[Dict[str, Any]] = None) -> list:
         r"""Map a website to retrieve all accessible URLs.
 
         Args:

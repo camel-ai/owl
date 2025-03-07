@@ -31,10 +31,7 @@ def _query_unimplemented(self, *input: Any) -> None:
         afterwards instead of this since the former takes care of running the
         registered hooks while the latter silently ignores them.
     """
-    raise NotImplementedError(
-        f"Retriever [{type(self).__name__}] is missing the required"
-        " \"query\" function"
-    )
+    raise NotImplementedError(f"Retriever [{type(self).__name__}] is missing the required" ' "query" function')
 
 
 def _process_unimplemented(self, *input: Any) -> None:
@@ -52,10 +49,7 @@ def _process_unimplemented(self, *input: Any) -> None:
         afterwards instead of this since the former takes care of running the
         registered hooks while the latter silently ignores them.
     """
-    raise NotImplementedError(
-        f"Retriever [{type(self).__name__}] is missing the required "
-        "\"process\" function"
-    )
+    raise NotImplementedError(f"Retriever [{type(self).__name__}] is missing the required " '"process" function')
 
 
 class BaseRetriever(ABC):

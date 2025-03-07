@@ -63,9 +63,7 @@ class SentenceTransformerEncoder(BaseEmbedding[str]):
         """
         if not objs:
             raise ValueError("Input text list is empty")
-        embeddings = self.model.encode(
-            objs, normalize_embeddings=True, **kwargs
-        )
+        embeddings = self.model.encode(objs, normalize_embeddings=True, **kwargs)
         assert isinstance(embeddings, ndarray)
         return embeddings.tolist()
 

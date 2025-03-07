@@ -18,9 +18,9 @@ from .cohere_rerank_retriever import CohereRerankRetriever
 from .vector_retriever import VectorRetriever
 
 __all__ = [
-    'BaseRetriever',
-    'VectorRetriever',
-    'AutoRetriever',
-    'BM25Retriever',
-    'CohereRerankRetriever',
+    "BaseRetriever",
+    "VectorRetriever",
+    "AutoRetriever",
+    "BM25Retriever",
+    "CohereRerankRetriever",
 ]

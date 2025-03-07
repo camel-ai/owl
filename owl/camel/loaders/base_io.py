@@ -121,16 +121,10 @@ class File(ABC):
         return File.create_file(file, filename)
 
     def __repr__(self) -> str:
-        return (
-            f"File(name={self.name}, id={self.file_id}, "
-            f"metadata={self.metadata}, docs={self.docs})"
-        )
+        return f"File(name={self.name}, id={self.file_id}, " f"metadata={self.metadata}, docs={self.docs})"
 
     def __str__(self) -> str:
-        return (
-            f"File(name={self.name}, id={self.file_id}, metadata="
-            f"{self.metadata})"
-        )
+        return f"File(name={self.name}, id={self.file_id}, metadata=" f"{self.metadata})"
 
     def copy(self) -> "File":
         r"""Create a deep copy of this File"""
@@ -158,7 +152,7 @@ def strip_consecutive_newlines(text: str) -> str:
 
 class DocxFile(File):
     @classmethod
-    @dependencies_required('docx2txt')
+    @dependencies_required("docx2txt")
     def from_bytes(cls, file: BytesIO, filename: str) -> "DocxFile":
         r"""Creates a DocxFile object from a BytesIO object.
 
@@ -206,9 +200,7 @@ class PdfFile(File):
             import fitz
         except ImportError:
             raise ImportError(
-                "Please install `PyMuPDF` first. "
-                "You can install it by running "
-                "`pip install PyMuPDF`."
+                "Please install `PyMuPDF` first. " "You can install it by running " "`pip install PyMuPDF`."
             )
         pdf = fitz.open(stream=file.read(), filetype="pdf")
         docs = []

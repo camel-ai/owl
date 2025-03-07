@@ -28,7 +28,7 @@ class SymPyToolkit(BaseToolkit):
     and Linear Algebra.
     """
 
-    def __init__(self, default_variable: str = 'x'):
+    def __init__(self, default_variable: str = "x"):
         r"""Initializes the toolkit with a default variable and logging.
 
         Args:
@@ -51,7 +51,7 @@ class SymPyToolkit(BaseToolkit):
                 the `"status"` field will be set to `"error"` with a
                 corresponding `"message"`.
         """
-        
+
         import sympy as sp
 
         try:
@@ -105,9 +105,7 @@ class SymPyToolkit(BaseToolkit):
         except Exception as e:
             return self.handle_exception("factor_expression", e)
 
-    def solve_linear_system(
-        self, equations: List[str], variables: List[str]
-    ) -> str:
+    def solve_linear_system(self, equations: List[str], variables: List[str]) -> str:
         r"""Solves a system of linear equations.
 
         Args:
@@ -133,9 +131,7 @@ class SymPyToolkit(BaseToolkit):
         except Exception as e:
             return self.handle_exception("solve_linear_system", e)
 
-    def solve_nonlinear_system(
-        self, sympy_equations: List[str], variables: List[str]
-    ) -> str:
+    def solve_nonlinear_system(self, sympy_equations: List[str], variables: List[str]) -> str:
         r"""Solves a system of nonlinear equations.
 
         Args:
@@ -164,9 +160,7 @@ class SymPyToolkit(BaseToolkit):
         except Exception as e:
             return self.handle_exception("solve_nonlinear_system", e)
 
-    def solve_univariate_inequality(
-        self, inequality: str, variable: str
-    ) -> str:
+    def solve_univariate_inequality(self, inequality: str, variable: str) -> str:
         r"""Solves a single-variable inequality.
 
         Args:
@@ -292,9 +286,7 @@ class SymPyToolkit(BaseToolkit):
         except Exception as e:
             return self.handle_exception("polynomial_coefficients", e)
 
-    def solve_equation(
-        self, sympy_equation: str, variable: Optional[str] = None
-    ) -> str:
+    def solve_equation(self, sympy_equation: str, variable: Optional[str] = None) -> str:
         r"""Solves an equation for a specific variable.
 
         Args:
@@ -312,11 +304,7 @@ class SymPyToolkit(BaseToolkit):
         import sympy as sp
 
         try:
-            variable = (
-                sp.symbols(variable)
-                if variable
-                else sp.symbols(self.default_variable)
-            )
+            variable = sp.symbols(variable) if variable else sp.symbols(self.default_variable)
             eq = sp.sympify(sympy_equation)
             solutions = sp.solve(eq, variable)
             return json.dumps({"result": [str(sol) for sol in solutions]})
@@ -347,9 +335,7 @@ class SymPyToolkit(BaseToolkit):
         except Exception as e:
             return self.handle_exception("find_roots", e)
 
-    def differentiate(
-        self, expression: str, variable: Optional[str] = None
-    ) -> str:
+    def differentiate(self, expression: str, variable: Optional[str] = None) -> str:
         r"""Differentiates an expression with respect to a variable.
 
         Args:
@@ -368,20 +354,14 @@ class SymPyToolkit(BaseToolkit):
         import sympy as sp
 
         try:
-            variable = (
-                sp.symbols(variable)
-                if variable
-                else sp.symbols(self.default_variable)
-            )
+            variable = sp.symbols(variable) if variable else sp.symbols(self.default_variable)
             expr = sp.parsing.sympy_parser.parse_expr(expression)
             derivative = sp.diff(expr, variable)
             return json.dumps({"result": str(derivative)})
         except Exception as e:
             return self.handle_exception("differentiate", e)
 
-    def integrate(
-        self, expression: str, variable: Optional[str] = None
-    ) -> str:
+    def integrate(self, expression: str, variable: Optional[str] = None) -> str:
         r"""Integrates an expression with respect to a variable.
 
         Args:
@@ -400,20 +380,14 @@ class SymPyToolkit(BaseToolkit):
         import sympy as sp
 
         try:
-            variable = (
-                sp.symbols(variable)
-                if variable
-                else sp.symbols(self.default_variable)
-            )
+            variable = sp.symbols(variable) if variable else sp.symbols(self.default_variable)
             expr = sp.parsing.sympy_parser.parse_expr(expression)
             integral = sp.integrate(expr, variable)
             return json.dumps({"result": str(integral)})
         except Exception as e:
             return self.handle_exception("integrate", e)
 
-    def definite_integral(
-        self, expression: str, variable: str, lower: float, upper: float
-    ) -> str:
+    def definite_integral(self, expression: str, variable: str, lower: float, upper: float) -> str:
         r"""Computes the definite integral of an expression within given
         bounds.
 
@@ -441,9 +415,7 @@ class SymPyToolkit(BaseToolkit):
         except Exception as e:
             return self.handle_exception("definite_integral", e)
 
-    def series_expansion(
-        self, expression: str, variable: str, point: float, order: int
-    ) -> str:
+    def series_expansion(self, expression: str, variable: str, point: float, order: int) -> str:
         r"""Expands an expression into a Taylor series around a given point up
         to a specified order.
 
@@ -529,15 +501,11 @@ class SymPyToolkit(BaseToolkit):
             expr = sp.parsing.sympy_parser.parse_expr(expression)
             derivative = sp.diff(expr, var)
             critical_points = sp.solve(derivative, var)
-            return json.dumps(
-                {"result": [str(point) for point in critical_points]}
-            )
+            return json.dumps({"result": [str(point) for point in critical_points]})
         except Exception as e:
             return self.handle_exception("find_critical_points", e)
 
-    def check_continuity(
-        self, expression: str, variable: str, point: float
-    ) -> str:
+    def check_continuity(self, expression: str, variable: str, point: float) -> str:
         r"""Checks if an expression is continuous at a given point.
 
         Args:
@@ -560,8 +528,8 @@ class SymPyToolkit(BaseToolkit):
         try:
             var = sp.symbols(variable)
             expr = sp.parsing.sympy_parser.parse_expr(expression)
-            left_limit = sp.limit(expr, var, point, dir='-')
-            right_limit = sp.limit(expr, var, point, dir='+')
+            left_limit = sp.limit(expr, var, point, dir="-")
+            right_limit = sp.limit(expr, var, point, dir="+")
             value_at_point = expr.subs(var, point)
             is_continuous = left_limit == right_limit == value_at_point
             return json.dumps({"result": str(is_continuous)})
@@ -633,9 +601,7 @@ class SymPyToolkit(BaseToolkit):
         try:
             mat = sp.Matrix(matrix)
             eigenvalues = mat.eigenvals()
-            return json.dumps(
-                {"result": {str(k): str(v) for k, v in eigenvalues.items()}}
-            )
+            return json.dumps({"result": {str(k): str(v) for k, v in eigenvalues.items()}})
         except Exception as e:
             return self.handle_exception("compute_eigenvalues", e)
 
@@ -722,9 +688,7 @@ class SymPyToolkit(BaseToolkit):
         except Exception as e:
             return self.handle_exception("compute_rank", e)
 
-    def compute_inner_product(
-        self, vector1: List[float], vector2: List[float]
-    ) -> str:
+    def compute_inner_product(self, vector1: List[float], vector2: List[float]) -> str:
         r"""Computes the inner (dot) product of two vectors.
 
         Args:
@@ -748,10 +712,7 @@ class SymPyToolkit(BaseToolkit):
 
             # Check that the vectors have the same dimensions.
             if v1.shape != v2.shape:
-                raise ValueError(
-                    "Vectors must have the same dimensions to compute "
-                    "the inner product."
-                )
+                raise ValueError("Vectors must have the same dimensions to compute " "the inner product.")
 
             # Compute the dot (inner) product.
             inner_product = v1.dot(v2)
@@ -776,9 +737,7 @@ class SymPyToolkit(BaseToolkit):
                 exception message.
         """
         logger.error(f"Error in {func_name}: {error}")
-        return json.dumps(
-            {"status": "error", "message": f"Error in {func_name}: {error}"}
-        )
+        return json.dumps({"status": "error", "message": f"Error in {func_name}: {error}"})
 
     def get_tools(self) -> List[FunctionTool]:
         r"""Exposes the tool's methods to the agent framework.

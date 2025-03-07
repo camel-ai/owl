@@ -20,23 +20,22 @@ class ExcelToolkit(BaseToolkit):
     def _convert_to_markdown(self, df: pd.DataFrame) -> str:
         """
         Convert DataFrame to Markdown format table.
-        
+
         Args:
             df (pd.DataFrame): DataFrame containing the Excel data.
-        
+
         Returns:
             str: Markdown formatted table.
         """
-        md_table = tabulate(df, headers='keys', tablefmt='pipe')
+        md_table = tabulate(df, headers="keys", tablefmt="pipe")
         return str(md_table)
-    
 
     def extract_excel_content(self, document_path: str) -> str:
         r"""Extract detailed cell information from an Excel file, including multiple sheets.
-        
+
         Args:
             document_path (str): The path of the Excel file.
-        
+
         Returns:
             str: Extracted excel information, including details of each sheet.
         """
@@ -55,7 +54,6 @@ class ExcelToolkit(BaseToolkit):
                 logger.error(f"Failed to process file {document_path}: {e}")
                 return f"Failed to process file {document_path}: {e}"
 
-
         if document_path.endswith("xls"):
             output_path = document_path.replace(".xls", ".xlsx")
             x2x = XLS2XLSX(document_path)
@@ -64,7 +62,7 @@ class ExcelToolkit(BaseToolkit):
 
         # Load the Excel workbook
         wb = load_workbook(document_path, data_only=True)
-        sheet_info_list = [] 
+        sheet_info_list = []
 
         # Iterate through all sheets
         for sheet in wb.sheetnames:
@@ -79,22 +77,28 @@ class ExcelToolkit(BaseToolkit):
                     cell_value = cell.value
 
                     font_color = None
-                    if cell.font and cell.font.color and "rgb=None" not in str(cell.font.color):  # Handle font color
+                    if (
+                        cell.font and cell.font.color and "rgb=None" not in str(cell.font.color)
+                    ):  # Handle font color
                         font_color = cell.font.color.rgb
 
                     fill_color = None
-                    if cell.fill and cell.fill.fgColor and "rgb=None" not in str(cell.fill.fgColor):  # Handle fill color
+                    if (
+                        cell.fill and cell.fill.fgColor and "rgb=None" not in str(cell.fill.fgColor)
+                    ):  # Handle fill color
                         fill_color = cell.fill.fgColor.rgb
 
-                    cell_info_list.append({
-                        "index": f"{row_num}{col_letter}",
-                        "value": cell_value,
-                        "font_color": font_color,
-                        "fill_color": fill_color,
-                    })
+                    cell_info_list.append(
+                        {
+                            "index": f"{row_num}{col_letter}",
+                            "value": cell_value,
+                            "font_color": font_color,
+                            "fill_color": fill_color,
+                        }
+                    )
 
             # Convert the sheet to a DataFrame and then to markdown
-            sheet_df = pd.read_excel(document_path, sheet_name=sheet, engine='openpyxl')
+            sheet_df = pd.read_excel(document_path, sheet_name=sheet, engine="openpyxl")
             markdown_content = self._convert_to_markdown(sheet_df)
 
             # Collect all information for the sheet

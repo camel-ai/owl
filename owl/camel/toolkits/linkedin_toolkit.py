@@ -50,17 +50,17 @@ class LinkedInToolkit(BaseToolkit):
             Exception: If the post creation fails due to
                        an error response from LinkedIn API.
         """
-        url = 'https://api.linkedin.com/v2/ugcPosts'
+        url = "https://api.linkedin.com/v2/ugcPosts"
         urn = self.get_profile(include_id=True)
 
         headers = {
-            'X-Restli-Protocol-Version': '2.0.0',
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {self._access_token}',
+            "X-Restli-Protocol-Version": "2.0.0",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._access_token}",
         }
 
         post_data = {
-            "author": urn['id'],
+            "author": urn["id"],
             "lifecycleState": "PUBLISHED",
             "specificContent": {
                 "com.linkedin.ugc.ShareContent": {
@@ -68,22 +68,17 @@ class LinkedInToolkit(BaseToolkit):
                     "shareMediaCategory": "NONE",
                 }
             },
-            "visibility": {
-                "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
-            },
+            "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"},
         }
 
-        response = requests.post(
-            url, headers=headers, data=json.dumps(post_data)
-        )
+        response = requests.post(url, headers=headers, data=json.dumps(post_data))
         if response.status_code == 201:
             post_response = response.json()
-            post_id = post_response.get('id', None)  # Get the ID of the post
-            return {'Post ID': post_id, 'Text': text}
+            post_id = post_response.get("id", None)  # Get the ID of the post
+            return {"Post ID": post_id, "Text": text}
         else:
             raise Exception(
-                f"Failed to create post. Status code: {response.status_code}, "
-                f"Response: {response.text}"
+                f"Failed to create post. Status code: {response.status_code}, " f"Response: {response.text}"
             )
 
     def delete_post(self, post_id: str) -> str:
@@ -106,14 +101,9 @@ class LinkedInToolkit(BaseToolkit):
         Reference:
             https://docs.microsoft.com/en-us/linkedin/marketing/integrations/community-management/shares/ugc-post-api
         """
-        print(
-            "You are going to delete a LinkedIn post "
-            f"with the following ID: {post_id}"
-        )
+        print("You are going to delete a LinkedIn post " f"with the following ID: {post_id}")
 
-        confirm = input(
-            "Are you sure you want to delete this post? (yes/no): "
-        )
+        confirm = input("Are you sure you want to delete this post? (yes/no): ")
         if confirm.lower() != "yes":
             return "Execution cancelled by the user."
 
@@ -129,10 +119,7 @@ class LinkedInToolkit(BaseToolkit):
 
         if response.status_code != HTTPStatus.NO_CONTENT:
             error_type = handle_http_error(response)
-            return (
-                f"Request returned a(n) {error_type!s}: "
-                f"{response.status_code!s} {response.text}"
-            )
+            return f"Request returned a(n) {error_type!s}: " f"{response.status_code!s} {response.text}"
 
         return f"Post deleted successfully. Post ID: {post_id}."
 
@@ -158,8 +145,8 @@ class LinkedInToolkit(BaseToolkit):
         """
         headers = {
             "Authorization": f"Bearer {self._access_token}",
-            'Connection': 'Keep-Alive',
-            'Content-Type': 'application/json',
+            "Connection": "Keep-Alive",
+            "Content-Type": "application/json",
             "X-Restli-Protocol-Version": "2.0.0",
         }
 
@@ -177,20 +164,20 @@ class LinkedInToolkit(BaseToolkit):
 
         json_response = response.json()
 
-        locale = json_response.get('locale', {})
-        country = locale.get('country', 'N/A')
-        language = locale.get('language', 'N/A')
+        locale = json_response.get("locale", {})
+        country = locale.get("country", "N/A")
+        language = locale.get("language", "N/A")
 
         profile_report = {
             "Country": country,
             "Language": language,
-            "First Name": json_response.get('given_name'),
-            "Last Name": json_response.get('family_name'),
-            "Email": json_response.get('email'),
+            "First Name": json_response.get("given_name"),
+            "Last Name": json_response.get("family_name"),
+            "Email": json_response.get("email"),
         }
 
         if include_id:
-            profile_report['id'] = f"urn:li:person:{json_response['sub']}"
+            profile_report["id"] = f"urn:li:person:{json_response['sub']}"
 
         return profile_report
 

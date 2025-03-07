@@ -137,12 +137,8 @@ class LLMGuardRuntime(BaseRuntime):
             ):
                 function_name = func.get_function_name()
                 if function_name in self.ignore_toolkit.ignored_risks:
-                    reason = self.ignore_toolkit.ignored_risks.pop(
-                        function_name
-                    )
-                    logger.info(
-                        f"Ignored risk for function {function_name}: {reason}"
-                    )
+                    reason = self.ignore_toolkit.ignored_risks.pop(function_name)
+                    logger.info(f"Ignored risk for function {function_name}: {reason}")
                     return inner_func(*args, **kwargs)
                 self.agent.init_messages()
                 resp = self.agent.step(
@@ -156,9 +152,7 @@ class LLMGuardRuntime(BaseRuntime):
                 tool_call = resp.info.get("external_tool_request", None)
                 if not tool_call:
                     logger.error("No tool call found in response.")
-                    return {
-                        "error": "Risk assessment failed. Disabling function."
-                    }
+                    return {"error": "Risk assessment failed. Disabling function."}
                 data = tool_call.function.arguments
                 data = json.loads(data)
                 if threshold < data["score"]:

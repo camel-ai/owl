@@ -37,10 +37,8 @@ class GithubToolkit(BaseToolkit):
             `get_github_access_token` method.
     """
 
-    @dependencies_required('github')
-    def __init__(
-        self, repo_name: str, access_token: Optional[str] = None
-    ) -> None:
+    @dependencies_required("github")
+    def __init__(self, repo_name: str, access_token: Optional[str] = None) -> None:
         r"""Initializes a new instance of the GitHubToolkit class.
 
         Args:
@@ -106,18 +104,14 @@ class GithubToolkit(BaseToolkit):
                 successfully or not.
         """
         sb = self.repo.get_branch(self.repo.default_branch)
-        self.repo.create_git_ref(
-            ref=f"refs/heads/{branch_name}", sha=sb.commit.sha
-        )
+        self.repo.create_git_ref(ref=f"refs/heads/{branch_name}", sha=sb.commit.sha)
 
         file = self.repo.get_contents(file_path)
 
         from github.ContentFile import ContentFile
 
         if isinstance(file, ContentFile):
-            self.repo.update_file(
-                file.path, body, new_content, file.sha, branch=branch_name
-            )
+            self.repo.update_file(file.path, body, new_content, file.sha, branch=branch_name)
             pr = self.repo.create_pull(
                 title=pr_title,
                 body=body,
@@ -132,9 +126,7 @@ class GithubToolkit(BaseToolkit):
         else:
             raise ValueError("PRs with multiple files aren't supported yet.")
 
-    def get_issue_list(
-        self, state: Literal["open", "closed", "all"] = "all"
-    ) -> List[Dict[str, object]]:
+    def get_issue_list(self, state: Literal["open", "closed", "all"] = "all") -> List[Dict[str, object]]:
         r"""Retrieves all issues from the GitHub repository.
 
         Args:
@@ -172,9 +164,7 @@ class GithubToolkit(BaseToolkit):
         except Exception as e:
             return f"can't get Issue number {issue_number}: {e!s}"
 
-    def get_pull_request_list(
-        self, state: Literal["open", "closed", "all"] = "all"
-    ) -> List[Dict[str, object]]:
+    def get_pull_request_list(self, state: Literal["open", "closed", "all"] = "all") -> List[Dict[str, object]]:
         r"""Retrieves all pull requests from the GitHub repository.
 
         Args:
@@ -225,9 +215,7 @@ class GithubToolkit(BaseToolkit):
 
         return files_changed
 
-    def get_pull_request_comments(
-        self, pr_number: int
-    ) -> List[Dict[str, str]]:
+    def get_pull_request_comments(self, pr_number: int) -> List[Dict[str, str]]:
         r"""Retrieves the comments from a specific pull request.
 
         Args:
@@ -265,9 +253,7 @@ class GithubToolkit(BaseToolkit):
         files: List[str] = []
 
         # Retrieves all contents of the current directory
-        contents: Union[List[ContentFile], ContentFile] = (
-            self.repo.get_contents(path)
-        )
+        contents: Union[List[ContentFile], ContentFile] = self.repo.get_contents(path)
 
         if isinstance(contents, ContentFile):
             files.append(contents.path)

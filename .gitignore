@@ -1,6 +1,96 @@
 .dist
 .DS_Store
-owl/data
-owl/tmp
-owl/.env
-owl/utils/__pycache__/
+
+__pycache__/
+*.py[cod]
+$py.class
+.idea/
+.vscode/
+
+*.tar.gz
+
+.mypy_cache/
+
+logs/
+*.log
+
+# venv
+venv/
+.venv
+env/
+*.env
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist/
+build/
+develop-eggs/
+.installed.cfg
+*.egg-link
+*.eggs
+
+# data
+*.csv
+
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+
+# Translations
+*.mo
+*.pot
+
+# VS Code stuff:
+.vscode/
+
+# others
+.hypothesis/
+.breakpoint
+
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/demo-saas/frontend/node_modules/
+
+
+nohup.out
+
+
+# Data
+data/
+models/
+*.jsonl
+*.csv
+*.xlsx
+
+#tmp
+tmp/
