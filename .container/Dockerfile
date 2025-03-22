@@ -41,11 +41,11 @@ COPY assets/ ./assets/
 COPY README_zh.md .
 
 # Create startup script
-RUN echo '#!/bin/bash\nxvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" python "$@"' > /usr/local/bin/xvfb-python && \
+RUN printf '#!/bin/bash\nxvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" python "$@"' > /usr/local/bin/xvfb-python && \
     chmod +x /usr/local/bin/xvfb-python
 
 # Create welcome script
-RUN echo '#!/bin/bash\necho "Welcome to the OWL Project Docker environment!"\necho "Welcome to OWL Project Docker environment!"\necho ""\necho "Available scripts:"\nls -1 *.py | grep -v "__" | sed "s/^/- /"\necho ""\necho "Run examples:"\necho "  xvfb-python run.py                     # Run default script"\necho "  xvfb-python run_deepseek_example.py      # Run DeepSeek example"\necho ""\necho "Or use custom query:"\necho "  xvfb-python run.py \"Your question\""\necho ""' > /usr/local/bin/owl-welcome && \
+RUN printf '#!/bin/bash\necho "Welcome to the OWL Project Docker environment!"\necho "Welcome to OWL Project Docker environment!"\necho ""\necho "Available scripts:"\nls -1 *.py | grep -v "__" | sed "s/^/- /"\necho ""\necho "Run examples:"\necho "  xvfb-python run.py                     # Run default script"\necho "  xvfb-python run_deepseek_example.py      # Run DeepSeek example"\necho ""\necho "Or use custom query:"\necho "  xvfb-python run.py \"Your question\""\necho ""' > /usr/local/bin/owl-welcome && \
     chmod +x /usr/local/bin/owl-welcome
 
 # Set working directory
