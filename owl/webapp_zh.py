@@ -1264,7 +1264,7 @@ def main():
         app = create_ui()
 
         app.queue()
-        app.launch(share=False)
+        app.launch(server_name="0.0.0.0", server_port=7860, share=False)
     except Exception as e:
         logging.error(f"启动应用程序时发生错误: {str(e)}")
         print(f"启动应用程序时发生错误: {str(e)}")
