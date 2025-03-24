@@ -251,6 +251,7 @@ MODULE_DESCRIPTIONS = {
     "run_qwen_zh": "Using qwen model to process tasks",
     "run_azure_openai": "Using azure openai model to process tasks",
     "run_groq": "Using groq model to process tasks",
+    "run_grok": "Using Grok AI model to process tasks (without function calling)",
 }
 
 
