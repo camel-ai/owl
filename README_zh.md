@@ -99,6 +99,19 @@
   </p>
 </div>
 
+<div align="center" style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; border: 2px solid #4caf50; margin: 20px 0;">
+  <h3 style="color: #2e7d32; margin: 0; font-size: 1.3em;">
+    🧩 <b>新增：社区智能体挑战！</b> 🧩
+  </h3>
+  <p style="font-size: 1.1em; margin: 10px 0;">
+    展示您的创造力，为AI智能体设计独特的挑战！<br>
+    加入我们的社区，见证您的创新想法被尖端AI技术实现。
+  </p>
+  <p>
+    <a href="https://github.com/camel-ai/owl/blob/main/community_challenges.md" style="background-color: #2e7d32; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">查看与提交挑战</a>
+  </p>
+</div>
+
 <div style="background-color: #e3f2fd; padding: 12px; border-radius: 8px; border-left: 4px solid #1e88e5; margin: 10px 0;">
   <h4 style="color: #1e88e5; margin: 0 0 8px 0;">
     🎉 最新重大更新 - 2025年3月15日
@@ -113,6 +126,7 @@
   </p>
 </div>
 
+- **[2025.03.26]**: 支持Gemini 2.5 Pro模型，添加示例运行代码
 - **[2025.03.21]**: 集成OpenRouter模型平台，修复Gemini工具调用的bug
 - **[2025.03.20]**: 在MCP工具包中添加Accept头部，支持自动安装playwright
 - **[2025.03.16]**: 支持必应搜索、百度搜索
@@ -127,6 +141,8 @@
 https://private-user-images.githubusercontent.com/55657767/420211368-f29f477d-7eef-46da-8d7a-8f3bcf506da2.mp4
 
 https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-136a-485f-8df3-f10d9b4e63ec.mp4
+
+此视频演示了如何在本地安装 OWL，展示了它作为一个前沿的多智能体协作框架，推动任务自动化边界的能力：https://www.youtube.com/watch?v=8XlqVyAZOr8
 
 # ✨️ 核心功能
 
@@ -365,6 +381,9 @@ python examples/run_qwen_zh.py
 
 # 使用 Deepseek 模型运行
 python examples/run_deepseek_zh.py
+
+# 使用 Gemini 模型运行
+python examples/run_gemini.py
 
 # 使用其他 OpenAI 兼容模型运行
 python examples/run_openai_compatible_model.py
