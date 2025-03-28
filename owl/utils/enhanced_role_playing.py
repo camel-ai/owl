@@ -313,7 +313,7 @@ Please note that our overall task may be very complicated. Here are some tips th
             Now please make a final answer of the original task based on our conversation : <task>{self.task_prompt}</task>
             """
 
-        assistant_response = await self.assistant_agent.astep(user_msg)
+        assistant_response = await self.assistant_agent.astep(modified_user_msg)
         if assistant_response.terminated or assistant_response.msgs is None:
             return (
                 ChatAgentResponse(
