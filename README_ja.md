@@ -294,10 +294,10 @@ cp owl/.env_template owl/.env
 ```bash
 # このオプションはDocker Hubから即使用可能なイメージをダウンロードします
 # 最速であり、ほとんどのユーザーに推奨されます
-docker-compose up -d
+docker compose up -d
 
 # コンテナ内でOWLを実行
-docker-compose exec owl bash
+docker compose exec owl bash
 cd .. && source .venv/bin/activate
 playwright install-deps
 xvfb-python examples/run.py
@@ -311,10 +311,10 @@ xvfb-python examples/run.py
 # 2. "image: mugglejinx/owl:latest"行をコメントアウト
 # 3. "build:"セクションとそのネストされたプロパティをコメント解除
 # 4. 次に実行：
-docker-compose up -d --build
+docker compose up -d --build
 
 # コンテナ内でOWLを実行
-docker-compose exec owl bash
+docker compose exec owl bash
 cd .. && source .venv/bin/activate
 playwright install-deps
 xvfb-python examples/run.py
@@ -544,6 +544,9 @@ python owl/webapp_zh.py
 
 # 英語版を起動
 python owl/webapp.py
+
+# 日本語版を起動
+python owl/webapp_jp.py
 ```
 
 ## 機能

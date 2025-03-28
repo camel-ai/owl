@@ -295,10 +295,10 @@ cp owl/.env_template owl/.env
 ```bash
 # 此选项从Docker Hub下载一个即用型镜像
 # 最快速且推荐给大多数用户
-docker-compose up -d
+docker compose up -d
 
 # 在容器中运行OWL
-docker-compose exec owl bash
+docker compose exec owl bash
 cd .. && source .venv/bin/activate
 playwright install-deps
 xvfb-python examples/run.py
@@ -312,10 +312,10 @@ xvfb-python examples/run.py
 # 2. 注释掉"image: mugglejinx/owl:latest"行
 # 3. 取消注释"build:"部分及其嵌套属性
 # 4. 然后运行：
-docker-compose up -d --build
+docker compose up -d --build
 
 # 在容器中运行OWL
-docker-compose exec owl bash
+docker compose exec owl bash
 cd .. && source .venv/bin/activate
 playwright install-deps
 xvfb-python examples/run.py
@@ -543,6 +543,9 @@ python owl/webapp_zh.py
 
 # 英文版本
 python owl/webapp.py
+
+# 日文版本
+python owl/webapp_jp.py
 ```
 
 网页界面提供以下功能：
