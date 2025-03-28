@@ -1295,7 +1295,13 @@ def main():
         app = create_ui()
 
         app.queue()
-        app.launch(share=False, favicon_path="../assets/owl-favicon.ico")
+        launch_kwargs = {
+            "share": False,
+            "favicon_path": "../assets/owl-favicon.ico"
+        }
+        if os.getenv("OWL_SERVER_NAME") is not None:
+            launch_kwargs["server_name"] = os.getenv("OWL_SERVER_NAME")
+        app.launch(**launch_kwargs)
     except Exception as e:
         logging.error(f"Error occurred while starting the application: {str(e)}")
         print(f"Error occurred while starting the application: {str(e)}")
