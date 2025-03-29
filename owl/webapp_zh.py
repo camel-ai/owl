@@ -252,6 +252,7 @@ MODULE_DESCRIPTIONS = {
     "run_qwen_zh": "使用qwen模型处理任务",
     "run_azure_openai": "使用azure openai模型处理任务",
     "run_groq": "使用groq模型处理任务",
+    "run_ppio": "使用ppio模型处理任务",
 }
 
 
@@ -611,6 +612,8 @@ def get_api_guide(key: str) -> str:
         return "https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key"
     elif "deepseek" in key_lower:
         return "https://platform.deepseek.com/api_keys"
+    elif "ppio" in key_lower:
+        return "https://ppinfra.com/settings/key-management?utm_source=github_owl"
     elif "google" in key_lower:
         return "https://coda.io/@jon-dallas/google-image-search-pack-example/search-engine-id-and-google-api-key-3"
     elif "search_engine_id" in key_lower:
