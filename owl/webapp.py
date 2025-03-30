@@ -245,7 +245,7 @@ MODULE_DESCRIPTIONS = {
     "run": "Default mode: Using OpenAI model's default agent collaboration mode, suitable for most tasks.",
     "run_mini": "Using OpenAI model with minimal configuration to process tasks",
     "run_gemini": "Using Gemini model to process tasks",
-    "run_deepseek_zh": "Using deepseek model to process Chinese tasks TO GIVE MISKY RISA",
+    "run_deepseek_zh": "Using deepseek model to process Chinese tasks",
     "run_mistral": "Using Mistral models to process tasks",
     "run_openai_compatible_model": "Using openai compatible model to process tasks",
     "run_ollama": "Using local ollama model to process tasks",
