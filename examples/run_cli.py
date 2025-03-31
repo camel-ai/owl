@@ -110,7 +110,7 @@ def construct_society() -> RolePlaying:
             model_type=selected_model_type,
             model_config_dict={"temperature": 0},
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=selected_model_platform,
             model_type=selected_model_type,
             model_config_dict={"temperature": 0},
@@ -141,9 +141,8 @@ def construct_society() -> RolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
-            output_language="Chinese",
         ).get_tools(),
         *VideoAnalysisToolkit(model=models["video"]).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),

@@ -12,6 +12,7 @@
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 from dotenv import load_dotenv
+import sys
 import os
 from camel.models import ModelFactory
 from camel.toolkits import (
@@ -38,10 +39,6 @@ set_log_level(level="DEBUG")
 def construct_society(question: str) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
 
-    This function initializes a society of agents with specific roles and tools
-    to address the provided task or question. It configures models for different
-    components, sets up toolkits, and defines agent roles and task parameters.
-
     Args:
         question (str): The task or question to be addressed by the society.
 
@@ -50,7 +47,7 @@ def construct_society(question: str) -> RolePlaying:
             question.
     """
 
-    # Create models for different components of the society
+    # Create models for different components
     models = {
         "user": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
@@ -62,7 +59,7 @@ def construct_society(question: str) -> RolePlaying:
             model_type=ModelType.GPT_4O,
             model_config_dict={"temperature": 0},
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
             model_type=ModelType.GPT_4O,
             model_config_dict={"temperature": 0},
@@ -74,11 +71,11 @@ def construct_society(question: str) -> RolePlaying:
         ),
     }
 
-    # Configure toolkits for the assistant agent
+    # Configure toolkits
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         SearchToolkit().search_duckduckgo,
@@ -87,17 +84,17 @@ def construct_society(question: str) -> RolePlaying:
         *TerminalToolkit().get_tools(),
     ]
 
-    # Define keyword arguments for user and assistant agents
+    # Configure agent roles and parameters
     user_agent_kwargs = {"model": models["user"]}
     assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
 
-    # Define task-specific parameters
+    # Configure task parameters
     task_kwargs = {
         "task_prompt": question,
         "with_task_specify": False,
     }
 
-    # Create and return the RolePlaying society
+    # Create and return the society
     society = RolePlaying(
         **task_kwargs,
         user_role_name="user",
@@ -110,23 +107,19 @@ def construct_society(question: str) -> RolePlaying:
 
 
 def main():
-    r"""Main function to run the OWL system with an example question.
-
-    This function demonstrates the usage of the `construct_society` function by
-    defining an example research question, constructing a society of agents, and
-    running the society to obtain results. The results include the answer,
-    chat history, and token count, which are printed to the console.
-    """
-
-    # Define an example research question
-    question = f"""打开百度搜索，总结一下camel-ai的camel框架的github star、fork数目等，并把数字用plot包写成python文件保存到"+{os.path.join
+    r"""Main function to run the OWL system with an example question."""
+    # Example research question
+    default_task = f"""打开百度搜索，总结一下camel-ai的camel框架的github star、fork数目等，并把数字用plot包写成python文件保存到"+{os.path.join
 (base_dir, 'final_output')}+"，用本地终端执行python文件显示图出来给我"""
 
-    # Construct and run the society of agents
-    society = construct_society(question)
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
+
+    # Construct and run the society
+    society = construct_society(task)
     answer, chat_history, token_count = run_society(society)
 
-    # Print the results
+    # Output the result
     print(
         f"\033[94mAnswer: {answer}\nChat History: {chat_history}\ntoken_count:{token_count}\033[0m"
     )

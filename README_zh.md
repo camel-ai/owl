@@ -99,6 +99,19 @@
   </p>
 </div>
 
+<div align="center" style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; border: 2px solid #4caf50; margin: 20px 0;">
+  <h3 style="color: #2e7d32; margin: 0; font-size: 1.3em;">
+    🧩 <b>新增：社区智能体挑战！</b> 🧩
+  </h3>
+  <p style="font-size: 1.1em; margin: 10px 0;">
+    展示您的创造力，为AI智能体设计独特的挑战！<br>
+    加入我们的社区，见证您的创新想法被尖端AI技术实现。
+  </p>
+  <p>
+    <a href="https://github.com/camel-ai/owl/blob/main/community_challenges.md" style="background-color: #2e7d32; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">查看与提交挑战</a>
+  </p>
+</div>
+
 <div style="background-color: #e3f2fd; padding: 12px; border-radius: 8px; border-left: 4px solid #1e88e5; margin: 10px 0;">
   <h4 style="color: #1e88e5; margin: 0 0 8px 0;">
     🎉 最新重大更新 - 2025年3月15日
@@ -113,6 +126,12 @@
   </p>
 </div>
 
+- **[2025.03.27]**: 集成SearxNGToolkit，使用SearxNG搜索引擎执行网络搜索。
+- **[2025.03.26]**: 增强Browser Toolkit，支持"chrome"、"msedge"和"chromium"多种浏览器通道。
+- **[2025.03.25]**: 支持Gemini 2.5 Pro模型，添加示例运行代码。
+- **[2025.03.21]**: 集成OpenRouter模型平台，修复Gemini工具调用的bug。
+- **[2025.03.20]**: 在MCP工具包中添加Accept header，支持自动安装playwright。
+- **[2025.03.16]**: 支持必应搜索、百度搜索。
 - **[2025.03.12]**: 在SearchToolkit中添加了Bocha搜索功能，集成了火山引擎模型平台，并更新了Azure和OpenAI Compatible模型的结构化输出和工具调用能力。
 - **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强了 OWL Agent 的 MCP（模型上下文协议）集成、文件写入能力和终端命令执行功能。MCP 作为一个通用协议层，标准化了 AI 模型与各种数据源和工具的交互方式。
 - **[2025.03.09]**: 我们添加了基于网页的用户界面，使系统交互变得更加简便。
@@ -124,6 +143,8 @@
 https://private-user-images.githubusercontent.com/55657767/420211368-f29f477d-7eef-46da-8d7a-8f3bcf506da2.mp4
 
 https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-136a-485f-8df3-f10d9b4e63ec.mp4
+
+此视频演示了如何在本地安装 OWL，展示了它作为一个前沿的多智能体协作框架，推动任务自动化边界的能力：https://www.youtube.com/watch?v=8XlqVyAZOr8
 
 # ✨️ 核心功能
 
@@ -363,8 +384,11 @@ python examples/run_qwen_zh.py
 # 使用 Deepseek 模型运行
 python examples/run_deepseek_zh.py
 
+# 使用 Gemini 模型运行
+python examples/run_gemini.py
+
 # 使用其他 OpenAI 兼容模型运行
-python examples/run_openai_compatiable_model.py
+python examples/run_openai_compatible_model.py
 
 # 使用 Azure OpenAI模型运行
 python examples/run_azure_openai.py
@@ -377,7 +401,7 @@ python examples/run_ollama.py
 
 ```python
 # Define your own task
-question = "Task description here."
+task = "Task description here."
 
 society = construct_society(question)
 answer, chat_history, token_count = run_society(society)
@@ -389,7 +413,7 @@ print(f"\033[94mAnswer: {answer}\033[0m")
 
 ```python
 # 处理本地文件（例如，文件路径为 `tmp/example.docx`）
-question = "给定的 DOCX 文件中有什么内容？文件路径如下：tmp/example.docx"
+task = "给定的 DOCX 文件中有什么内容？文件路径如下：tmp/example.docx"
 
 society = construct_society(question)
 answer, chat_history, token_count = run_society(society)
@@ -582,8 +606,10 @@ python examples/run_gaia_roleplaying.py
 3. 提交包含您改进的拉取请求
 
 **当前开放贡献的问题：**
-- [#1905](https://github.com/camel-ai/camel/issues/1905)
-- [#1712](https://github.com/camel-ai/camel/issues/1712)
+- [#362](https://github.com/camel-ai/owl/issues/362)
+- [#1945](https://github.com/camel-ai/camel/issues/1945)
+- [#1925](https://github.com/camel-ai/camel/issues/1925)
+- [#1915](https://github.com/camel-ai/camel/issues/1915)
 
 要认领一个问题，只需在该问题下留言表明您的兴趣即可。
 
@@ -592,7 +618,7 @@ python examples/run_gaia_roleplaying.py
 
 加入我们，参与更多讨论！
 
-![](./assets/community.jpeg)
+![](./assets/community.jpg)
 
 # ❓ 常见问题
 

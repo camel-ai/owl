@@ -26,6 +26,7 @@ To use this module:
 3. Run with: python -m examples.run_groq
 """
 
+import sys
 from dotenv import load_dotenv
 from camel.models import ModelFactory
 from camel.toolkits import (
@@ -70,7 +71,7 @@ def construct_society(question: str) -> OwlRolePlaying:
             model_type=ModelType.GROQ_LLAMA_3_3_70B,  # Main assistant needs tool capability
             model_config_dict={"temperature": 0},
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.GROQ,
             model_type=ModelType.GROQ_LLAMA_3_3_70B,  # Web browsing requires tool usage
             model_config_dict={"temperature": 0},
@@ -101,7 +102,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         *VideoAnalysisToolkit(model=models["video"]).get_tools(),
@@ -141,13 +142,18 @@ def construct_society(question: str) -> OwlRolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    question = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+    default_task = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
 
     # Construct and run the society
     # Note: This configuration uses GROQ_LLAMA_3_3_70B for tool-intensive roles (assistant, web, planning, video, image)
     # and GROQ_MIXTRAL_8_7B for document processing. GROQ_LLAMA_3_1_8B is used only for the user role
     # which doesn't require tool usage capabilities.
-    society = construct_society(question)
+
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
+
+    # Construct and run the society
+    society = construct_society(task)
     answer, chat_history, token_count = run_society(society)
 
     # Output the result

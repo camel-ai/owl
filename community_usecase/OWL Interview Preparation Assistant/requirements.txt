@@ -1,0 +1,25 @@
+# Core dependencies
+camel-ai[all]==0.2.35
+chunkr-ai>=0.0.41
+docx2markdown>=0.1.1
+streamlit>=1.24.0
+
+# UI and visualization
+opencv-python>=4.7.0
+matplotlib>=3.7.1
+
+# Data handling
+numpy>=1.24.3
+pandas>=2.0.2
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
+tqdm>=4.65.0
+
+# Document processing
+PyPDF2>=3.0.0
+spacy>=3.5.3
+
+# Install spaCy model
+# Run after pip install: python -m spacy download en_core_web_sm

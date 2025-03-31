@@ -13,6 +13,7 @@
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 # run_ollama.py by tj-scripts（https://github.com/tj-scripts）
 
+import sys
 from dotenv import load_dotenv
 from camel.models import ModelFactory
 from camel.toolkits import (
@@ -64,7 +65,7 @@ def construct_society(question: str) -> RolePlaying:
             url="http://192.168.236.54:11434/v1",
             model_config_dict={"temperature": 0.2, "max_tokens": 1000000},
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.OLLAMA,
             model_type="llava:latest",
             url="http://192.168.236.54:11434/v1",
@@ -88,7 +89,7 @@ def construct_society(question: str) -> RolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
@@ -124,11 +125,14 @@ def construct_society(question: str) -> RolePlaying:
 
 def main():
     r"""Main function to run the OWL system with an example question."""
-    # Example research question
-    question = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+    # Default research question
+    default_task = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
 
     # Construct and run the society
-    society = construct_society(question)
+    society = construct_society(task)
     answer, chat_history, token_count = run_society(society)
 
     # Output the result

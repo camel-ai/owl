@@ -16,6 +16,7 @@
 # You can obtain your API key from Bailian platform: bailian.console.aliyun.com
 # Set it as QWEN_API_KEY="your-api-key" in your .env file or add it to your environment variables
 
+import sys
 from dotenv import load_dotenv
 from camel.models import ModelFactory
 from camel.toolkits import (
@@ -67,7 +68,7 @@ def construct_society(question: str) -> RolePlaying:
             model_type=ModelType.QWEN_MAX,
             model_config_dict={"temperature": 0},
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.QWEN,
             model_type=ModelType.QWEN_VL_MAX,
             model_config_dict={"temperature": 0},
@@ -98,7 +99,7 @@ def construct_society(question: str) -> RolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
             output_language="Chinese",
         ).get_tools(),
@@ -140,10 +141,13 @@ def construct_society(question: str) -> RolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    question = "浏览亚马逊并找出一款对程序员有吸引力的产品。请提供产品名称和价格"
+    default_task = "浏览亚马逊并找出一款对程序员有吸引力的产品。请提供产品名称和价格"
+
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
 
     # Construct and run the society
-    society = construct_society(question)
+    society = construct_society(task)
     answer, chat_history, token_count = run_society(society)
 
     # Output the result

@@ -17,7 +17,7 @@
 # Set it as QWEN_API_KEY="your-api-key" in your .env file or add it to your environment variables
 
 from dotenv import load_dotenv
-
+import sys
 from camel.models import ModelFactory
 from camel.toolkits import BrowserToolkit, SearchToolkit, FileWriteToolkit
 from camel.types import ModelPlatformType, ModelType
@@ -101,9 +101,14 @@ def construct_society(question: str) -> RolePlaying:
 
 
 # Example case
-question = "浏览亚马逊并找出一款对程序员有吸引力的产品。请提供产品名称和价格"
+default_task = "浏览亚马逊并找出一款对程序员有吸引力的产品。请提供产品名称和价格"
 
-society = construct_society(question)
+# Override default task if command line argument is provided
+task = sys.argv[1] if len(sys.argv) > 1 else default_task
+
+# Construct and run the society
+society = construct_society(task)
+
 answer, chat_history, token_count = run_society(society)
 
 print(f"\033[94mAnswer: {answer}\033[0m")

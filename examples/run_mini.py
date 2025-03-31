@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
+import sys
 from dotenv import load_dotenv
 
 from camel.models import ModelFactory
@@ -58,7 +59,7 @@ def construct_society(question: str) -> RolePlaying:
             model_type=ModelType.GPT_4O,
             model_config_dict={"temperature": 0},
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
             model_type=ModelType.GPT_4O,
             model_config_dict={"temperature": 0},
@@ -74,7 +75,7 @@ def construct_society(question: str) -> RolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         SearchToolkit().search_duckduckgo,
@@ -106,11 +107,14 @@ def construct_society(question: str) -> RolePlaying:
 
 def main():
     r"""Main function to run the OWL system with an example question."""
-    # Example research question
-    question = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+    # Default research question
+    default_task = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
 
     # Construct and run the society
-    society = construct_society(question)
+    society = construct_society(task)
     answer, chat_history, token_count = run_society(society)
 
     # Output the result

@@ -73,6 +73,7 @@ Note:
 """
 
 import asyncio
+import sys
 from pathlib import Path
 from typing import List
 
@@ -146,15 +147,19 @@ async def main():
     try:
         await mcp_toolkit.connect()
 
-        question = (
+        # Default task
+        default_task = (
             "I'd like a academic report about Andrew Ng, including "
             "his research direction, published papers (At least 3),"
             " institutions, etc. "
         )
 
+        # Override default task if command line argument is provided
+        task = sys.argv[1] if len(sys.argv) > 1 else default_task
+
         # Connect to all MCP toolkits
         tools = [*mcp_toolkit.get_tools()]
-        society = await construct_society(question, tools)
+        society = await construct_society(task, tools)
         answer, chat_history, token_count = await arun_society(society)
         print(f"\033[94mAnswer: {answer}\033[0m")
 

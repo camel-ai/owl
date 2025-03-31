@@ -13,10 +13,12 @@
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 import os
 import logging
+import functools
 import json
+from typing import Callable, Any, Dict, List
 
 from dotenv import load_dotenv
-from camel.models import ModelFactory
+from camel.models import ModelFactory, BaseModelBackend
 
 from camel.toolkits import (
     ExcelToolkit,
@@ -24,8 +26,9 @@ from camel.toolkits import (
     SearchToolkit,
     BrowserToolkit,
     FileWriteToolkit,
-    VirtualTryOnToolkit,
+    VirtualTryOnToolkit
 )
+from camel.toolkits.base import BaseToolkit
 from camel.types import ModelPlatformType
 
 from owl.utils import run_society
@@ -41,15 +44,14 @@ load_dotenv(dotenv_path=str(env_path))
 # set detailed log recording for debug
 set_log_level(level="DEBUG")
 logger = get_logger(__name__)
-file_handler = logging.FileHandler("tool_calls.log")
+file_handler = logging.FileHandler('tool_calls.log')
 file_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 root_logger = logging.getLogger()
 root_logger.addHandler(file_handler)
-
 
 def construct_society(question: str) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
@@ -105,7 +107,7 @@ def construct_society(question: str) -> RolePlaying:
     excel_toolkit = ExcelToolkit()
     file_toolkit = FileWriteToolkit(output_dir="./")
     virtual_try_on_toolkit = VirtualTryOnToolkit()
-
+    
     tools = [
         *browser_toolkit.get_tools(),
         *image_toolkit.get_tools(),
@@ -142,66 +144,13 @@ def construct_society(question: str) -> RolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
 
-    question = "open https://www.uniqlo.com/eu-at/en/women/tops?path=37608%2C84986%2C85018%2C85207 which shows some clothes on sale. First, directly click one image of clothes which should be an big interactive element (don't wrongly click the small like button overlapped on the image!) to go into its specific details page and then get a partial screenshot for this clothes. Second, only after you've get the partial screenshort of the product, using your own virtual try-on toolkit (there is no built-in virtual try-on button on this website, either no third party tool required) to show me the virtual try-on result with the product."
+    question = f"open https://www.uniqlo.com/eu-at/en/women/tops?path=37608%2C84986%2C85018%2C85207 which shows some clothes on sale. First, directly click one image of clothes which should be an big interactive element (don't wrongly click the small like button overlapped on the image!) to go into its specific details page and then get a partial screenshot for this clothes. Second, only after you've get the partial screenshort of the product, using your own virtual try-on toolkit (there is no built-in virtual try-on button on this website, either no third party tool required) to show me the virtual try-on result with the product."
 
     # Construct and run the society
     society = construct_society(question)
     answer, chat_history, token_count = run_society(society)
-
-    # record tool using history (for debug)
-    analyze_chat_history(chat_history)
+    # output the result
     print(f"\033[94mAnswer: {answer}\033[0m")
-
-
-def analyze_chat_history(chat_history):
-    r"""分析聊天历史记录，提取工具调用信息。"""
-    print("\n============ 工具调用分析 ============")
-    logger.info("========== 开始分析聊天历史中的工具调用 ==========")
-
-    tool_calls = []
-    for i, message in enumerate(chat_history):
-        if message.get("role") == "assistant" and "tool_calls" in message:
-            for tool_call in message.get("tool_calls", []):
-                if tool_call.get("type") == "function":
-                    function = tool_call.get("function", {})
-                    tool_info = {
-                        "call_id": tool_call.get("id"),
-                        "name": function.get("name"),
-                        "arguments": function.get("arguments"),
-                        "message_index": i,
-                    }
-                    tool_calls.append(tool_info)
-                    print(
-                        f"工具调用: {function.get('name')} 参数: {function.get('arguments')}"
-                    )
-                    logger.info(
-                        f"工具调用: {function.get('name')} 参数: {function.get('arguments')}"
-                    )
-
-        elif message.get("role") == "tool" and "tool_call_id" in message:
-            # 找到对应的工具调用
-            for tool_call in tool_calls:
-                if tool_call.get("call_id") == message.get("tool_call_id"):
-                    result = message.get("content", "")
-                    result_summary = (
-                        result[:100] + "..." if len(result) > 100 else result
-                    )
-                    print(f"工具结果: {tool_call.get('name')} 返回: {result_summary}")
-                    logger.info(
-                        f"工具结果: {tool_call.get('name')} 返回: {result_summary}"
-                    )
-
-    print(f"总共发现 {len(tool_calls)} 个工具调用")
-    logger.info(f"总共发现 {len(tool_calls)} 个工具调用")
-    logger.info("========== 结束分析聊天历史中的工具调用 ==========")
-
-    # 将完整聊天历史保存到文件
-    with open("chat_history.json", "w", encoding="utf-8") as f:
-        json.dump(chat_history, f, ensure_ascii=False, indent=2)
-
-    print("记录已保存到 chat_history.json")
-    print("============ 分析结束 ============\n")
-
 
 if __name__ == "__main__":
     main()

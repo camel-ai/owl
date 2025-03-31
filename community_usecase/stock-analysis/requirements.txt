@@ -1,0 +1,8 @@
+# Core dependencies
+camel-ai[all]==0.2.35
+chunkr-ai>=0.0.41
+docx2markdown>=0.1.1
+streamlit>=1.24.0
+
+# SEC
+sec-api>=1.0.31

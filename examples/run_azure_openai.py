@@ -12,6 +12,7 @@
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 import os
+import sys
 from dotenv import load_dotenv
 from camel.configs import ChatGPTConfig
 from camel.models import ModelFactory
@@ -58,7 +59,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     models = {
         "user": ModelFactory.create(**base_model_config),
         "assistant": ModelFactory.create(**base_model_config),
-        "web": ModelFactory.create(**base_model_config),
+        "browsing": ModelFactory.create(**base_model_config),
         "planning": ModelFactory.create(**base_model_config),
         "image": ModelFactory.create(**base_model_config),
     }
@@ -67,7 +68,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
@@ -104,10 +105,14 @@ def construct_society(question: str) -> OwlRolePlaying:
 def main():
     r"""Main function to run the OWL system with Azure OpenAI."""
     # Example question
-    question = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+    default_task = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
 
     # Construct and run the society
-    society = construct_society(question)
+    society = construct_society(task)
+
     answer, chat_history, token_count = run_society(society)
 
     # Output the result

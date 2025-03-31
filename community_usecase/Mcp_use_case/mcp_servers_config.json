@@ -1,0 +1,21 @@
+{
+    "mcpServers": {
+      "desktop-commander": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@wonderwhy-er/desktop-commander"
+        ]
+      },
+      
+      "playwright": {
+        "command": "npx",
+        "args": ["-y", "@executeautomation/playwright-mcp-server", "--browser", "chromium"]
+      },
+
+      "mcp-server-firecrawl": {
+        "command": "npx",
+        "args": ["-y", "firecrawl-mcp"]
+      }
+    }
+  }

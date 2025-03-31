@@ -71,7 +71,7 @@ def main():
             model_type=ModelType.GPT_4O,
             model_config_dict=ChatGPTConfig(temperature=0, top_p=1).as_dict(),
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
             model_type=ModelType.GPT_4O,
             model_config_dict=ChatGPTConfig(temperature=0, top_p=1).as_dict(),
@@ -97,7 +97,7 @@ def main():
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         *VideoAnalysisToolkit(

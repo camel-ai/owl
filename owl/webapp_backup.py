@@ -265,7 +265,7 @@ MODULE_DESCRIPTIONS = {
     "run_deepseek_zh": "使用deepseek模型处理中文任务",
     "run_terminal_zh": "终端模式：可执行命令行操作，支持网络搜索、文件处理等功能。适合需要系统交互的任务，使用OpenAI模型",
     "run_gaia_roleplaying": "GAIA基准测试实现，用于评估Agent能力",
-    "run_openai_compatiable_model": "使用openai兼容模型处理任务",
+    "run_openai_compatible_model": "使用openai兼容模型处理任务",
     "run_ollama": "使用本地ollama模型处理任务",
     "run_qwen_mini_zh": "使用qwen模型最小化配置处理任务",
     "run_qwen_zh": "使用qwen模型处理任务",

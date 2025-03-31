@@ -244,11 +244,14 @@ def get_latest_logs(max_lines=100, queue_source=None):
 MODULE_DESCRIPTIONS = {
     "run": "Default mode: Using OpenAI model's default agent collaboration mode, suitable for most tasks.",
     "run_mini": "Using OpenAI model with minimal configuration to process tasks",
+    "run_gemini": "Using Gemini model to process tasks",
     "run_deepseek_zh": "Using deepseek model to process Chinese tasks",
-    "run_openai_compatiable_model": "Using openai compatible model to process tasks",
+    "run_openai_compatible_model": "Using openai compatible model to process tasks",
     "run_ollama": "Using local ollama model to process tasks",
     "run_qwen_mini_zh": "Using qwen model with minimal configuration to process tasks",
     "run_qwen_zh": "Using qwen model to process tasks",
+    "run_azure_openai": "Using azure openai model to process tasks",
+    "run_groq": "Using groq model to process tasks",
 }
 
 
@@ -855,7 +858,7 @@ def create_ui():
                 logs2,
             )
 
-    with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as app:
+    with gr.Blocks(title="OWL", theme=gr.themes.Soft(primary_hue="blue")) as app:
         gr.Markdown(
             """
                 # 🦉 OWL Multi-Agent Collaboration System
@@ -1292,7 +1295,7 @@ def main():
         app = create_ui()
 
         app.queue()
-        app.launch(share=False)
+        app.launch(share=False, favicon_path="../assets/owl-favicon.ico")
     except Exception as e:
         logging.error(f"Error occurred while starting the application: {str(e)}")
         print(f"Error occurred while starting the application: {str(e)}")

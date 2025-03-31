@@ -11,25 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
-import os
-
+import sys
+import pathlib
 from dotenv import load_dotenv
 from camel.models import ModelFactory
 from camel.toolkits import (
+    AudioAnalysisToolkit,
     CodeExecutionToolkit,
     ExcelToolkit,
     ImageAnalysisToolkit,
     SearchToolkit,
+    VideoAnalysisToolkit,
     BrowserToolkit,
     FileWriteToolkit,
 )
-from camel.types import ModelPlatformType
-
-from owl.utils import run_society
-from camel.societies import RolePlaying
+from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
+from camel.societies import RolePlaying
 
-import pathlib
+from owl.utils import run_society, DocumentProcessingToolkit
 
 base_dir = pathlib.Path(__file__).parent.parent
 env_path = base_dir / "owl" / ".env"
@@ -51,39 +51,39 @@ def construct_society(question: str) -> RolePlaying:
     # Create models for different components
     models = {
         "user": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-max",
-            api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 4096},
+            model_platform=ModelPlatformType.GEMINI,
+            model_type=ModelType.GEMINI_2_5_PRO_EXP,
+            model_config_dict={"temperature": 0},
         ),
         "assistant": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-max",
-            api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 4096},
+            model_platform=ModelPlatformType.GEMINI,
+            model_type=ModelType.GEMINI_2_5_PRO_EXP,
+            model_config_dict={"temperature": 0},
         ),
-        "web": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-vl-max",
-            api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 4096},
+        "browsing": ModelFactory.create(
+            model_platform=ModelPlatformType.GEMINI,
+            model_type=ModelType.GEMINI_2_5_PRO_EXP,
+            model_config_dict={"temperature": 0},
         ),
         "planning": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-max",
-            api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 4096},
+            model_platform=ModelPlatformType.GEMINI,
+            model_type=ModelType.GEMINI_2_5_PRO_EXP,
+            model_config_dict={"temperature": 0},
+        ),
+        "video": ModelFactory.create(
+            model_platform=ModelPlatformType.GEMINI,
+            model_type=ModelType.GEMINI_2_5_PRO_EXP,
+            model_config_dict={"temperature": 0},
         ),
         "image": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="qwen-vl-max",
-            api_key=os.getenv("QWEN_API_KEY"),
-            url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 4096},
+            model_platform=ModelPlatformType.GEMINI,
+            model_type=ModelType.GEMINI_2_5_PRO_EXP,
+            model_config_dict={"temperature": 0},
+        ),
+        "document": ModelFactory.create(
+            model_platform=ModelPlatformType.GEMINI,
+            model_type=ModelType.GEMINI_2_5_PRO_EXP,
+            model_config_dict={"temperature": 0},
         ),
     }
 
@@ -91,7 +91,7 @@ def construct_society(question: str) -> RolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
@@ -100,6 +100,7 @@ def construct_society(question: str) -> RolePlaying:
         SearchToolkit().search_google,  # Comment this out if you don't have google search
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
+        *DocumentProcessingToolkit(model=models["document"]).get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
@@ -127,11 +128,14 @@ def construct_society(question: str) -> RolePlaying:
 
 def main():
     r"""Main function to run the OWL system with an example question."""
-    # Example research question
-    question = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+    # Default research question
+    default_task = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
 
     # Construct and run the society
-    society = construct_society(question)
+    society = construct_society(task)
     answer, chat_history, token_count = run_society(society)
 
     # Output the result

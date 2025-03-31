@@ -244,11 +244,14 @@ def get_latest_logs(max_lines=100, queue_source=None):
 MODULE_DESCRIPTIONS = {
     "run": "默认模式：使用OpenAI模型的默认的智能体协作模式，适合大多数任务。",
     "run_mini": "使用使用OpenAI模型最小化配置处理任务",
+    "run_gemini": "使用 Gemini模型处理任务",
     "run_deepseek_zh": "使用deepseek模型处理中文任务",
-    "run_openai_compatiable_model": "使用openai兼容模型处理任务",
+    "run_openai_compatible_model": "使用openai兼容模型处理任务",
     "run_ollama": "使用本地ollama模型处理任务",
     "run_qwen_mini_zh": "使用qwen模型最小化配置处理任务",
     "run_qwen_zh": "使用qwen模型处理任务",
+    "run_azure_openai": "使用azure openai模型处理任务",
+    "run_groq": "使用groq模型处理任务",
 }
 
 

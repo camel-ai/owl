@@ -28,6 +28,9 @@ env/
 ENV/
 .env
 
+# Runtime Temporary files
+tmp/
+
 # IDE
 .idea/
 .vscode/

@@ -17,7 +17,7 @@
 # You can obtain your API key from DeepSeek platform: https://platform.deepseek.com/api_keys
 # Set it as DEEPSEEK_API_KEY="your-api-key" in your .env file or add it to your environment variables
 
-
+import sys
 from dotenv import load_dotenv
 
 from camel.models import ModelFactory
@@ -102,10 +102,14 @@ def construct_society(question: str) -> RolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    question = "搜索OWL项目最近的新闻并生成一篇报告，最后保存到本地。"
+    default_task = "搜索OWL项目最近的新闻并生成一篇报告，最后保存到本地。"
+
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
 
     # Construct and run the society
-    society = construct_society(question)
+    society = construct_society(task)
+
     answer, chat_history, token_count = run_society(society)
 
     # Output the result

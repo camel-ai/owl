@@ -12,6 +12,7 @@
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 from dotenv import load_dotenv
+import sys
 import os
 from camel.models import ModelFactory
 from camel.toolkits import (
@@ -58,7 +59,7 @@ def construct_society(question: str) -> RolePlaying:
             model_type=ModelType.GPT_4O,
             model_config_dict={"temperature": 0},
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
             model_type=ModelType.GPT_4O,
             model_config_dict={"temperature": 0},
@@ -74,7 +75,7 @@ def construct_society(question: str) -> RolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         SearchToolkit().search_duckduckgo,
@@ -108,13 +109,16 @@ def construct_society(question: str) -> RolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    question = f"""Open Google Search, summarize the number of GitHub stars, forks, etc., of the camel framework of camel-ai, 
+    default_task = f"""Open Google Search, summarize the number of GitHub stars, forks, etc., of the camel framework of camel-ai, 
     and write the numbers into a Python file using the plot package, 
     save it to "+{os.path.join(base_dir, 'final_output')}+", 
     and execute the Python file with the local terminal to display the graph for me."""
 
+    # Override default task if command line argument is provided
+    task = sys.argv[1] if len(sys.argv) > 1 else default_task
+
     # Construct and run the society
-    society = construct_society(question)
+    society = construct_society(task)
     answer, chat_history, token_count = run_society(society)
 
     # Output the result

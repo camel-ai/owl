@@ -99,6 +99,19 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   </p>
 </div>
 
+<div align="center" style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; border: 2px solid #4caf50; margin: 20px 0;">
+  <h3 style="color: #2e7d32; margin: 0; font-size: 1.3em;">
+    🧩 <b>NEW: COMMUNITY AGENT CHALLENGES!</b> 🧩
+  </h3>
+  <p style="font-size: 1.1em; margin: 10px 0;">
+    Showcase your creativity by designing unique challenges for AI agents! <br>
+    Join our community and see your innovative ideas tackled by cutting-edge AI.
+  </p>
+  <p>
+    <a href="https://github.com/camel-ai/owl/blob/main/community_challenges.md" style="background-color: #2e7d32; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">View & Submit Challenges</a>
+  </p>
+</div>
+
 <div style="background-color: #e3f2fd; padding: 12px; border-radius: 8px; border-left: 4px solid #1e88e5; margin: 10px 0;">
   <h4 style="color: #1e88e5; margin: 0 0 8px 0;">
     🎉 Latest Major Update - March 15, 2025
@@ -113,6 +126,12 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   </p>
 </div>
 
+- **[2025.03.27]**: Integrate SearxNGToolkit performing web searches using SearxNG search engine.
+- **[2025.03.26]**: Enhanced Browser Toolkit with multi-browser support for "chrome", "msedge", and "chromium" channels.
+- **[2025.03.25]**: Supported Gemini 2.5 Pro, added example run code
+- **[2025.03.21]**: Integrated OpenRouter model platform, fix bug with Gemini tool calling.
+- **[2025.03.20]**: Accept header in MCP Toolkit, support automatic playwright installation.
+- **[2025.03.16]**: Support Bing search, Baidu search.
 - **[2025.03.12]**: Added Bocha search in SearchToolkit, integrated Volcano Engine model platform, and enhanced Azure and OpenAI Compatible models with structured output and tool calling.
 - **[2025.03.11]**: We added MCPToolkit, FileWriteToolkit, and TerminalToolkit to enhance OWL agents with MCP tool calling, file writing capabilities, and terminal command execution.
 - **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
@@ -125,6 +144,8 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 https://github.com/user-attachments/assets/2a2a825d-39ea-45c5-9ba1-f9d58efbc372
 
 https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-136a-485f-8df3-f10d9b4e63ec.mp4
+
+This video demonstrates how to install OWL locally and showcases its capabilities as a cutting-edge framework for multi-agent collaboration: https://www.youtube.com/watch?v=8XlqVyAZOr8
 
 # ✨️ Core Features
 
@@ -139,9 +160,29 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 
 # 🛠️ Installation
 
-OWL supports multiple installation methods to fit your workflow preferences. Choose the option that works best for you.
+## **Prerequisites**
 
-## Option 1: Using uv (Recommended)
+### Install Python
+Before installing OWL, ensure you have Python installed (version 3.10, 3.11, or 3.12 is supported):
+
+```bash
+# Check if Python is installed
+python --version
+
+# If not installed, download and install from https://www.python.org/downloads/
+# For macOS users with Homebrew:
+brew install python@3.10
+
+# For Ubuntu/Debian:
+sudo apt update
+sudo apt install python3.10 python3.10-venv python3-pip
+```
+
+## **Installation Options**
+
+OWL supports multiple installation methods to fit your workflow preferences.
+
+### Option 1: Using uv (Recommended)
 
 ```bash
 # Clone github repo
@@ -154,7 +195,6 @@ cd owl
 pip install uv
 
 # Create a virtual environment and install dependencies
-# We support using Python 3.10, 3.11, 3.12
 uv venv .venv --python=3.10
 
 # Activate the virtual environment
@@ -165,12 +205,9 @@ source .venv/bin/activate
 
 # Install CAMEL with all dependencies
 uv pip install -e .
-
-# Exit the virtual environment when done
-deactivate
 ```
 
-## Option 2: Using venv and pip
+### Option 2: Using venv and pip
 
 ```bash
 # Clone github repo
@@ -193,7 +230,7 @@ source .venv/bin/activate
 pip install -r requirements.txt --use-pep517
 ```
 
-## Option 3: Using conda
+### Option 3: Using conda
 
 ```bash
 # Clone github repo
@@ -213,70 +250,11 @@ pip install -e .
 
 # Option 2: Install from requirements.txt
 pip install -r requirements.txt --use-pep517
-
-# Exit the conda environment when done
-conda deactivate
 ```
 
-## **Setup Environment Variables**
+### Option 4: Using Docker
 
-OWL requires various API keys to interact with different services. The `owl/.env_template` file contains placeholders for all necessary API keys along with links to the services where you can register for them.
-
-### Option 1: Using a `.env` File (Recommended)
-
-1. **Copy and Rename the Template**:
-   ```bash
-   cd owl
-   cp .env_template .env
-   ```
-
-2. **Configure Your API Keys**:
-   Open the `.env` file in your preferred text editor and insert your API keys in the corresponding fields.
-   
-   > **Note**: For the minimal example (`examples/run_mini.py`), you only need to configure the LLM API key (e.g., `OPENAI_API_KEY`).
-
-### Option 2: Setting Environment Variables Directly
-
-Alternatively, you can set environment variables directly in your terminal:
-
-- **macOS/Linux (Bash/Zsh)**:
-  ```bash
-  export OPENAI_API_KEY="your-openai-api-key-here"
-  ```
-
-- **Windows (Command Prompt)**:
-  ```batch
-  set OPENAI_API_KEY="your-openai-api-key-here"
-  ```
-
-- **Windows (PowerShell)**:
-  ```powershell
-  $env:OPENAI_API_KEY = "your-openai-api-key-here"
-  ```
-
-> **Note**: Environment variables set directly in the terminal will only persist for the current session.
-
-
-
-## **Running with Docker**
-
-OWL can be easily deployed using Docker, which provides a consistent environment across different platforms.
-
-### **Setup Instructions**
-
-```bash
-# Clone the repository
-git clone https://github.com/camel-ai/owl.git
-cd owl
-
-# Configure environment variables
-cp owl/.env_template owl/.env
-# Edit the .env file and fill in your API keys
-```
-
-### **Deployment Options**
-
-#### **Option 1: Using Pre-built Image (Recommended)**
+#### **Using Pre-built Image (Recommended)**
 
 ```bash
 # This option downloads a ready-to-use image from Docker Hub
@@ -290,7 +268,7 @@ playwright install-deps
 xvfb-python examples/run.py
 ```
 
-#### **Option 2: Building Image Locally**
+#### **Building Image Locally**
 
 ```bash
 # For users who need to customize the Docker image or cannot access Docker Hub:
@@ -307,7 +285,7 @@ playwright install-deps
 xvfb-python examples/run.py
 ```
 
-#### **Option 3: Using Convenience Scripts**
+#### **Using Convenience Scripts**
 
 ```bash
 # Navigate to container directory
@@ -320,6 +298,54 @@ chmod +x build_docker.sh
 # Run OWL with your question
 ./run_in_docker.sh "your question"
 ```
+
+## **Setup Environment Variables**
+
+OWL requires various API keys to interact with different services.
+
+### Setting Environment Variables Directly
+
+You can set environment variables directly in your terminal:
+
+- **macOS/Linux (Bash/Zsh)**:
+  ```bash
+  export OPENAI_API_KEY="your-openai-api-key-here"
+  # Add other required API keys as needed
+  ```
+
+- **Windows (Command Prompt)**:
+  ```batch
+  set OPENAI_API_KEY=your-openai-api-key-here
+  ```
+
+- **Windows (PowerShell)**:
+  ```powershell
+  $env:OPENAI_API_KEY = "your-openai-api-key-here"
+  ```
+
+> **Note**: Environment variables set directly in the terminal will only persist for the current session.
+
+### Alternative: Using a `.env` File
+
+If you prefer using a `.env` file instead, you can:
+
+1. **Copy and Rename the Template**:
+   ```bash
+   # For macOS/Linux
+   cd owl
+   cp .env_template .env
+   
+   # For Windows
+   cd owl
+   copy .env_template .env
+   ```
+
+   Alternatively, you can manually create a new file named `.env` in the owl directory and copy the contents from `.env_template`.
+
+2. **Configure Your API Keys**:
+   Open the `.env` file in your preferred text editor and insert your API keys in the corresponding fields.
+
+> **Note**: For the minimal example (`examples/run_mini.py`), you only need to configure the LLM API key (e.g., `OPENAI_API_KEY`).
 
 ### **MCP Desktop Commander Setup**
 
@@ -365,7 +391,10 @@ python examples/run_qwen_zh.py
 python examples/run_deepseek_zh.py
 
 # Run with other OpenAI-compatible models
-python examples/run_openai_compatiable_model.py
+python examples/run_openai_compatible_model.py
+
+# Run with Gemini model
+python examples/run_gemini.py
 
 # Run with Azure OpenAI
 python examples/run_azure_openai.py
@@ -384,7 +413,7 @@ You can run OWL agent with your own task by modifying the `examples/run.py` scri
 
 ```python
 # Define your own task
-question = "Task description here."
+task = "Task description here."
 
 society = construct_society(question)
 answer, chat_history, token_count = run_society(society)
@@ -396,7 +425,7 @@ For uploading files, simply provide the file path along with your question:
 
 ```python
 # Task with a local file (e.g., file path: `tmp/example.docx`)
-question = "What is in the given DOCX file? Here is the file path: tmp/example.docx"
+task = "What is in the given DOCX file? Here is the file path: tmp/example.docx"
 
 society = construct_society(question)
 answer, chat_history, token_count = run_society(society)
@@ -595,9 +624,11 @@ We welcome contributions from the community! Here's how you can help:
 3. Submit pull requests with your improvements
 
 **Current Issues Open for Contribution:**
-- [#1905](https://github.com/camel-ai/camel/issues/1905)
-- [#1712](https://github.com/camel-ai/camel/issues/1712)
-
+- [#362](https://github.com/camel-ai/owl/issues/362)
+- [#1945](https://github.com/camel-ai/camel/issues/1945)
+- [#1925](https://github.com/camel-ai/camel/issues/1925)
+- [#1915](https://github.com/camel-ai/camel/issues/1915)
+- [#1970](https://github.com/camel-ai/camel/issues/1970)
 
 To take on an issue, simply leave a comment stating your interest.
 
@@ -606,7 +637,7 @@ Join us ([*Discord*](https://discord.camel-ai.org/) or [*WeChat*](https://ghli.o
 
 Join us for further discussions!
 <!-- ![](./assets/community.png) -->
-![](./assets/community.jpeg)
+![](./assets/community.jpg)
 
 # ❓ FAQ
 
