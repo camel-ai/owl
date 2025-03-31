@@ -397,6 +397,14 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
                 "0",
                 f"❌ Error: Build failed - {str(e)}",
             )
+            
+        # Check if STOP_REQUESTED. Early Premption when triggered early
+        if STOP_REQUESTED and STOP_REQUESTED.is_set():
+            return (
+                f"Thread Returned Early due to termination",
+                "0",
+                "☑️ Success - OWL Stopped",
+            )
 
         # Run society simulation
         try:
