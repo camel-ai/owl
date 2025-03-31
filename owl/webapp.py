@@ -78,7 +78,12 @@ LOG_QUEUE: queue.Queue = queue.Queue()  # Log queue
 STOP_LOG_THREAD = threading.Event()
 CURRENT_PROCESS = None  # Used to track the currently running process
 STOP_REQUESTED = threading.Event()  # Used to mark if stop was requested
-
+STATE = {
+    "token_count": "0", 
+    "status": (f"<span class='status-indicator status-success'></span> Ready"),
+    "logs": "No conversation records yet.",
+    "running": False
+}
 
 # Log reading and updating functions
 def log_reader_thread(log_file):
@@ -320,7 +325,7 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
     Returns:
         Tuple[...]: Answer, token count, status
     """
-    global CURRENT_PROCESS
+    global CURRENT_PROCESS, STOP_REQUESTED
 
     # Validate input
     if not validate_input(question):
@@ -396,7 +401,10 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
         # Run society simulation
         try:
             logging.info("Running society simulation...")
-            answer, chat_history, token_info = run_society(society)
+            answer, chat_history, token_info = run_society(
+                society=society, 
+                stop_event=STOP_REQUESTED
+            )
             logging.info("Society simulation completed")
         except Exception as e:
             logging.error(f"Error occurred while running society simulation: {str(e)}")
@@ -430,6 +438,25 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
         )
         return (f"Error occurred: {str(e)}", "0", f"❌ Error: {str(e)}")
 
+def stop_owl() -> None:
+    r"""
+    Trigger the STOP_REQUESTED Event to Stop OWL and update the app state
+    
+    Returns:
+        None
+    """
+    global CURRENT_PROCESS, STOP_REQUESTED, STATE
+    msg_template = lambda msg: (f"<span class='status-indicator status-running'></span> {msg}")
+    
+    if STOP_REQUESTED.is_set() and CURRENT_PROCESS.is_alive():
+        STATE["status"] =  msg_template("Termination in the process...")
+    
+    if CURRENT_PROCESS.is_alive():
+        STOP_REQUESTED.set()  # Signal the thread to stop        
+        logging.info("📐STOP_REQUESTED Event is Set")
+        STATE["status"] = msg_template("Stopping the society...")
+    else:
+        STATE["status"] = msg_template("Process already completed.")
 
 def update_module_description(module_name: str) -> str:
     """Return the description of the selected module"""

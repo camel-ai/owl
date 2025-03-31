@@ -436,10 +436,11 @@ class OwlGAIARolePlaying(OwlRolePlaying):
             ),
         )
 
-
+import threading
 def run_society(
     society: OwlRolePlaying,
     round_limit: int = 15,
+    stop_event: threading.Event = None
 ) -> Tuple[str, List[dict], dict]:
     overall_completion_token_count = 0
     overall_prompt_token_count = 0
@@ -488,6 +489,7 @@ def run_society(
             assistant_response.terminated
             or user_response.terminated
             or "TASK_DONE" in user_response.msg.content
+            or (stop_event and stop_event.is_set())
         ):
             break
 
