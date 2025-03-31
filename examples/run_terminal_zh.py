@@ -38,6 +38,10 @@ set_log_level(level="DEBUG")
 def construct_society(question: str) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
 
+    This function initializes a society of agents with specific roles and tools
+    to address the provided task or question. It configures models for different
+    components, sets up toolkits, and defines agent roles and task parameters.
+
     Args:
         question (str): The task or question to be addressed by the society.
 
@@ -46,7 +50,7 @@ def construct_society(question: str) -> RolePlaying:
             question.
     """
 
-    # Create models for different components
+    # Create models for different components of the society
     models = {
         "user": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
@@ -70,7 +74,7 @@ def construct_society(question: str) -> RolePlaying:
         ),
     }
 
-    # Configure toolkits
+    # Configure toolkits for the assistant agent
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
@@ -83,17 +87,17 @@ def construct_society(question: str) -> RolePlaying:
         *TerminalToolkit().get_tools(),
     ]
 
-    # Configure agent roles and parameters
+    # Define keyword arguments for user and assistant agents
     user_agent_kwargs = {"model": models["user"]}
     assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
 
-    # Configure task parameters
+    # Define task-specific parameters
     task_kwargs = {
         "task_prompt": question,
         "with_task_specify": False,
     }
 
-    # Create and return the society
+    # Create and return the RolePlaying society
     society = RolePlaying(
         **task_kwargs,
         user_role_name="user",
@@ -106,16 +110,23 @@ def construct_society(question: str) -> RolePlaying:
 
 
 def main():
-    r"""Main function to run the OWL system with an example question."""
-    # Example research question
+    r"""Main function to run the OWL system with an example question.
+
+    This function demonstrates the usage of the `construct_society` function by
+    defining an example research question, constructing a society of agents, and
+    running the society to obtain results. The results include the answer,
+    chat history, and token count, which are printed to the console.
+    """
+
+    # Define an example research question
     question = f"""打开百度搜索，总结一下camel-ai的camel框架的github star、fork数目等，并把数字用plot包写成python文件保存到"+{os.path.join
 (base_dir, 'final_output')}+"，用本地终端执行python文件显示图出来给我"""
 
-    # Construct and run the society
+    # Construct and run the society of agents
     society = construct_society(question)
     answer, chat_history, token_count = run_society(society)
 
-    # Output the result
+    # Print the results
     print(
         f"\033[94mAnswer: {answer}\nChat History: {chat_history}\ntoken_count:{token_count}\033[0m"
     )

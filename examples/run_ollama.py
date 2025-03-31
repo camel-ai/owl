@@ -54,32 +54,32 @@ def construct_society(question: str) -> RolePlaying:
     models = {
         "user": ModelFactory.create(
             model_platform=ModelPlatformType.OLLAMA,
-            model_type="qwen2.5:72b",
-            url="http://localhost:11434/v1",
+            model_type="qwen2.5-coder:32b",
+            url="http://192.168.236.54:11434/v1",
             model_config_dict={"temperature": 0.8, "max_tokens": 1000000},
         ),
         "assistant": ModelFactory.create(
             model_platform=ModelPlatformType.OLLAMA,
-            model_type="qwen2.5:72b",
-            url="http://localhost:11434/v1",
+            model_type="qwen2.5-coder:32b",
+            url="http://192.168.236.54:11434/v1",
             model_config_dict={"temperature": 0.2, "max_tokens": 1000000},
         ),
         "web": ModelFactory.create(
             model_platform=ModelPlatformType.OLLAMA,
             model_type="llava:latest",
-            url="http://localhost:11434/v1",
+            url="http://192.168.236.54:11434/v1",
             model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
         ),
         "planning": ModelFactory.create(
             model_platform=ModelPlatformType.OLLAMA,
-            model_type="qwen2.5:72b",
-            url="http://localhost:11434/v1",
+            model_type="qwen2.5-coder:32b",
+            url="http://192.168.236.54:11434/v1",
             model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
         ),
         "image": ModelFactory.create(
             model_platform=ModelPlatformType.OLLAMA,
             model_type="llava:latest",
-            url="http://localhost:11434/v1",
+            url="http://192.168.236.54:11434/v1",
             model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
         ),
     }

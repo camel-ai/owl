@@ -34,7 +34,7 @@ nest_asyncio.apply()
 
 logger = get_logger(__name__)
 
-
+# 定义一个工具类，用于处理文档并返回文档内容
 class DocumentProcessingToolkit(BaseToolkit):
     r"""A class representing a toolkit for processing document and return the content of the document.
 
@@ -44,10 +44,13 @@ class DocumentProcessingToolkit(BaseToolkit):
     def __init__(
         self, cache_dir: Optional[str] = None, model: Optional[BaseModelBackend] = None
     ):
+        # 初始化图像分析工具
         self.image_tool = ImageAnalysisToolkit(model=model)
         # self.audio_tool = AudioAnalysisToolkit()
+        # 初始化Excel分析工具
         self.excel_tool = ExcelToolkit()
 
+        # 设置缓存目录，默认为"tmp/"
         self.cache_dir = "tmp/"
         if cache_dir:
             self.cache_dir = cache_dir
@@ -69,36 +72,38 @@ class DocumentProcessingToolkit(BaseToolkit):
             f"Calling extract_document_content function with document_path=`{document_path}`"
         )
 
+        # 处理图像文件
         if any(document_path.endswith(ext) for ext in [".jpg", ".jpeg", ".png"]):
             res = self.image_tool.ask_question_about_image(
                 document_path, "Please make a detailed caption about the image."
             )
             return True, res
 
-        # if any(document_path.endswith(ext) for ext in ['.mp3', '.wav']):
-        #     res = self.audio_tool.ask_question_about_audio(document_path, "Please transcribe the audio content to text.")
-        #     return True, res
-
+        # 处理Excel文件
         if any(document_path.endswith(ext) for ext in ["xls", "xlsx"]):
             res = self.excel_tool.extract_excel_content(document_path)
             return True, res
 
+        # 处理zip文件
         if any(document_path.endswith(ext) for ext in ["zip"]):
             extracted_files = self._unzip_file(document_path)
             return True, f"The extracted files are: {extracted_files}"
 
+        # 处理JSON文件
         if any(document_path.endswith(ext) for ext in ["json", "jsonl", "jsonld"]):
             with open(document_path, "r", encoding="utf-8") as f:
                 content = json.load(f)
             f.close()
             return True, content
 
+        # 处理Python文件
         if any(document_path.endswith(ext) for ext in ["py"]):
             with open(document_path, "r", encoding="utf-8") as f:
                 content = f.read()
             f.close()
             return True, content
 
+        # 处理XML文件
         if any(document_path.endswith(ext) for ext in ["xml"]):
             data = None
             with open(document_path, "r", encoding="utf-8") as f:
@@ -114,19 +119,20 @@ class DocumentProcessingToolkit(BaseToolkit):
                 logger.debug(f"The raw xml data is: {content}")
                 return True, content
 
+        # 判断是否为网页
         if self._is_webpage(document_path):
             extracted_text = self._extract_webpage_content(document_path)
             return True, extracted_text
 
         else:
-            # judge if url
+            # 判断是否为URL
             parsed_url = urlparse(document_path)
             is_url = all([parsed_url.scheme, parsed_url.netloc])
             if not is_url:
                 if not os.path.exists(document_path):
                     return False, f"Document not found at path: {document_path}."
 
-            # if is docx file, use docx2markdown to convert it
+            # 处理docx文件
             if document_path.endswith(".docx"):
                 if is_url:
                     tmp_path = self._download_file(document_path)
@@ -137,11 +143,13 @@ class DocumentProcessingToolkit(BaseToolkit):
                 md_file_path = f"{file_name}.md"
                 docx_to_markdown(tmp_path, md_file_path)
 
-                # load content of md file
+                # 加载md文件内容
                 with open(md_file_path, "r") as f:
                     extracted_text = f.read()
                 f.close()
                 return True, extracted_text
+
+            # 尝试使用Chunkr处理文档
             try:
                 result = asyncio.run(self._extract_content_with_chunkr(document_path))
                 return True, result
@@ -150,8 +158,8 @@ class DocumentProcessingToolkit(BaseToolkit):
                 logger.warning(
                     f"Error occurred while using Chunkr to process document: {e}"
                 )
+                # 处理PDF文件
                 if document_path.endswith(".pdf"):
-                    # try using pypdf to extract text from pdf
                     try:
                         from PyPDF2 import PdfReader
 
@@ -159,7 +167,7 @@ class DocumentProcessingToolkit(BaseToolkit):
                             tmp_path = self._download_file(document_path)
                             document_path = tmp_path
 
-                        # Open file in binary mode for PdfReader
+                        # 以二进制模式打开文件以供PdfReader使用
                         f = open(document_path, "rb")
                         reader = PdfReader(f)
                         extracted_text = ""
@@ -178,7 +186,7 @@ class DocumentProcessingToolkit(BaseToolkit):
                             f"Error occurred while processing pdf: {pdf_error}",
                         )
 
-                # If we get here, either it's not a PDF or PDF processing failed
+                # 如果到这里，要么不是PDF，要么PDF处理失败
                 logger.error(f"Error occurred while processing document: {e}")
                 return False, f"Error occurred while processing document: {e}"
 
@@ -204,7 +212,6 @@ class DocumentProcessingToolkit(BaseToolkit):
                 return False
 
         except requests.exceptions.RequestException as e:
-            # raise RuntimeError(f"Error while checking the URL: {e}")
             logger.warning(f"Error while checking the URL: {e}")
             return False
 
@@ -221,15 +228,13 @@ class DocumentProcessingToolkit(BaseToolkit):
 
         result = await chunkr.upload(document_path)
 
-        # result = chunkr.upload(document_path)
-
         if result.status == "Failed":
             logger.error(
                 f"Error while processing document {document_path}: {result.message} using Chunkr."
             )
             return f"Error while processing document: {result.message}"
 
-        # extract document name
+        # 提取文档名称
         document_name = os.path.basename(document_path)
         output_file_path: str
 
@@ -254,7 +259,7 @@ class DocumentProcessingToolkit(BaseToolkit):
         api_key = os.getenv("FIRECRAWL_API_KEY")
         from firecrawl import FirecrawlApp
 
-        # Initialize the FirecrawlApp with your API key
+        # 初始化FirecrawlApp
         app = FirecrawlApp(api_key=api_key)
 
         data = app.crawl_url(
@@ -320,4 +325,4 @@ class DocumentProcessingToolkit(BaseToolkit):
         """
         return [
             FunctionTool(self.extract_document_content),
-        ]  # Added closing triple quotes here
+        ]

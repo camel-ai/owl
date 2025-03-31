@@ -1111,7 +1111,7 @@ def create_ui():
             with gr.Tabs():  # 设置对话记录为默认选中的标签页
                 with gr.TabItem("对话记录"):
                     # 添加对话记录显示区域
-                    with gr.Box():
+                    with gr.Blocks():
                         log_display2 = gr.Markdown(
                             value="暂无对话记录。",
                             elem_classes="log-display",
@@ -1125,7 +1125,7 @@ def create_ui():
                         clear_logs_button2 = gr.Button("清空记录", variant="secondary")
 
                 with gr.TabItem("环境变量管理", id="env-settings"):
-                    with gr.Box(elem_classes="env-manager-container"):
+                    with gr.Blocks(elem_classes="env-manager-container"):
                         gr.Markdown("""
                             ## 环境变量管理
                             
@@ -1136,7 +1136,7 @@ def create_ui():
                         with gr.Row():
                             # 左侧列：环境变量管理控件
                             with gr.Column(scale=3):
-                                with gr.Box(elem_classes="env-controls"):
+                                with gr.Blocks(elem_classes="env-controls"):
                                     # 环境变量表格 - 设置为可交互以直接编辑
                                     gr.Markdown("""
                                     <div style="background-color: #e7f3fe; border-left: 6px solid #2196F3; padding: 10px; margin: 15px 0; border-radius: 4px;">
