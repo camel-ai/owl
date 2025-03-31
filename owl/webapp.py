@@ -1337,7 +1337,7 @@ def create_ui():
             outputs=[log_display2],
         )
 
-        # No longer automatically refresh logs by default
+        app.load(update_interface, outputs=[token_count_output, status_output, log_display2, run_button, stop_button], every=1)
 
     return app
 
