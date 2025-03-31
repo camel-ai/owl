@@ -820,9 +820,14 @@ def create_ui():
             return ""
 
     # Create a real-time log update function
-    def process_with_live_logs(question, module_name):
-        """Process questions and update logs in real-time"""
-        global CURRENT_PROCESS
+    import asyncio
+    async def process_with_live_logs(question, module_name) -> Tuple[gr.Button, gr.Button]:
+        r"""Start Owl in Thread and update logs in realtime
+        
+        Returns:
+            Tuple[...]: Optimistically toggle the state of the button
+        """
+        global CURRENT_PROCESS, STATE
 
         # Clear log file
         clear_log_file()
@@ -844,47 +849,73 @@ def create_ui():
         CURRENT_PROCESS = bg_thread  # Record current process
         bg_thread.start()
 
-        # While waiting for processing to complete, update logs once per second
-        while bg_thread.is_alive():
-            # Update conversation record display
-            logs2 = get_latest_logs(100, LOG_QUEUE)
+        async def update_logs_async(result_queue, bg_thread, STATE) -> None:
+            r"""Updates the realtime logs in async with a new asyncio task
+            
+            Args:
+                result_queue: The Queue updated by run_owl(). Contains answer, token_count & Status
+                bg_thread: The Background thread the run_owl() is running at
+                STATE: The current app state which is a global dictionary of data
+            """
+            while bg_thread.is_alive():
+                STATE["logs"] = get_latest_logs(100, LOG_QUEUE)
+                STATE["token_count"] = "0"  # Example update
+                STATE["status"] = (f"<span class='status-indicator status-running'></span> Processing...")
+                STATE["running"] = True
+                
+                await asyncio.sleep(1)  # Allow UI updates
+            # Processing complete, get results
+            if not result_queue.empty():
+                logging.info("Real time logs finished ✅")
+                result = result_queue.get()
+                answer, token_count, status = result
+                # Final update of conversation record
+                logs2 = get_latest_logs(100, LOG_QUEUE)
+                # Set different indicators based on status
+                if "Error" in status:
+                    status_with_indicator = (
+                        f"<span class='status-indicator status-error'></span> {status}"
+                    )
+                else:
+                    status_with_indicator = (
+                        f"<span class='status-indicator status-success'></span> {status}"
+                    )
 
-            # Always update status
-            yield (
-                "0",
-                "<span class='status-indicator status-running'></span> Processing...",
-                logs2,
-            )
-
-            time.sleep(1)
-
-        # Processing complete, get results
-        if not result_queue.empty():
-            result = result_queue.get()
-            answer, token_count, status = result
-
-            # Final update of conversation record
-            logs2 = get_latest_logs(100, LOG_QUEUE)
-
-            # Set different indicators based on status
-            if "Error" in status:
-                status_with_indicator = (
-                    f"<span class='status-indicator status-error'></span> {status}"
-                )
+                STATE["logs"] = logs2
+                STATE["status"] = status_with_indicator
+                STATE["token_count"] = token_count  # Example update
+                STATE["running"] = False
             else:
-                status_with_indicator = (
-                    f"<span class='status-indicator status-success'></span> {status}"
-                )
+                logs2 = get_latest_logs(100, LOG_QUEUE)
+                gr.update()
+                
+                STATE["logs"] = "0"
+                STATE["status"] ="<span class='status-indicator status-error'></span> Terminated"
+                STATE["token_count"] = logs2
+                STATE["running"] = False
 
-            yield token_count, status_with_indicator, logs2
-        else:
-            logs2 = get_latest_logs(100, LOG_QUEUE)
-            yield (
-                "0",
-                "<span class='status-indicator status-error'></span> Terminated",
-                logs2,
-            )
+        # Start a separate async task for updating logs
+        asyncio.create_task(update_logs_async(result_queue, bg_thread, STATE))
+        
+        # Optimistic Toggle of Start Button
+        return (gr.Button(visible=False), gr.Button(visible=True))
 
+    def update_interface() -> Tuple[str,str,str,gr.Button,gr.Button]:
+        r"""Update the latest state values.
+        
+        Returns:
+            Tuple[...]: Links output to token_count_output, status_output, log_display2, run_button, stop_button
+        """
+        global STATE
+        
+        return (
+            STATE["token_count"], 
+            STATE["status"], 
+            STATE["logs"],
+            gr.Button(visible=not STATE["running"]),  # run_button
+            gr.Button(visible=STATE["running"])       # stop_button
+        )
+        
     with gr.Blocks(title="OWL", theme=gr.themes.Soft(primary_hue="blue")) as app:
         gr.Markdown(
             """
@@ -1135,6 +1166,8 @@ def create_ui():
                     run_button = gr.Button(
                         "Run", variant="primary", elem_classes="primary"
                     )
+                    # Stop button (hidden initially)
+                    stop_button = gr.Button("Stop", variant="secondary", visible=False)
 
                 status_output = gr.HTML(
                     value="<span class='status-indicator status-success'></span> Ready",
@@ -1264,10 +1297,17 @@ def create_ui():
                     refresh_button.click(fn=update_env_table, outputs=[env_table])
 
         # Set up event handling
-        run_button.click(
+        start_event = run_button.click(
             fn=process_with_live_logs,
             inputs=[question_input, module_dropdown],
-            outputs=[token_count_output, status_output, log_display2],
+            outputs=[run_button, stop_button],
+            queue=True
+        )
+        # When clicking the stop button, stop the background thread and show start button
+        stop_button.click(
+            fn=stop_owl,
+            queue=True,
+            cancels=start_event
         )
 
         # Module selection updates description
