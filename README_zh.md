@@ -458,7 +458,9 @@ npm install -g @executeautomation/playwright-mcp-server
 npx playwright install-deps
 ```
 
-查看我们的综合示例 `examples/run_mcp.py` 来体验这些功能！
+查看我们的MCP示例：
+- `examples/run_mcp.py` - 基础MCP功能演示 (本地调用，需要安装依赖)
+- `examples/run_mcp_sse.py` - 使用SSE协议的示例 (使用远程服务，无需安装依赖)
 
 ## 可用工具包
 
