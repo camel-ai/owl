@@ -462,9 +462,9 @@ def stop_owl() -> None:
     if STOP_REQUESTED.is_set() and CURRENT_PROCESS.is_alive():
         STATE["status"] =  msg_template("Termination in the process...")
     
-    if CURRENT_PROCESS.is_alive():
+    if CURRENT_PROCESS and CURRENT_PROCESS.is_alive():
         STOP_REQUESTED.set()  # Signal the thread to stop        
-        logging.info("📐STOP_REQUESTED Event is Set")
+        logging.info("STOP_REQUESTED Event is Set")
         STATE["status"] = msg_template("Stopping the society...")
     else:
         STATE["status"] = msg_template("Process already completed.")
@@ -898,6 +898,9 @@ def create_ui():
                 STATE["status"] = status_with_indicator
                 STATE["token_count"] = token_count  # Example update
                 STATE["running"] = False
+                
+                #Revert the Task Flag
+                STOP_REQUESTED.clear()
             else:
                 logs2 = get_latest_logs(100, LOG_QUEUE)
                 gr.update()
