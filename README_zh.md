@@ -83,22 +83,6 @@
 
 # 🔥 新闻
 
-<div align="center" style="background-color: #fffacd; padding: 15px; border-radius: 10px; border: 2px solid #ffd700; margin: 20px 0;">
-  <h3 style="color: #d81b60; margin: 0; font-size: 1.3em;">
-    🌟🌟🌟 <b>OWL社区用例征集令！</b> 🌟🌟🌟
-  </h3>
-  <p style="font-size: 1.1em; margin: 10px 0;">
-    我们请社区成员贡献创新的OWL用例！<br>
-    <b>前十名提交</b>将获得特别社区礼物和认可。
-  </p>
-  <p>
-    <a href="https://github.com/camel-ai/owl/tree/main/community_usecase/COMMUNITY_CALL_FOR_USE_CASES.md" style="background-color: #d81b60; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">了解更多并提交</a>
-  </p>
-  <p style="margin: 5px 0;">
-    提交截止日期：<b>2025年3月31日</b>
-  </p>
-</div>
-
 <div align="center" style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; border: 2px solid #4caf50; margin: 20px 0;">
   <h3 style="color: #2e7d32; margin: 0; font-size: 1.3em;">
     🧩 <b>新增：社区智能体挑战！</b> 🧩
@@ -295,10 +279,10 @@ cp owl/.env_template owl/.env
 ```bash
 # 此选项从Docker Hub下载一个即用型镜像
 # 最快速且推荐给大多数用户
-docker-compose up -d
+docker compose up -d
 
 # 在容器中运行OWL
-docker-compose exec owl bash
+docker compose exec owl bash
 cd .. && source .venv/bin/activate
 playwright install-deps
 xvfb-python examples/run.py
@@ -312,10 +296,10 @@ xvfb-python examples/run.py
 # 2. 注释掉"image: mugglejinx/owl:latest"行
 # 3. 取消注释"build:"部分及其嵌套属性
 # 4. 然后运行：
-docker-compose up -d --build
+docker compose up -d --build
 
 # 在容器中运行OWL
-docker-compose exec owl bash
+docker compose exec owl bash
 cd .. && source .venv/bin/activate
 playwright install-deps
 xvfb-python examples/run.py
@@ -458,7 +442,9 @@ npm install -g @executeautomation/playwright-mcp-server
 npx playwright install-deps
 ```
 
-查看我们的综合示例 `examples/run_mcp.py` 来体验这些功能！
+查看我们的MCP示例：
+- `examples/run_mcp.py` - 基础MCP功能演示 (本地调用，需要安装依赖)
+- `examples/run_mcp_sse.py` - 使用SSE协议的示例 (使用远程服务，无需安装依赖)
 
 ## 可用工具包
 
@@ -543,6 +529,9 @@ python owl/webapp_zh.py
 
 # 英文版本
 python owl/webapp.py
+
+# 日文版本
+python owl/webapp_jp.py
 ```
 
 网页界面提供以下功能：
@@ -606,10 +595,13 @@ python examples/run_gaia_roleplaying.py
 3. 提交包含您改进的拉取请求
 
 **当前开放贡献的问题：**
-- [#362](https://github.com/camel-ai/owl/issues/362)
-- [#1945](https://github.com/camel-ai/camel/issues/1945)
-- [#1925](https://github.com/camel-ai/camel/issues/1925)
 - [#1915](https://github.com/camel-ai/camel/issues/1915)
+- [#2190](https://github.com/camel-ai/camel/issues/2190)
+- [#2165](https://github.com/camel-ai/camel/issues/2165)
+- [#2121](https://github.com/camel-ai/camel/issues/2121)
+- [#1908](https://github.com/camel-ai/camel/issues/1908)
+- [#1538](https://github.com/camel-ai/camel/issues/1538)
+- [#1481](https://github.com/camel-ai/camel/issues/1481)
 
 要认领一个问题，只需在该问题下留言表明您的兴趣即可。
 
@@ -618,7 +610,7 @@ python examples/run_gaia_roleplaying.py
 
 加入我们，参与更多讨论！
 
-![](./assets/community.jpg)
+![](./assets/community.jpeg)
 
 # ❓ 常见问题
 

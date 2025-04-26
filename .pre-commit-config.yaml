@@ -4,9 +4,9 @@ repos:
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --show-fixes]
-        exclude: ^docs/cookbooks/  # Ignore files under docs/cookbooks
+        exclude: ^(docs/cookbooks/|community_usecase/)  # Ignore files under docs/cookbooks and community_usecase
       - id: ruff-format
-        exclude: ^docs/cookbooks/  # Ignore files under docs/cookbooks
+        exclude: ^(docs/cookbooks/|community_usecase/)  # Ignore files under docs/cookbooks and community_usecase
 
   - repo: local
     hooks:
@@ -17,7 +17,7 @@ repos:
         types: [python]
         pass_filenames: false
         require_serial: true
-        exclude: ^docs/cookbooks/  # Ignore files under docs/cookbooks
+        exclude: ^(docs/cookbooks/|community_usecase/)  # Ignore files under docs/cookbooks and community_usecase
 
   - repo: local
     hooks:
@@ -26,4 +26,12 @@ repos:
       entry: python licenses/update_license.py . licenses/license_template.txt 
       language: system
       types: [python]
-      exclude: ^docs/cookbooks/  # Ignore files under docs/cookbooks
+      exclude: ^(docs/cookbooks/|community_usecase/)  # Ignore files under docs/cookbooks and community_usecase
+
+  - repo: https://github.com/codespell-project/codespell
+    # Configuration for codespell is in pyproject.toml
+    rev: v2.4.1
+    hooks:
+    - id: codespell
+      additional_dependencies:
+      - tomli  # for python_version < '3.11'

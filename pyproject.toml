@@ -21,12 +21,13 @@ keywords = [
     "learning-systems"
 ]
 dependencies = [
-    "camel-ai[all]==0.2.37",
+    "camel-ai[owl]==0.2.45",
     "chunkr-ai>=0.0.41",
     "docx2markdown>=0.1.1",
     "gradio>=3.50.2",
     "mcp-simple-arxiv==0.2.2",
     "mcp-server-fetch==2025.1.17",
+    "xmltodict>=0.14.2",
 ]
 
 [project.urls]
@@ -59,3 +60,10 @@ follow_imports = "skip"
 [[tool.mypy.overrides]]
 module = "utils"
 ignore_missing_imports = true
+
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '.git*,*.pdf,*.lock'
+check-hidden = true
+ignore-regex = '\bBrin\b'
+ignore-words-list = 'datas'

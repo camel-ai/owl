@@ -252,6 +252,7 @@ MODULE_DESCRIPTIONS = {
     "run_qwen_zh": "qwenモデルを使用して中国語タスクを処理します",
     "run_azure_openai": "Azure OpenAIモデルを使用してタスクを処理します",
     "run_groq": "groqモデルを使用してタスクを処理します",
+    "run_together_ai": "together aiモデルを使用してタスクを処理します",
 }
 
 
@@ -1138,7 +1139,7 @@ def create_ui():
             with gr.Tabs():  # Set conversation record as the default selected tab
                 with gr.TabItem("会話記録"):
                     # Add conversation record display area
-                    with gr.Box():
+                    with gr.Group():
                         log_display2 = gr.Markdown(
                             value="まだ会話記録はありません。",
                             elem_classes="log-display",
@@ -1154,7 +1155,7 @@ def create_ui():
                         )
 
                 with gr.TabItem("環境変数管理", id="env-settings"):
-                    with gr.Box(elem_classes="env-manager-container"):
+                    with gr.Group(elem_classes="env-manager-container"):
                         gr.Markdown("""
                             ## 環境変数管理
                             
@@ -1165,7 +1166,7 @@ def create_ui():
                         with gr.Row():
                             # Left column: Environment variable management controls
                             with gr.Column(scale=3):
-                                with gr.Box(elem_classes="env-controls"):
+                                with gr.Group(elem_classes="env-controls"):
                                     # Environment variable table - set to interactive for direct editing
                                     gr.Markdown("""
                                     <div style="background-color: #e7f3fe; border-left: 6px solid #2196F3; padding: 10px; margin: 15px 0; border-radius: 4px;">
@@ -1295,7 +1296,12 @@ def main():
         app = create_ui()
 
         app.queue()
-        app.launch(share=False, favicon_path="../assets/owl-favicon.ico")
+        app.launch(
+            share=False,
+            favicon_path=os.path.join(
+                os.path.dirname(__file__), "assets", "owl-favicon.ico"
+            ),
+        )
     except Exception as e:
         logging.error(f"アプリケーションの起動中にエラーが発生しました: {str(e)}")
         print(f"アプリケーションの起動中にエラーが発生しました: {str(e)}")

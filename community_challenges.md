@@ -41,10 +41,13 @@ It's easy! Simply add your challenge directly to this document by following the 
 
 ---
 
-### [Your Challenge Here]
+### Build an AI Agent for YouTube Channel Performance Insights
+**Task**: Develop an AI agent that integrates with YouTube’s Analytics, Reporting, and Data APIs to automatically retrieve and analyze video and channel performance data. The agent should provide creators with a conversational interface where they can ask questions (e.g., "What are my top-performing videos this month?") and receive actionable insights and recommendations—such as optimal posting times, title improvements, or thumbnail suggestions—to improve engagement and overall channel strategy.
 
-**Task**: 
 
 **Success Criteria**:
+- The agent successfully authenticates with and retrieves real-time and historical data from YouTube’s APIs (views, watch time, retention, engagement).
+- Creators can interact naturally with the agent to receive clear responses, including actionable recommendations (e.g., posting times, title improvements).
 
-**Hints** (Optional):
+**Hints**:
+- Review YouTube API docs and use NLP libraries (e.g., spaCy or GPT-based models) to build the conversational interface.

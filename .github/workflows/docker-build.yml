@@ -11,6 +11,12 @@ jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
+
+    # Only run on main repo on and PRs that match the main repo.
+    if: |
+      github.repository == 'camel-ai/owl' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
     
     steps:
       - name: Checkout code

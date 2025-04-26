@@ -92,6 +92,9 @@ def update_license_in_directory(
             continue
         if any(part.startswith(".") for part in py_files.parts):
             continue
+        # Skip files in the community_usecase directory
+        if "community_usecase" in py_files.parts:
+            continue
         if update_license_in_file(
             py_files,
             license_template_path,

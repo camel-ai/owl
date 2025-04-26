@@ -245,13 +245,15 @@ MODULE_DESCRIPTIONS = {
     "run": "默认模式：使用OpenAI模型的默认的智能体协作模式，适合大多数任务。",
     "run_mini": "使用使用OpenAI模型最小化配置处理任务",
     "run_gemini": "使用 Gemini模型处理任务",
-    "run_deepseek_zh": "使用deepseek模型处理中文任务",
+    "run_deepseek_zh": "使用eepseek模型处理中文任务",
     "run_openai_compatible_model": "使用openai兼容模型处理任务",
     "run_ollama": "使用本地ollama模型处理任务",
     "run_qwen_mini_zh": "使用qwen模型最小化配置处理任务",
     "run_qwen_zh": "使用qwen模型处理任务",
     "run_azure_openai": "使用azure openai模型处理任务",
     "run_groq": "使用groq模型处理任务",
+    "run_ppio": "使用ppio模型处理任务",
+    "run_together_ai": "使用together ai模型处理任务",
 }
 
 
@@ -611,6 +613,8 @@ def get_api_guide(key: str) -> str:
         return "https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key"
     elif "deepseek" in key_lower:
         return "https://platform.deepseek.com/api_keys"
+    elif "ppio" in key_lower:
+        return "https://ppinfra.com/settings/key-management?utm_source=github_owl"
     elif "google" in key_lower:
         return "https://coda.io/@jon-dallas/google-image-search-pack-example/search-engine-id-and-google-api-key-3"
     elif "search_engine_id" in key_lower:
@@ -1114,7 +1118,7 @@ def create_ui():
             with gr.Tabs():  # 设置对话记录为默认选中的标签页
                 with gr.TabItem("对话记录"):
                     # 添加对话记录显示区域
-                    with gr.Box():
+                    with gr.Group():
                         log_display2 = gr.Markdown(
                             value="暂无对话记录。",
                             elem_classes="log-display",
@@ -1128,7 +1132,7 @@ def create_ui():
                         clear_logs_button2 = gr.Button("清空记录", variant="secondary")
 
                 with gr.TabItem("环境变量管理", id="env-settings"):
-                    with gr.Box(elem_classes="env-manager-container"):
+                    with gr.Group(elem_classes="env-manager-container"):
                         gr.Markdown("""
                             ## 环境变量管理
                             
@@ -1139,7 +1143,7 @@ def create_ui():
                         with gr.Row():
                             # 左侧列：环境变量管理控件
                             with gr.Column(scale=3):
-                                with gr.Box(elem_classes="env-controls"):
+                                with gr.Group(elem_classes="env-controls"):
                                     # 环境变量表格 - 设置为可交互以直接编辑
                                     gr.Markdown("""
                                     <div style="background-color: #e7f3fe; border-left: 6px solid #2196F3; padding: 10px; margin: 15px 0; border-radius: 4px;">

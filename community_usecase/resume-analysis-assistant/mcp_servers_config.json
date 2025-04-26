@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "pdf-reader": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "your/path/owl/community_usecase/resume-analysis-assistant/resumes:/pdfs",
+        "cr7258/pdf-reader"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "your/path/owl/community_usecase/resume-assistant/resumes"
+      ]
+    }
+  }
+}

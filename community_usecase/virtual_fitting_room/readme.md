@@ -7,7 +7,7 @@ All with one prompt 🪄
 
 ## Dependencies:
 
- 1. I made some modificaitons to the camel repo so please first run "git clone -b feature/virtual-try-on-toolkit-and-partial-screenshot --single-branch https://github.com/camel-ai/camel.git"
+ 1. I made some modifications to the camel repo so please first run "git clone -b feature/virtual-try-on-toolkit-and-partial-screenshot --single-branch https://github.com/camel-ai/camel.git"
  2. fill in your klingai api keys for virtual try-on in camel/toolkits/virtual_try_on_toolkit.py (you can get it from https://klingai.kuaishou.com/dev-center)
  3. pip install the above cloned repo
 
