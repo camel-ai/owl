@@ -1,0 +1,68 @@
+Scribe County Public Library
+Title Author Publisher Genre Status
+Books
+Young Children's
+The Very Hungry Caterpillar Eric Carle World Publishing Company Picture Available
+Hop on Pop Dr. Seuss Random House Picture Checked Out
+The Lorax Dr. Seuss Random House Picture Overdue
+The Book With No Pictures B.J. Novak Dial Books Picture Available
+Don't Let the Pigeon Drive the Bus! Mo Willems Disney Hyperion Picture Available
+I Spy: Spooky Night Jean Marzollo, Walter Wick Scholastic Activity Checked Out
+I Spy: Mystery Jean Marzollo, Walter Wick Scholastic Activity Checked Out
+I Spy: Treasure Hunt Jean Marzollo, Walter Wick Scholastic Activity Overdue
+Can You See What I See? Walter Wick Scholastic Activity Overdue
+Can You See What I See? Dream Machine Walter Wick Scholastic Activity Available
+Middle Grade
+The Lightning Thief Rick Riordan Disney Hyperion Fantasy Available
+The Titan's Curse Rick Riordan Disney Hyperion Fantasy Available
+The Battle of the Labyrinth Rick Riordan Disney Hyperion Fantasy Checked Out
+The Last Olympian Rick Riordan Disney Hyperion Fantasy Checked Out
+Harry Potter and the Sorcerer's Stone J. K. Rowling Scholastic Fantasy Checked Out
+Harry Potter and the Chamber of Secrets J. K. Rowling Scholastic Fantasy Overdue
+Harry Potter and the Prisoner of Azkaban J. K. Rowling Scholastic Fantasy Overdue
+Gregor the Overlander Suzanne Collins Scholastic Fantasy Overdue
+The Name of This Book Is Secret Psedonymus Bosch Little, Brown Fantasy Available
+The Bad Beginning Lemony Snicket HarperCollins Gothic Fiction Available
+Young Adult
+The Hunger Games Suzanne Collins Scholastic Dystopian Available
+Catching Fire Suzanne Collins Scholastic Dystopian Available
+Mockingjay Suzanne Collins Scholastic Dystopian Checked Out
+The Lost Hero Rick Riordan Disney Hyperion Fantasy Checked Out
+The Son of Neptune Rick Riordan Disney Hyperion Fantasy Checked Out
+The Mark of Athena Rick Riordan Disney Hyperion Fantasy Checked Out
+The House of Hades Rick Riordan Disney Hyperion Fantasy Overdue
+The Blood of Olympus Rick Riordan Disney Hyperion Fantasy Overdue
+Divergent Veronica Roth HarperCollins Dystopian Overdue
+Adult
+Jurassic Park Michael Crichton Alfred A. Knopf Science Fiction Overdue
+Prey Michael Crichton HarperCollins Science Fiction Available
+Lord of the Rings J.R.R. Tolkien HarperCollins Fantasy Available
+A Game of Thrones George R.R. Martin Bantam Fantasy Available
+The Crying of Lot 49 Thomas Pynchon J.B. Lippincott Realistic Fiction Available
+Fahrenheit 451 Ray Bradbury Ballantine Dystopian Available
+The Great Gatsby F. Scott Fitzgerald Simon & Schuster Realistic Fiction Checked Out
+Beloved Toni Morrison Alfred A. Knopf Historical Fiction Checked Out
+Silence Shūsaku Endō Macmillan Historical Fiction Checked Out
+Invisible Man Ralph Ellison Random House Historical Fiction Checked Out
+2001: A Space Odyssey Arthur C. Clarke New American Library Science Fiction Checked Out
+The Hitchhiker's Guide to the Galaxy Douglas Adams Pan Books Science Fiction Overdue
+1984 George Orwell Signet Classic Dystopian Overdue
+Dune Frank Herbert Chilton Books Science Fiction Overdue
+Heart of Darkness Joseph Conrad Random House Realistic Fiction Overdue
+Periodicals
+The New York Times News Available
+Washington Post News Available
+Time Magazine News Available
+Food Network Magazine Culinary Available
+Sports Illustrated Sports Available
+DVD
+The Hunger Games Francis Lawrence, Gary Ross Lionsgate Dystopian Overdue
+Jurassic Park Stephen Spielberg Universal Science Fiction Available
+Dune Denis Villenueve Warner Bros. Science Fiction Available
+The Hitchhiker's Guide to the Galaxy Garth Jennings Touchstone Science Fiction Available
+The Lightning Thief Chris Columbus 20th Century Fox Fantasy Available
+Spider-Man Sam Raimi Sony Superhero Available
+Guardians of the Galaxy James Gunn Marvel Studios Superhero Available
+Star Wars George Lucas 20th Century Fox Fantasy Checked Out
+Harry Potter and the Goblet of Fire Mike Newell Warner Bros. Fantasy Checked Out
+Halloween John Carpenter Compass International Horror Checked Out

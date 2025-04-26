@@ -1,0 +1,1 @@
+I will attempt to extract the text from the DOCX file using a different method.

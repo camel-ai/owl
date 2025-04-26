@@ -16,23 +16,29 @@ from dotenv import load_dotenv
 
 
 import os
+import json
+
 
 from camel.models import ModelFactory
 from camel.logger import get_logger
 from camel.toolkits import (
-    AudioAnalysisToolkit,
+    # AudioAnalysisToolkit,
     CodeExecutionToolkit,
     ExcelToolkit,
     ImageAnalysisToolkit,
     SearchToolkit,
-    VideoAnalysisToolkit,
-    BrowserToolkit,
+    # VideoAnalysisToolkit,
+    # BrowserToolkit,
     FileWriteToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.configs import ChatGPTConfig
 
-from owl.utils import GAIABenchmark
+from owl.utils.gaia import GAIABenchmark
+from owl.utils.gaia_multirun import GAIABenchmark as GAIABenchmarkMultirun
+from owl.utils.audio_analysis_toolkit import AudioAnalysisToolkit
+from owl.utils.browser_toolkit import BrowserToolkit
+from owl.utils.video_analysis_toolkit import VideoAnalysisToolkit
 from camel.logger import set_log_level
 
 import pathlib
@@ -46,9 +52,34 @@ set_log_level(level="DEBUG")
 logger = get_logger(__name__)
 
 # Configuration
-LEVEL = 1
+LEVEL = 'all'
 SAVE_RESULT = True
-test_idx = [0]
+
+import pandas as pd
+df = pd.read_csv('samples_with_index.tsv', sep='\t')
+# 获取 task_id 列
+task_ids = df['idx']
+
+# test_idx = task_ids.tolist()[0:10]
+# import random
+# test_idx = random.sample(task_ids.tolist(), 30)
+
+# Optional prompt loading - handle missing file gracefully
+# file_path = "./prompt_process/forder_owl_agent_prompt.json"  # Corrected spelling from "promt" to "prompt"
+# try:
+#     with open(file_path, "r", encoding="utf-8") as f:
+#         data_list = json.load(f)
+#     print(data_list)
+# except FileNotFoundError:
+#     logger.warning(f"Prompt file {file_path} not found, using default settings")
+#     data_list = []  # Default empty list if file doesn't exist
+
+# USE_SEW_PROMPT = True
+# selected_prompt = data_list[2]
+# Audio_analysis_prompt = selected_prompt['Audio_analysis_prompt']
+# web_agent_system_prompt = selected_prompt['web_agent_system_prompt']
+# planning_agent_system_prompt = selected_prompt['planning_agent_system_prompt']
+# video_QA_prompt = selected_prompt['video_QA_prompt']
 
 
 def main():
@@ -116,7 +147,11 @@ def main():
     assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
 
     # Initialize benchmark
-    benchmark = GAIABenchmark(data_dir="data/gaia", save_to="results/result.json")
+    SUFFIX = "_allvalid_SEW_forder_index11.json"
+    # SUFFIX = "_random30.json"
+    save_dir = "results"
+    os.makedirs(save_dir, exist_ok=True)
+    benchmark = GAIABenchmarkMultirun(data_dir="data/gaia", save_to=os.path.join(save_dir, SUFFIX), processes=10)
 
     # Print benchmark information
     print(f"Number of validation examples: {len(benchmark.valid)}")
@@ -126,7 +161,7 @@ def main():
     result = benchmark.run(
         on="valid",
         level=LEVEL,
-        idx=test_idx,
+        # idx=test_idx,
         save_result=SAVE_RESULT,
         user_role_name="user",
         user_agent_kwargs=user_agent_kwargs,

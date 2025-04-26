@@ -254,6 +254,16 @@ class GAIABenchmark(BaseBenchmark):
                 self._results.append(_result_info)
 
             except Exception as e:
+                _result_info = {
+                    "task_id": task["task_id"],
+                    "question": task["Question"],
+                    "level": task["Level"],
+                    "model_answer": None,
+                    "ground_truth": None,
+                    "score": 0,
+                    "history": None,
+                }
+                self._results.append(_result_info)
                 logger.error(f"Error in processing task: {e}")
 
             if save_result:

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CATEGORIES>
+    <CATEGORY>
+        <NAME>Fruits</NAME>
+        <ITEMS>
+            <ITEM>apple</ITEM>
+            <ITEM>banana</ITEM>
+            <ITEM>cherry</ITEM>
+        </ITEMS>
+    </CATEGORY>
+    <CATEGORY>
+        <NAME>Vegetables</NAME>
+        <ITEMS>
+            <ITEM>carrot</ITEM>
+            <ITEM>broccoli</ITEM>
+            <ITEM>spinach</ITEM>
+        </ITEMS>
+    </CATEGORY>
+    <CATEGORY>
+        <NAME>Meats</NAME>
+        <ITEMS>
+            <ITEM>chicken</ITEM>
+            <ITEM>beef</ITEM>
+            <ITEM>pork</ITEM>
+        </ITEMS>
+    </CATEGORY>
+    <CATEGORY>
+        <NAME>Dairy</NAME>
+        <ITEMS>
+            <ITEM>milk</ITEM>
+            <ITEM>cheese</ITEM>
+            <ITEM>yogurt</ITEM>
+        </ITEMS>
+    </CATEGORY>
+    <CATEGORY>
+        <NAME>Seafood</NAME>
+        <ITEMS>
+            <ITEM>salmon</ITEM>
+            <ITEM>tuna</ITEM>
+            <ITEM>shrimp</ITEM>
+        </ITEMS>
+    </CATEGORY>
+</CATEGORIES>

@@ -1,0 +1,1 @@
+Attempting to extract content from the DOCX file using a different approach.

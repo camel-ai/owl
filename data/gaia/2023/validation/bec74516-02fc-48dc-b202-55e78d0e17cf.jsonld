@@ -1,0 +1,17 @@
+{
+  "@context": "http://schema.org",
+  "@type": "Person",
+  "name": "John Doe",
+  "identifier": [
+    {
+      "@type": "PropertyValue",
+      "propertyID": "ORCID",
+      "value": "0000-0001-2345-6789"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "ResearcherID",
+      "value": "A-1234-5678"
+    }
+  ]
+}
