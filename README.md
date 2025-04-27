@@ -266,10 +266,6 @@ export CXX=/root/miniconda3/envs/owl/bin/x86_64-conda-linux-gnu-g++
 yum install libsndfile
 # Option 1: Install as a package (recommended)
 pip install -e .
-# 设置环境变量后重试
-
-
-
 # Option 2: Install from requirements.txt
 pip install -r requirements.txt --use-pep517
 
