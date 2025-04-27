@@ -576,6 +576,7 @@ Selecting only necessary toolkits optimizes performance and reduces resource usa
 ```bash
 # Start the Chinese version
 python owl/webapp_zh.py
+app.launch(share=False)--->app.launch(share=False, server_name="0.0.0.0") for service at internet
 
 # Start the English version
 python owl/webapp.py
