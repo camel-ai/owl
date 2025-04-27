@@ -211,18 +211,15 @@ Please note that our overall task may be very complicated. Here are some tips th
 
         return user_sys_msg, assistant_sys_msg
 
+    import threading
     def step(
-        self, assistant_msg: BaseMessage
+        self, assistant_msg: BaseMessage, stop_event: Optional[threading.Event] = None
     ) -> Tuple[ChatAgentResponse, ChatAgentResponse]:
-        user_response = self.user_agent.step(assistant_msg)
+        user_response = self.user_agent.step(assistant_msg, stop_event=stop_event)
         if user_response.terminated or user_response.msgs is None:
             return (
-                ChatAgentResponse(msgs=[], terminated=False, info={}),
-                ChatAgentResponse(
-                    msgs=[],
-                    terminated=user_response.terminated,
-                    info=user_response.info,
-                ),
+                ChatAgentResponse(msgs=[assistant_msg], terminated=False, info={}),
+                user_response
             )
         user_msg = self._reduce_message_options(user_response.msgs)
 
@@ -244,16 +241,12 @@ Please note that our overall task may be very complicated. Here are some tips th
             """
 
         # process assistant's response
-        assistant_response = self.assistant_agent.step(modified_user_msg)
+        assistant_response = self.assistant_agent.step(modified_user_msg, stop_event=stop_event)
         if assistant_response.terminated or assistant_response.msgs is None:
             return (
+                assistant_response,
                 ChatAgentResponse(
-                    msgs=[],
-                    terminated=assistant_response.terminated,
-                    info=assistant_response.info,
-                ),
-                ChatAgentResponse(
-                    msgs=[user_msg], terminated=False, info=user_response.info
+                    msgs=[modified_user_msg], terminated=False, info=user_response.info
                 ),
             )
         assistant_msg = self._reduce_message_options(assistant_response.msgs)
