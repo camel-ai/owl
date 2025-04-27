@@ -440,7 +440,7 @@ import threading
 def run_society(
     society: OwlRolePlaying,
     round_limit: int = 15,
-    stop_event: threading.Event = None
+    stop_event: Optional[threading.Event] = None
 ) -> Tuple[str, List[dict], dict]:
     overall_completion_token_count = 0
     overall_prompt_token_count = 0
@@ -451,7 +451,7 @@ def run_society(
         """
     input_msg = society.init_chat(init_prompt)
     for _round in range(round_limit):
-        assistant_response, user_response = society.step(input_msg)
+        assistant_response, user_response = society.step(input_msg, stop_event)
         # Check if usage info is available before accessing it
         if assistant_response.info.get("usage") and user_response.info.get("usage"):
             overall_completion_token_count += assistant_response.info["usage"].get(
@@ -491,6 +491,13 @@ def run_society(
             or "TASK_DONE" in user_response.msg.content
             or (stop_event and stop_event.is_set())
         ):
+            # Check if terminate_browser tool exists and call it before ending
+            if hasattr(society.assistant_agent, 'tool_dict') and society.assistant_agent.tool_dict and 'terminate_browser' in society.assistant_agent.tool_dict:
+                try:
+                    flag, msg = society.assistant_agent.tool_dict['terminate_browser']()
+                    logger.info(f"Browser termination result: success={flag}, message='{msg}'")
+                except Exception as e:
+                    logger.error(f"Failed to terminate browser: {e}")
             break
 
         input_msg = assistant_response.msg
