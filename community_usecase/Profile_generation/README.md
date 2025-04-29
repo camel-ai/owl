@@ -19,3 +19,5 @@ python run_profile_generation.py --task "Ahmed Eltawil, Professor at KAUST, Sugg
 
 3. You can find the entire thought process of the agent within the log file.
 
+4. If you want to search information in websites need LOGIN information, please refer this camel branch https://github.com/camel-ai/camel/pull/2291
+![workflow](https://github.com/user-attachments/assets/9861705a-50b7-4e53-85e2-31397f285a73)
