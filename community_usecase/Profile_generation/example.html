@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bernard Ghanem – Professional Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* ----------  Palette  ---------- */
+        :root {
+            --clr-primary: #006d77;
+            --clr-accent : #ffba08;
+            --clr-light  : #f1faee;
+            --clr-dark   : #1d3557;
+            --clr-text   : #343a40;
+        }
+
+        /* ----------  Base  ---------- */
+        *,*::before,*::after{box-sizing:border-box;}
+        html{scroll-behavior:smooth;}
+        body{
+            margin:0;
+            font-family:"Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+            line-height:1.6;
+            background:var(--clr-light);
+            color:var(--clr-text);
+        }
+        h1,h2,h3,h4,h5,h6{
+            font-family:"Poppins", "Roboto", sans-serif;
+            margin:0 0 .5em 0;
+            color:var(--clr-dark);
+        }
+        a{color:var(--clr-primary);text-decoration:none;}
+        a:hover{text-decoration:underline;color:var(--clr-accent);}        
+
+        /* ----------  Layout container  ---------- */
+        .wrapper{
+            max-width:1000px;
+            margin:40px auto;
+            padding:0 24px;
+        }
+        .card{
+            background:#fff;
+            border-radius:12px;
+            padding:32px 28px;
+            box-shadow:0 6px 18px rgba(0,0,0,.08);
+            margin-bottom:40px;
+        }
+        .section-title{
+            font-size:1.55rem;
+            color:var(--clr-primary);
+            border-left:6px solid var(--clr-accent);
+            padding-left:14px;
+            margin-bottom:1em;
+        }
+        /* ----------  Profile header  ---------- */
+        .profile-header{
+            display:flex;
+            flex-wrap:wrap;
+            align-items:center;
+            gap:24px;
+        }
+        .avatar{
+            width:160px;height:160px;
+            border-radius:50%;
+            object-fit:cover;
+            border:5px solid var(--clr-primary);
+            box-shadow:0 4px 12px rgba(0,0,0,.11);
+        }
+        .dash{
+            display:inline-block;
+            width:6px;height:6px;
+            background:var(--clr-accent);
+            border-radius:50%;
+            margin:0 8px;
+        }
+        .metrics{
+            display:flex;
+            flex-wrap:wrap;
+            gap:18px;
+            margin:1em 0;
+        }
+        .metric{
+            background:var(--clr-light);
+            border:1px solid #dee2e6;
+            padding:10px 18px;
+            border-radius:8px;
+            font-weight:600;
+            color:var(--clr-primary);
+        }
+        .link-list a{
+            display:inline-block;
+            margin:4px 14px 4px 0;
+            font-weight:500;
+        }
+        /* ----------  Responsive  ---------- */
+        @media(max-width:768px){
+            .profile-header{flex-direction:column;align-items:flex-start;}
+            .avatar{width:120px;height:120px;}
+        }
+    </style>
+</head>
+<body>
+    <main class="wrapper">
+        <!--   PERSONAL INFORMATION   -->
+        <section class="card" id="personal-info">
+            <div class="profile-header">
+                <img class="avatar" src="https://www.bernardghanem.com/static/img/bernardghanem.jpg" alt="Bernard Ghanem portrait">
+                <div>
+                    <h1>Bernard Ghanem</h1>
+                    <h3 style="margin-top:-.4em;color:var(--clr-accent);font-weight:500;">Professor, King Abdullah University of Science & Technology (KAUST)</h3>
+                    <p style="margin:.3em 0 1.2em 0;">
+                        Chair/Director, Center of Excellence on Generative AI
+                        <span class="dash"></span>
+                        PI, <a href="https://ivul.kaust.edu.sa" target="_blank">GenAI Vision (IVUL Lab)</a>
+                    </p>
+                    <div class="metrics">
+                        <span class="metric">Citations 26,000+</span>
+                        <span class="metric">h‑index 69</span>
+                        <span class="metric">i10‑index 206</span>
+                    </div>
+                    <p style="max-width:650px;">
+                        <strong>Current Roles:</strong> Professor @ KAUST; Chair/Director – Center of Excellence on Generative AI; Co‑Founder – Thya Technology; Advisor – <a href="https://camel-ai.org" target="_blank">CAMEL‑AI.org</a>.
+                        <br>
+                        <strong>Contact:</strong> bernard.ghanem<span style="user-select:none">&nbsp;</span>[at]&nbsp;kaust.edu.sa
+                    </p>
+                </div>
+            </div>
+            <div class="link-list" style="margin-top:12px;">
+                <a href="https://www.linkedin.com/in/bernardghanem/" target="_blank">LinkedIn</a>
+                <a href="https://scholar.google.com/citations?hl=en&user=rVsGTeEAAAAJ&view_op=list_works" target="_blank">Google Scholar</a>
+                <a href="https://x.com/BernardSGhanem" target="_blank">X (Twitter)</a>
+                <a href="https://www.researchgate.net/profile/Bernard-Ghanem" target="_blank">ResearchGate</a>
+                <a href="https://www.bernardghanem.com/home" target="_blank">Website</a>
+                <a href="https://www.bernardghanem.com/curriculum-vitae" target="_blank">Download CV</a>
+            </div>
+        </section>
+
+        <!--   BIOGRAPHY   -->
+        <section class="card" id="biography">
+            <h2 class="section-title">Biography</h2>
+            <p>
+                Bernard Ghanem received his PhD in Electrical & Computer Engineering from the University of Illinois at Urbana‑Champaign, advised by Narendra Ahuja. He is currently a Professor at KAUST where he directs the Center of Excellence on Generative AI and leads the Image & Video Understanding Lab (IVUL). Bernard’s work bridges core research in computer vision, large‑scale video analysis, 3D scene understanding, and foundational machine‑learning theory with real‑world deployment.
+            </p>
+            <p>
+                <strong>Professional Milestones</strong>
+                <ul>
+                    <li>Advisor, <a href="https://camel-ai.org" target="_blank">CAMEL‑AI.org</a> (Jul 2024 – present), London UK.</li>
+                    <li>Co‑Founder, Thya Technology (Jan 2022 – present), Saudi Arabia.</li>
+                    <li>Chair/Director, Center of Excellence on Generative AI, KAUST (Jul 2022 – present).</li>
+                    <li>Deputy Director, AI Initiative, KAUST (Oct 2021 – Jul 2024).</li>
+                    <li>Associate Professor, KAUST (Jun 2018 – Jun 2022).</li>
+                    <li>Co‑Founder, AutoScout Inc. (Apr 2014 – Jun 2016), Chicago IL, USA.</li>
+                    <li>Senior Research Scientist, Advanced Digital Sciences Center (ADSC), Singapore (Dec 2010 – Feb 2012).</li>
+                </ul>
+            </p>
+            <p>
+                Bernard actively collaborates with industry and open‑source communities, co‑founding startup ventures and advising organizations pushing forward general‑purpose AI agents. His Google Scholar citations exceed 26k, reflecting a sustained impact on the AI community.
+            </p>
+        </section>
+
+        <!--   RESEARCH INTERESTS   -->
+        <section class="card" id="interests">
+            <h2 class="section-title">Research Interests</h2>
+            <p>
+                Computer Vision; Machine Learning; Generative AI; Large‑Scale Video Understanding; 3D Scene Understanding; Foundations & Theory of Machine Learning. Bernard’s current agenda explores how generative models can unlock richer video reasoning and interactive perception at scale.
+            </p>
+        </section>
+
+        <!--   AWARDS   -->
+        <section class="card" id="awards">
+            <h2 class="section-title">Awards &amp; Distinctions</h2>
+            <ul style="line-height:1.6;margin:0 0 0 1.2em;">
+                <li><strong>Shoman Arab Researcher Award</strong> (2020) — honored for impactful contributions to science &amp; technology in the Arab world.</li>
+                <li>Multiple <strong>Best Paper Awards</strong> at CVPR Workshops (2013, 2018 – 2021) and other international venues.</li>
+                <li>Led winning team for the <strong>3D Instance Segmentation Task</strong> at a CVPR Workshop (2019).</li>
+                <li><strong>Google Faculty Research Award</strong> (2015).</li>
+                <li><strong>SABIC Postdoctoral Award</strong> (2014 – 2015).</li>
+                <li><strong>Best Business Plan Award</strong>, KAUST (2016) &amp; 1st place, <strong>IEN Business Plan Competition</strong> (2009).</li>
+                <li><strong>Research Collaboration Award</strong>, University of Western Australia (2014).</li>
+                <li><strong>KAUST Seed Fund Award</strong> (2013 – 2015).</li>
+                <li><strong>Computational Science &amp; Engineering Fellowship</strong>, UIUC (2007 – 2009) and <strong>James M. Henderson Fellowship</strong>, UIUC (2006 – 2007).</li>
+                <li>National high‑school valedictorian, Lebanon — ranked 1st in the Lebanese Baccalaureate (2000 – 2001) and received the Presidential Award for Academic Excellence.</li>
+            </ul>
+        </section>
+
+        <!--   EDUCATION   -->
+        <section class="card" id="education">
+            <h2 class="section-title">Education</h2>
+            <div style="margin-bottom:1.3em;">
+                <h3 style="margin:0;color:var(--clr-primary);">University of Illinois at Urbana‑Champaign (UIUC)</h3>
+                <p style="margin:.2em 0 .6em 0;font-weight:500;">PhD in Electrical &amp; Computer Engineering · 2005 – 2010</p>
+                <ul style="margin:0 0 .8em 1.2em;line-height:1.55;">
+                    <li>Student member, IEEE (2004 – 2010)</li>
+                    <li>President &amp; active member, Lebanese Cultural Club — promoted Lebanese culture across campus</li>
+                </ul>
+            </div>
+            <div>
+                <h3 style="margin:0;color:var(--clr-primary);">American University of Beirut (AUB)</h3>
+                <p style="margin:.2em 0 .6em 0;font-weight:500;">Bachelor of Engineering in Computer &amp; Communications Engineering · 2001 – 2005</p>
+            </div>
+        </section>
+
+    </main>
+</body>
+</html>
