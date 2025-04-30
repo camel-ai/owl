@@ -8,7 +8,7 @@ import sys
 from typing import Optional
 
 from owl.utils import run_society
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from camel.agents import ChatAgent
 from camel.logger import get_logger, set_log_level
@@ -120,12 +120,13 @@ def analyze_chat_history(chat_history: list[dict]) -> Optional[str]:
                 isinstance(assistant_content, str)
                 and "FINAL SUMMARY REPORT" in assistant_content
         ):
-            final_summary=assistant_content
+            final_summary = assistant_content
     if final_summary:
         logger.info("\033[94m===== RAW SUMMARY FROM AGENTS =====\033[0m")
         logger.info(final_summary)
     else:
-        logger.info("\033[91mNo final summary report found in chat history.\033[0m")
+        logger.info(
+            "\033[91mNo final summary report found in chat history.\033[0m")
 
     queried_urls: list[str] = []
     for turn in chat_history:
@@ -147,31 +148,63 @@ def analyze_chat_history(chat_history: list[dict]) -> Optional[str]:
 
     return final_summary
 
+
 # ------------------ Pydantic Schemas ------------------
 
 class PersonalInformation(BaseModel):
-    name: str
-    positions: list[str]
-    contact_information: str | None = None
-    social_media: list[str] | None = None
-    research_keywords: list[str]
+    name: str = Field(description="Full name of the scholar")
+    positions: list[str] = Field(
+        description="List of current academic or professional positions")
+    contact_information: Optional[str] = Field(
+        description="Primary contact information such as email address or "
+                    "phone number"
+    )
+    social_media: Optional[list[str]] = Field(
+        description="List of social media or personal profile URLs (e.g., "
+                    "LinkedIn, Twitter)"
+    )
+    research_keywords: list[str] = Field(
+        description="Keywords summarizing key research areas or topics")
+    short_introduction: str = Field(
+        description="A brief one-paragraph summary of the scholar's profile")
 
 
 class Biography(BaseModel):
-    career_history: str
-    research_focus: str
+    biography: str = Field(
+        description="Narrative biography including career trajectory and "
+                    "research journey")
 
 
 class ResearchInterests(BaseModel):
-    areas: list[str]
+    areas: list[str] = Field(
+        description="List of active or long-term research topics")
 
 
 class AwardsAndDistinctions(BaseModel):
-    honors: list[str]
+    honors: list[str] = Field(
+        description="List of awards, honors, and professional distinctions "
+                    "received")
 
 
 class Education(BaseModel):
-    degrees: list[str]
+    degrees: list[str] = Field(
+        description="Academic degrees in reverse chronological order, "
+                    "including institution and year")
+
+
+class Links(BaseModel):
+    scholarly_identity_links: list[str] = Field(
+        description="Links to unique scholarly identity profiles (e.g., "
+                    "ORCID, IEEE Xplore, DBLP)"
+    )
+    related_sites: list[str] = Field(
+        description="Links to institutional or departmental homepages (e.g., "
+                    "KAUST ECE department)"
+    )
+    related_links: list[str] = Field(
+        description="Links to academic and professional presence (e.g., "
+                    "Google Scholar, ResearchGate, LinkedIn)"
+    )
 
 
 class ScholarProfile(BaseModel):
@@ -180,21 +213,16 @@ class ScholarProfile(BaseModel):
     research_interests: ResearchInterests
     awards_and_distinctions: AwardsAndDistinctions
     education: Education
+    links: Links
 
 
-def generate_html_profile(input_text: str,
-                          output_file: str = "profile.html") -> None:
-    """Pipeline: extract structured profile from a free‑form biography and
-    turn it into a polished HTML page.
-
-    Parameters
-    ----------
-    input_text : str
-        Raw biography or resume text.
-    output_file : str, optional
-        Path where the final HTML file will be saved, by default
-        "profile.html".
-    """
+def generate_html_profile(input_text,
+                          template_path: str = "template.html",
+                          output_file: str = "profile.html",
+                          base_url: str = "https://cemse.kaust.edu.sa") -> \
+        None:
+    """Fill an HTML template with profile data, some with agent rewriting,
+    and write to file."""
     extraction_prompt = (
         "You are a scholarly‑profile extraction assistant. "
         "Return ONLY JSON that matches the provided schema."
@@ -205,43 +233,112 @@ def generate_html_profile(input_text: str,
         input_message=input_text,
         response_format=ScholarProfile,
     )
-    profile: ScholarProfile = extraction_response.msgs[0].parsed
+    profile = extraction_response.msgs[0].parsed
 
-    html_system_prompt = "You are an expert HTML profile page generator."
-    html_agent = ChatAgent(system_message=html_system_prompt)
+    def to_html_list(items: list[str]) -> str:
+        return "<br>".join(items)
 
-    html_user_prompt = f"""
-    Using the following JSON, build a complete HTML5 profile page.
+    def format_awards_with_agent(awards: list[str]) -> str:
+        formatted_awards = []
+        agent = ChatAgent(
+            system_message="""Reformat awards as HTML list items using the 
+                           structure, Like:
+                           <li class="field__item"><strong>The 
+                           NSF CAREER grant in low-power computing and 
+                           communication systems</strong>, 2024</li>.""")
+        for award in awards:
+            response = agent.step(f"Reformat this: {award}")
+            formatted_awards.append(response.msgs[0].content.strip())
+        return "\n".join(formatted_awards)
 
-    • Sections: Personal Information, Biography, Research Interests, Awards 
-    and Distinctions, Education.
-    Generate a professional and natural-looking personal profile HTML page 
-    based 
-    on the provided information, following these detailed requirements:
-    Using standard HTML5 + simple inline CSS, beautiful but not complicated.
-    Layout should be clearly organized using <h1> for the main title, <h2> for 
-    section headings, and <p> for paragraph text.
-    Use proper <a href> hyperlinks for any external links (e.g., LinkedIn, 
-    ResearchGate, Google Scholar).
-    Write in a natural, flowing narrative style suitable for introducing the 
-    person to a broad audience.
+    def format_education_with_agent(degrees: list[str]) -> str:
+        agent = ChatAgent(
+            system_message="""Reformat education degrees into <dl> format. 
+            Like: 
+            <dl class="field__item"><dt>Doctor of Philosophy (Ph.D.)</dt>
+            <dd class="text-break">Integrated Circuits and Systems, 
+            <em>University of California</em>, United States, 2003</dd></dl>
+            """)
 
-    Please write ALL the input content to the webpage.
-    JSON:
-    {profile.model_dump_json(indent=2)}
+        items = []
+        for degree in degrees:
+            response = agent.step(f"Reformat this: {degree}")
+            items.append(response.msgs[0].content.strip())
+        return "\n".join(items)
+
+    def format_links(links: list[str], html_template: str) -> str:
+        agent = ChatAgent(
+            system_message="Reformat link into this html structure: %s ." %
+                           html_template)
+        items = []
+        for link in links:
+            response = agent.step(f"Reformat this: {link}")
+            items.append(response.msgs[0].content.strip())
+        return "\n".join(items)
+
+    engage_link_template = """
+    <li class="field__item"><a class="text-decoration-none" 
+    href="https://orcid.org/0000-0003-1849-083X" title="Follow Ahmed Eltawil 
+    on ORCID at 0000-0003-1849-083X"><button class="btn btn-orcid px-1 py-0 
+    text-bg-light bg-opacity-10 text-break text-wrap" type="button" 
+    aria-label="ORCID"><i class="bi bi-orcid mx-1"></i><span class="mx-1 
+    text-start">ORCID</span></button></a></li>-->
     """
+    related_link_template = """
+    <li class="field__item"><a 
+    href="https://scholar.google.com/citations?user=XzW-KWoAAAAJ&amp;hl=en" 
+    class="text-break text-underline-hover">Publications on Google 
+    Scholar</a></li>
+    """
+    related_site_template = """
+    <li class="list-group-item px-0 field__item"><a class="text-break 
+    text-underline-hover" href="https://ece.kaust.edu.sa/" title="Electrical 
+    and Computer Engineering (ECE) Academic Program">Electrical and Computer 
+    Engineering (ECE)</a></li>
+    """
+    with open(template_path, "r", encoding="utf-8") as f:
+        template = f.read()
 
-    html_response = html_agent.step(html_user_prompt)
-    html_code = html_response.msgs[0].content
-    html_code_block = re.search(r"```html(.*?)```", html_code, re.DOTALL)
+    name = profile.personal_information.name
+    slug = name.replace(" ", '-').lower()
+    share_url = f"{base_url}/profiles/{slug}"
 
-    if html_code_block:
-        extracted_html = html_code_block.group(1).strip()
-        with open(output_file, "w", encoding="utf-8") as fp:
-            fp.write(extracted_html)
-        logger.info(f"HTML profile page saved to: {output_file}")
-    else:
-        logger.warning("No HTML code block found in the Agent response.")
+    filled = (
+        template
+        .replace("{{ name }}", name)
+        .replace("{{ personal information }}",
+                 to_html_list(profile.personal_information.positions))
+        .replace("{{ email }}",
+                 profile.personal_information.contact_information)
+        .replace("{{ introduction }}",
+                 profile.personal_information.short_introduction)
+        .replace("{{ biography }}", profile.biography.biography)
+        .replace("{{ research interests }}",
+                 to_html_list(profile.research_interests.areas))
+        .replace("{{ awards and distinctions }}", format_awards_with_agent(
+            profile.awards_and_distinctions.honors))
+        .replace("{{ education }}",
+                 format_education_with_agent(profile.education.degrees))
+        .replace("{{ engage }}",
+                 format_links(profile.links.scholarly_identity_links,
+                              html_template=engage_link_template))
+        .replace("{{ related sites }}",
+                 format_links(profile.links.related_sites,
+                              html_template=related_site_template))
+        .replace("{{ related links }}",
+                 format_links(profile.links.related_links,
+                              html_template=related_link_template))
+        .replace("{{ slug }}", slug)
+        .replace("{{ base_url }}", base_url)
+        .replace("{{ share_url }}", share_url)
+        .replace("{{ summary }}",
+                 profile.biography.career_history.replace('\n', '%0A'))
+    )
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(filled)
+
+    logger.info(f"HTML profile generated at: {output_file}")
 
 
 def run_profile_generation(task: str | None = None,
@@ -250,18 +347,24 @@ def run_profile_generation(task: str | None = None,
     the browsing history, and render the final HTML profile.
     """
     default_task = (
-        "find Bernard‑Ghanem's information based on these websites:\n"
-        "https://www.linkedin.com/in/bernardghanem/\n"
-        "https://scholar.google.com/citations?hl=en&user=rVsGTeEAAAAJ"
-        "&view_op=list_works\n"
-        "https://x.com/bernardsghanem\n"
-        "https://www.researchgate.net/profile/Bernard-Ghanem\n"
+        """find Bernard‑Ghanem's information based on these websites:
+        https://www.linkedin.com/in/bernardghanem/
+        https://scholar.google.com/citations?hl=en&user=rVsGTeEAAAAJ&view_op
+        =list_works
+        https://x.com/bernardsghanem
+        https://www.bernardghanem.com/
+        https://www.researchgate.net/profile/Bernard-Ghanem
+        https://www.bernardghanem.com/curriculum-vitae
+        https://www.bernardghanem.com/home
+        """
 
     )
     section_plan = """
     Information summary focus on sections: "
         "Personal Information, Biography, Research Interests, Awards and "
-        "Distinctions, Education.
+        "Distinctions, Education, related links, related sites, Scholarly 
+        Identity Links
+        
     Each section need to be as detailed as possible.
     
     Final summary report please note "FINAL SUMMARY REPORT" at the beginning.
