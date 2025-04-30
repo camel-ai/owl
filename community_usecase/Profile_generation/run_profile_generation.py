@@ -5,6 +5,8 @@ import os
 import pathlib
 import re
 import sys
+from typing import Optional
+
 from owl.utils import run_society
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -22,28 +24,23 @@ base_dir = pathlib.Path(__file__).parent.parent.parent
 env_path = base_dir / "owl" / ".env"
 load_dotenv(dotenv_path=str(env_path))
 set_log_level(level="DEBUG")
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
 
-file_handler = logging.FileHandler("process_history.log", encoding="utf-8")
-file_handler.setLevel(logging.DEBUG)
-file_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-file_handler.setFormatter(file_formatter)
+if not logger.handlers:
+    file_handler = logging.FileHandler("process_history.log", encoding="utf-8")
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.DEBUG)
-console_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-console_handler.setFormatter(console_formatter)
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
-
-root_logger = logging.getLogger()
-root_logger.addHandler(file_handler)
-root_logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
 
 
 def construct_society(task: str) -> RolePlaying:
@@ -112,8 +109,24 @@ def construct_society(task: str) -> RolePlaying:
     return society
 
 
-def analyze_chat_history(chat_history: list[dict]) -> None:
+def analyze_chat_history(chat_history: list[dict]) -> Optional[str]:
     """Extract and logger.info every URL that the agents actually browsed."""
+
+    final_summary = None
+
+    for item in reversed(chat_history):
+        assistant_content = item.get("assistant", "")
+        if (
+                isinstance(assistant_content, str)
+                and "FINAL SUMMARY REPORT" in assistant_content
+        ):
+            final_summary=assistant_content
+    if final_summary:
+        logger.info("\033[94m===== RAW SUMMARY FROM AGENTS =====\033[0m")
+        logger.info(final_summary)
+    else:
+        logger.info("\033[91mNo final summary report found in chat history.\033[0m")
+
     queried_urls: list[str] = []
     for turn in chat_history:
         for call in turn.get("tool_calls", []):
@@ -132,6 +145,7 @@ def analyze_chat_history(chat_history: list[dict]) -> None:
     logger.info("Records saved to process_history.json")
     logger.info("============ Analysis Complete ============\n")
 
+    return final_summary
 
 # ------------------ Pydantic Schemas ------------------
 
@@ -201,26 +215,33 @@ def generate_html_profile(input_text: str,
 
     • Sections: Personal Information, Biography, Research Interests, Awards 
     and Distinctions, Education.
-    Generate a professional and natural-looking personal profile HTML page based 
+    Generate a professional and natural-looking personal profile HTML page 
+    based 
     on the provided information, following these detailed requirements:
-    Use standard HTML5 structure.
+    Using standard HTML5 + simple inline CSS, beautiful but not complicated.
     Layout should be clearly organized using <h1> for the main title, <h2> for 
     section headings, and <p> for paragraph text.
     Use proper <a href> hyperlinks for any external links (e.g., LinkedIn, 
     ResearchGate, Google Scholar).
     Write in a natural, flowing narrative style suitable for introducing the 
-    person to a broad audience (no bullet points).
+    person to a broad audience.
 
+    Please write ALL the input content to the webpage.
     JSON:
     {profile.model_dump_json(indent=2)}
     """
 
     html_response = html_agent.step(html_user_prompt)
     html_code = html_response.msgs[0].content
+    html_code_block = re.search(r"```html(.*?)```", html_code, re.DOTALL)
 
-    with open(output_file, "w", encoding="utf-8") as fp:
-        fp.write(html_code)
-    logger.info(f"HTML profile page saved to: {output_file}")
+    if html_code_block:
+        extracted_html = html_code_block.group(1).strip()
+        with open(output_file, "w", encoding="utf-8") as fp:
+            fp.write(extracted_html)
+        logger.info(f"HTML profile page saved to: {output_file}")
+    else:
+        logger.warning("No HTML code block found in the Agent response.")
 
 
 def run_profile_generation(task: str | None = None,
@@ -242,6 +263,8 @@ def run_profile_generation(task: str | None = None,
         "Personal Information, Biography, Research Interests, Awards and "
         "Distinctions, Education.
     Each section need to be as detailed as possible.
+    
+    Final summary report please note "FINAL SUMMARY REPORT" at the beginning.
     """
     task = task or default_task
 
@@ -249,14 +272,12 @@ def run_profile_generation(task: str | None = None,
 
     answer, chat_history, token_count = run_society(society, round_limit=9)
 
-    analyze_chat_history(chat_history)
+    final_summary = analyze_chat_history(chat_history)
 
-    logger.info("\033[94m===== RAW SUMMARY FROM AGENTS =====\033[0m")
-    logger.info(answer)
     logger.info(f"\033[94mToken count: {token_count}\033[0m")
 
     # turn the raw answer into a polished HTML profile
-    generate_html_profile(answer, output_file=html_path)
+    generate_html_profile(final_summary, output_file=html_path)
 
 
 if __name__ == "__main__":
