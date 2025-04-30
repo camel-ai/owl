@@ -92,7 +92,7 @@ def construct_society(task: str) -> RolePlaying:
         web_agent_model=models["content_researcher"],
         planning_agent_model=models["planning"],
         channel="chromium",
-        user_data_dir=r"C:\Users\13033\playwright_user_data",
+        # user_data_dir=None,
     )
 
     tools = [
