@@ -5,9 +5,10 @@ import os
 import pathlib
 import re
 import sys
-
+from owl.utils import run_society
+from pydantic import BaseModel
 from dotenv import load_dotenv
-
+from camel.agents import ChatAgent
 from camel.logger import get_logger, set_log_level
 from camel.models import ModelFactory
 from camel.societies import RolePlaying
@@ -19,7 +20,6 @@ from camel.types import ModelPlatformType
 
 base_dir = pathlib.Path(__file__).parent.parent.parent
 env_path = base_dir / "owl" / ".env"
-print(env_path)
 load_dotenv(dotenv_path=str(env_path))
 set_log_level(level="DEBUG")
 logger = get_logger(__name__)
@@ -47,37 +47,40 @@ root_logger.addHandler(console_handler)
 
 
 def construct_society(task: str) -> RolePlaying:
-    """Construct a society of agents for the profile generation.
+    """Create a Role‑Playing society of agents able to browse, search and
+    retrieve profile information for the given task string.
 
-    Args:
-        task (str): The personal information including the name and
-        corresponding websites.
+    Parameters
+    ----------
+    task : str
+        Task prompt that contains the person name and seed URLs.
 
-    Returns:
-        RolePlaying: A configured society of agents for the profile
-        generation.
+    Returns
+    -------
+    RolePlaying
+        Configured society ready to be executed with `run_society`.
     """
     models = {
         "user": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+            model_platform=ModelPlatformType.OPENAI,
             model_type="gpt-4.1",
             api_key=os.getenv("OPENAI_API_KEY"),
             model_config_dict={"temperature": 0.4},
         ),
         "assistant": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+            model_platform=ModelPlatformType.OPENAI,
             model_type="gpt-4.1",
             api_key=os.getenv("OPENAI_API_KEY"),
             model_config_dict={"temperature": 0.4},
         ),
         "content_researcher": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+            model_platform=ModelPlatformType.OPENAI,
             model_type="gpt-4.1",
             api_key=os.getenv("OPENAI_API_KEY"),
             model_config_dict={"temperature": 0.2},
         ),
         "planning": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+            model_platform=ModelPlatformType.OPENAI,
             model_type="gpt-4.1",
             api_key=os.getenv("OPENAI_API_KEY"),
             model_config_dict={"temperature": 0.3},
@@ -88,7 +91,8 @@ def construct_society(task: str) -> RolePlaying:
         headless=False,
         web_agent_model=models["content_researcher"],
         planning_agent_model=models["planning"],
-        channel='chromium',
+        channel="chromium",
+        user_data_dir=r"C:\Users\13033\playwright_user_data",
     )
 
     tools = [
@@ -96,158 +100,171 @@ def construct_society(task: str) -> RolePlaying:
         SearchToolkit().search_duckduckgo,
     ]
 
-    user_agent_kwargs = {
-        "model": models["user"],
-    }
-
-    assistant_agent_kwargs = {
-        "model": models["assistant"],
-        "tools": tools,
-    }
-
-    task_kwargs = {
-        "task_prompt": task,
-        "with_task_specify": False,
-    }
-
     society = RolePlaying(
-        **task_kwargs,
+        task_prompt=task,
+        with_task_specify=False,
         user_role_name="user",
-        user_agent_kwargs=user_agent_kwargs,
+        user_agent_kwargs={"model": models["user"]},
         assistant_role_name="Information_retriever",
-        assistant_agent_kwargs=assistant_agent_kwargs,
+        assistant_agent_kwargs={"model": models["assistant"], "tools": tools},
     )
 
     return society
 
 
-def analyze_chat_history(chat_history, filename='profile.html'):
-    """Parse the chat history to extract queried URLs
-    and associated HTML content."""
-
-    print("\n============ URL Analysis ============")
-    logger.info("========== Starting URL analysis ==========")
-
-    queried_urls = []
-    for entry in chat_history:
-        for tool_call in entry.get("tool_calls", []):
-            if tool_call.get("tool_name") == "browse_url":
-                args = tool_call.get("args", {})
-                url = args.get("start_url")
+def analyze_chat_history(chat_history: list[dict]) -> None:
+    """Extract and logger.info every URL that the agents actually browsed."""
+    queried_urls: list[str] = []
+    for turn in chat_history:
+        for call in turn.get("tool_calls", []):
+            if call.get("tool_name") == "browse_url":
+                url = call.get("args", {}).get("start_url")
                 if url:
                     queried_urls.append(url)
 
-    url_count = len(queried_urls)
+    logger.info("\n============ URL Analysis ============")
 
-    print(f"Total queried URLs found: {url_count}")
-    logger.info(f"Total queried URLs found: {url_count}")
-
-    print("List of queried URLs:")
-    logger.info("List of queried URLs:")
+    logger.info(f"Total queried URLs: {len(queried_urls)}")
     for url in queried_urls:
-        print(url)
         logger.info(url)
-
-    last_html_content = None
-
-    for item in reversed(chat_history):
-        assistant_content = item.get("assistant", "")
-        if (
-            isinstance(assistant_content, str)
-            and "```html" in assistant_content
-        ):
-            matches = re.findall(
-                r"```html\s*(.*?)\s*```", assistant_content, re.DOTALL
-            )
-            if matches:
-                last_html_content = matches[-1]
-                break
-
-    if last_html_content:
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(last_html_content)
-        print(f"\033[92mExtracted HTML saved to {filename}\033[0m")
-    else:
-        print("\033[91mNo HTML block found in chat history.\033[0m")
-
-    with open("process_history.json", "w", encoding="utf-8") as f:
-        json.dump(chat_history, f, ensure_ascii=False, indent=2)
-
-    print("Records saved to process_history.json")
-    print("============ Analysis Complete ============\n")
+    with open("process_history.json", "w", encoding="utf-8") as fp:
+        json.dump(chat_history, fp, ensure_ascii=False, indent=2)
+    logger.info("Records saved to process_history.json")
+    logger.info("============ Analysis Complete ============\n")
 
 
-def run_profile_generation(task: str | None = None):
-    """Run the profile_generation with the given task.
+# ------------------ Pydantic Schemas ------------------
 
-    Args:
-        task (str, optional): The personal information.
-        Defaults to an example task.
+class PersonalInformation(BaseModel):
+    name: str
+    positions: list[str]
+    contact_information: str | None = None
+    social_media: list[str] | None = None
+    research_keywords: list[str]
+
+
+class Biography(BaseModel):
+    career_history: str
+    research_focus: str
+
+
+class ResearchInterests(BaseModel):
+    areas: list[str]
+
+
+class AwardsAndDistinctions(BaseModel):
+    honors: list[str]
+
+
+class Education(BaseModel):
+    degrees: list[str]
+
+
+class ScholarProfile(BaseModel):
+    personal_information: PersonalInformation
+    biography: Biography
+    research_interests: ResearchInterests
+    awards_and_distinctions: AwardsAndDistinctions
+    education: Education
+
+
+def generate_html_profile(input_text: str,
+                          output_file: str = "profile.html") -> None:
+    """Pipeline: extract structured profile from a free‑form biography and
+    turn it into a polished HTML page.
+
+    Parameters
+    ----------
+    input_text : str
+        Raw biography or resume text.
+    output_file : str, optional
+        Path where the final HTML file will be saved, by default
+        "profile.html".
     """
-    if not task:
-        task = """
-find Bernard-Ghanem's information and generate a html page based on these 
-websites:
-https://www.linkedin.com/in/bernardghanem/
-https://scholar.google.com/citations?hl=en&user=rVsGTeEAAAAJ&view_op=list_works
-https://x.com/bernardsghanem
-https://www.researchgate.net/profile/Bernard-Ghanem
-https://www.bernardghanem.com/curriculum-vitae
-https://www.bernardghanem.com/home
-        """
-    html_prompt = """
-Generate a professional and natural-looking personal profile HTML page based 
-on the provided information, following these detailed requirements:
+    extraction_prompt = (
+        "You are a scholarly‑profile extraction assistant. "
+        "Return ONLY JSON that matches the provided schema."
+    )
 
-Use standard HTML5 structure.
+    extractor = ChatAgent(system_message=extraction_prompt)
+    extraction_response = extractor.step(
+        input_message=input_text,
+        response_format=ScholarProfile,
+    )
+    profile: ScholarProfile = extraction_response.msgs[0].parsed
 
-Layout should be clearly organized using <h1> for the main title, <h2> for 
-section headings, and <p> for paragraph text.
+    html_system_prompt = "You are an expert HTML profile page generator."
+    html_agent = ChatAgent(system_message=html_system_prompt)
 
-Use proper <a href> hyperlinks for any external links (e.g., LinkedIn, 
-ResearchGate, Google Scholar).
+    html_user_prompt = f"""
+    Using the following JSON, build a complete HTML5 profile page.
 
-Write in a natural, flowing narrative style suitable for introducing the 
-person to a broad audience (no bullet points).
+    • Sections: Personal Information, Biography, Research Interests, Awards 
+    and Distinctions, Education.
+    Generate a professional and natural-looking personal profile HTML page based 
+    on the provided information, following these detailed requirements:
+    Use standard HTML5 structure.
+    Layout should be clearly organized using <h1> for the main title, <h2> for 
+    section headings, and <p> for paragraph text.
+    Use proper <a href> hyperlinks for any external links (e.g., LinkedIn, 
+    ResearchGate, Google Scholar).
+    Write in a natural, flowing narrative style suitable for introducing the 
+    person to a broad audience (no bullet points).
 
-Strictly follow the given content structure:
-
-Personal Information (Name, Positions, Contact( include social media), 
-Research Keywords)
-
-Summary (Short description of expertise and overall role)
-
-Biography (Detailed career history (can be found in Linkedin) and research 
-focus)
-
-Research Interests (Areas of active research)
-
-Awards and Distinctions (Honors and recognitions)
-
-Education (Academic degrees in order)
-
-Engage / Related Links (Professional profiles and external resources)
-
-The final HTML should look clean, modern, and ready to be used as a complete 
-professional personal page.
+    JSON:
+    {profile.model_dump_json(indent=2)}
     """
 
-    society = construct_society(task + html_prompt)
+    html_response = html_agent.step(html_user_prompt)
+    html_code = html_response.msgs[0].content
 
-    from owl.utils import run_society
+    with open(output_file, "w", encoding="utf-8") as fp:
+        fp.write(html_code)
+    logger.info(f"HTML profile page saved to: {output_file}")
+
+
+def run_profile_generation(task: str | None = None,
+                           html_path: str = "profile.html") -> None:
+    """High‑level orchestration: execute the retrieval society, analyse
+    the browsing history, and render the final HTML profile.
+    """
+    default_task = (
+        "find Bernard‑Ghanem's information based on these websites:\n"
+        "https://www.linkedin.com/in/bernardghanem/\n"
+        "https://scholar.google.com/citations?hl=en&user=rVsGTeEAAAAJ"
+        "&view_op=list_works\n"
+        "https://x.com/bernardsghanem\n"
+        "https://www.researchgate.net/profile/Bernard-Ghanem\n"
+
+    )
+    section_plan = """
+    Information summary focus on sections: "
+        "Personal Information, Biography, Research Interests, Awards and "
+        "Distinctions, Education.
+    Each section need to be as detailed as possible.
+    """
+    task = task or default_task
+
+    society = construct_society(task + section_plan)
 
     answer, chat_history, token_count = run_society(society, round_limit=9)
 
     analyze_chat_history(chat_history)
-    print(f"\033[94mAnswer: {answer}\033[0m")
-    print(f"\033[94mToken_count: {token_count}\033[0m")
+
+    logger.info("\033[94m===== RAW SUMMARY FROM AGENTS =====\033[0m")
+    logger.info(answer)
+    logger.info(f"\033[94mToken count: {token_count}\033[0m")
+
+    # turn the raw answer into a polished HTML profile
+    generate_html_profile(answer, output_file=html_path)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Generate a personal profile page."
-    )
-    parser.add_argument('--task', type=str, help='The personal information.')
+        description="Generate an academic profile page.")
+    parser.add_argument("--task", type=str, help="Seed task prompt with URLs.")
+    parser.add_argument("--html", type=str, default="profile.html",
+                        help="Output HTML file path.")
     args = parser.parse_args()
 
-    run_profile_generation(task=args.task)
+    run_profile_generation(task=args.task, html_path=args.html)
