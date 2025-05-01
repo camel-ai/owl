@@ -89,7 +89,7 @@ def construct_society(task: str) -> RolePlaying:
         web_agent_model=models["content_researcher"],
         planning_agent_model=models["planning"],
         channel="chromium",
-        # user_data_dir=None,
+        user_data_dir=r"C:\Users\13033\playwright_user_data",
     )
 
     tools = [
@@ -156,8 +156,7 @@ class PersonalInformation(BaseModel):
     positions: list[str] = Field(
         description="List of current academic or professional positions")
     contact_information: Optional[str] = Field(
-        description="Primary contact information such as email address or "
-                    "phone number"
+        description="Primary contact information such as email address"
     )
     social_media: Optional[list[str]] = Field(
         description="List of social media or personal profile URLs (e.g., "
@@ -182,28 +181,60 @@ class ResearchInterests(BaseModel):
 
 class AwardsAndDistinctions(BaseModel):
     honors: list[str] = Field(
-        description="List of awards, honors, and professional distinctions "
-                    "received")
+        description="""List of awards, honors, and professional distinctions 
+        received
+        Reformat each award as HTML structure, Like:
+       <li class="field__item"><strong>The 
+       NSF CAREER grant in low-power computing and 
+       communication systems</strong>, 2024</li>.
+        """
+    )
 
 
 class Education(BaseModel):
     degrees: list[str] = Field(
-        description="Academic degrees in reverse chronological order, "
-                    "including institution and year")
+        description="""
+        Academic degrees in reverse chronological order, 
+        including institution and year.
+        Format each degree in html structure like:
+            <dl class="field__item"><dt>Doctor of Philosophy (Ph.D.)</dt>
+            <dd class="text-break">Integrated Circuits and Systems, 
+            <em>University of California</em>, United States, 2003</dd></dl>
+        """)
 
 
 class Links(BaseModel):
     scholarly_identity_links: list[str] = Field(
-        description="Links to unique scholarly identity profiles (e.g., "
-                    "ORCID, IEEE Xplore, DBLP)"
+        description="""Links to unique scholarly identity profiles (e.g., 
+                    ORCID, IEEE Xplore, DBLP)
+                    reformat each link in html structure like:
+    <li class="field__item"><a class="text-decoration-none" 
+    href="https://orcid.org/0000-0003-1849-083X" title="Follow Ahmed Eltawil 
+    on ORCID at 0000-0003-1849-083X"><button class="btn btn-orcid px-1 py-0 
+    text-bg-light bg-opacity-10 text-break text-wrap" type="button" 
+    aria-label="ORCID"><i class="bi bi-orcid mx-1"></i><span class="mx-1 
+    text-start">ORCID</span></button></a></li>-->
+                    """
     )
     related_sites: list[str] = Field(
-        description="Links to institutional or departmental homepages (e.g., "
-                    "KAUST ECE department)"
+        description="""Links to institutional or departmental homepages (e.g., 
+                    KAUST ECE department)
+    reformat each link in html structure like:
+    <li class="list-group-item px-0 field__item"><a class="text-break 
+    text-underline-hover" href="https://ece.kaust.edu.sa/" title="Electrical 
+    and Computer Engineering (ECE) Academic Program">Electrical and Computer 
+    Engineering (ECE)</a></li>
+                    """
     )
     related_links: list[str] = Field(
-        description="Links to academic and professional presence (e.g., "
-                    "Google Scholar, ResearchGate, LinkedIn)"
+        description="""Links to academic and professional presence (e.g., 
+                    Google Scholar, ResearchGate, LinkedIn)
+   reformat each link in html structure like:
+    <li class="field__item"><a 
+    href="https://scholar.google.com/citations?user=XzW-KWoAAAAJ&amp;hl=en" 
+    class="text-break text-underline-hover">Publications on Google 
+    Scholar</a></li>
+                    """
     )
 
 
@@ -238,64 +269,6 @@ def generate_html_profile(input_text,
     def to_html_list(items: list[str]) -> str:
         return "<br>".join(items)
 
-    def format_awards_with_agent(awards: list[str]) -> str:
-        formatted_awards = []
-        agent = ChatAgent(
-            system_message="""Reformat awards as HTML list items using the 
-                           structure, Like:
-                           <li class="field__item"><strong>The 
-                           NSF CAREER grant in low-power computing and 
-                           communication systems</strong>, 2024</li>.""")
-        for award in awards:
-            response = agent.step(f"Reformat this: {award}")
-            formatted_awards.append(response.msgs[0].content.strip())
-        return "\n".join(formatted_awards)
-
-    def format_education_with_agent(degrees: list[str]) -> str:
-        agent = ChatAgent(
-            system_message="""Reformat education degrees into <dl> format. 
-            Like: 
-            <dl class="field__item"><dt>Doctor of Philosophy (Ph.D.)</dt>
-            <dd class="text-break">Integrated Circuits and Systems, 
-            <em>University of California</em>, United States, 2003</dd></dl>
-            """)
-
-        items = []
-        for degree in degrees:
-            response = agent.step(f"Reformat this: {degree}")
-            items.append(response.msgs[0].content.strip())
-        return "\n".join(items)
-
-    def format_links(links: list[str], html_template: str) -> str:
-        agent = ChatAgent(
-            system_message="Reformat link into this html structure: %s ." %
-                           html_template)
-        items = []
-        for link in links:
-            response = agent.step(f"Reformat this: {link}")
-            items.append(response.msgs[0].content.strip())
-        return "\n".join(items)
-
-    engage_link_template = """
-    <li class="field__item"><a class="text-decoration-none" 
-    href="https://orcid.org/0000-0003-1849-083X" title="Follow Ahmed Eltawil 
-    on ORCID at 0000-0003-1849-083X"><button class="btn btn-orcid px-1 py-0 
-    text-bg-light bg-opacity-10 text-break text-wrap" type="button" 
-    aria-label="ORCID"><i class="bi bi-orcid mx-1"></i><span class="mx-1 
-    text-start">ORCID</span></button></a></li>-->
-    """
-    related_link_template = """
-    <li class="field__item"><a 
-    href="https://scholar.google.com/citations?user=XzW-KWoAAAAJ&amp;hl=en" 
-    class="text-break text-underline-hover">Publications on Google 
-    Scholar</a></li>
-    """
-    related_site_template = """
-    <li class="list-group-item px-0 field__item"><a class="text-break 
-    text-underline-hover" href="https://ece.kaust.edu.sa/" title="Electrical 
-    and Computer Engineering (ECE) Academic Program">Electrical and Computer 
-    Engineering (ECE)</a></li>
-    """
     with open(template_path, "r", encoding="utf-8") as f:
         template = f.read()
 
@@ -315,24 +288,22 @@ def generate_html_profile(input_text,
         .replace("{{ biography }}", profile.biography.biography)
         .replace("{{ research interests }}",
                  to_html_list(profile.research_interests.areas))
-        .replace("{{ awards and distinctions }}", format_awards_with_agent(
-            profile.awards_and_distinctions.honors))
+        .replace("{{ awards and distinctions }}",
+                 to_html_list(profile.awards_and_distinctions.honors))
         .replace("{{ education }}",
-                 format_education_with_agent(profile.education.degrees))
+                 to_html_list(profile.education.degrees))
         .replace("{{ engage }}",
-                 format_links(profile.links.scholarly_identity_links,
-                              html_template=engage_link_template))
+                 to_html_list(profile.links.scholarly_identity_links))
         .replace("{{ related sites }}",
-                 format_links(profile.links.related_sites,
-                              html_template=related_site_template))
+                 to_html_list(profile.links.related_sites))
         .replace("{{ related links }}",
-                 format_links(profile.links.related_links,
-                              html_template=related_link_template))
+                 to_html_list(profile.links.related_links))
         .replace("{{ slug }}", slug)
         .replace("{{ base_url }}", base_url)
         .replace("{{ share_url }}", share_url)
         .replace("{{ summary }}",
-                 profile.biography.career_history.replace('\n', '%0A'))
+                 profile.personal_information.short_introduction.replace('\n',
+                                                                         '%0A'))
     )
 
     with open(output_file, "w", encoding="utf-8") as f:
@@ -362,8 +333,13 @@ def run_profile_generation(task: str | None = None,
     section_plan = """
     Information summary focus on sections: "
         "Personal Information, Biography, Research Interests, Awards and "
-        "Distinctions, Education, related links, related sites, Scholarly 
-        Identity Links
+        "Distinctions, Education, 
+        related links(Links to institutional or departmental homepages (e.g., 
+                    KAUST ECE department), 
+        related sites(Links to institutional or departmental homepages (e.g., 
+                    KAUST ECE department), 
+        Scholarly Identity Links(Links to unique scholarly identity profiles 
+        (e.g., ORCID, IEEE Xplore, DBLP)
         
     Each section need to be as detailed as possible.
     
