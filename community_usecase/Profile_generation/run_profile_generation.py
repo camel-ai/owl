@@ -175,8 +175,9 @@ class Biography(BaseModel):
 
 
 class ResearchInterests(BaseModel):
-    areas: list[str] = Field(
-        description="List of active or long-term research topics")
+    areas: str = Field(
+        description="Description of his current active or long-term research "
+                    "topics")
 
 
 class AwardsAndDistinctions(BaseModel):
@@ -287,7 +288,7 @@ def generate_html_profile(input_text,
                  profile.personal_information.short_introduction)
         .replace("{{ biography }}", profile.biography.biography)
         .replace("{{ research interests }}",
-                 to_html_list(profile.research_interests.areas))
+                 profile.research_interests.areas)
         .replace("{{ awards and distinctions }}",
                  to_html_list(profile.awards_and_distinctions.honors))
         .replace("{{ education }}",
