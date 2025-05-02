@@ -5,10 +5,11 @@ data into a structured HTML profile page.
 
 ## How to use
 
-1. Set up the OPENAI api key in the .env file
+1. Set up the OPENAI api key and EXA search api key in the .env file
 
 ```bash
 OPENAI_API_KEY = 'xxx'
+EXA_API_KEY = 'xxx'
 ```
 
 2. Run the script

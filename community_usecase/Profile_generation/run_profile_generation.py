@@ -89,12 +89,12 @@ def construct_society(task: str) -> RolePlaying:
         web_agent_model=models["content_researcher"],
         planning_agent_model=models["planning"],
         channel="chromium",
-        #user_data_dir=None,
+        # user_data_dir=None,
     )
 
     tools = [
         *browser_toolkit.get_tools(),
-        SearchToolkit().search_duckduckgo,
+        SearchToolkit().search_exa,
     ]
 
     society = RolePlaying(
@@ -319,22 +319,20 @@ def run_profile_generation(task: str | None = None,
     the browsing history, and render the final HTML profile.
     """
     default_task = (
-        """find Bernard‑Ghanem's information based on these websites:
-        https://www.linkedin.com/in/bernardghanem/
-        https://scholar.google.com/citations?hl=en&user=rVsGTeEAAAAJ&view_op
-        =list_works
-        https://x.com/bernardsghanem
-        https://www.bernardghanem.com/
-        https://www.researchgate.net/profile/Bernard-Ghanem
-        https://www.bernardghanem.com/curriculum-vitae
-        https://www.bernardghanem.com/home
+        """find Bernard‑Ghanem's information based on information you 
+        searched in internet
         """
 
     )
     section_plan = """
+    If there is no URLs provided, please first search websites (prioritizing 
+    official websites) 
+    and then browser them to get relevant information.
+    
     Information summary focus on sections: "
         "Personal Information, Biography, Research Interests, Awards and "
-        "Distinctions, Education, 
+        "Distinctions(Complete list of honors and corresponding years), 
+        Education (Complete education history and corresponding years), 
         related links(Links to institutional or departmental homepages (e.g., 
                     KAUST ECE department), 
         related sites(Links to institutional or departmental homepages (e.g., 
@@ -342,6 +340,7 @@ def run_profile_generation(task: str | None = None,
         Scholarly Identity Links(Links to unique scholarly identity profiles 
         (e.g., ORCID, IEEE Xplore, DBLP)
         
+    DO NOT OMIT information in the summary.
     Each section need to be as detailed as possible.
     
     Final summary report please note "FINAL SUMMARY REPORT" at the beginning.
@@ -363,7 +362,7 @@ def run_profile_generation(task: str | None = None,
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Generate an academic profile page.")
-    parser.add_argument("--task", type=str, help="Seed task prompt with URLs.")
+    parser.add_argument("--task", type=str, help="Seed task prompt")
     parser.add_argument("--html", type=str, default="profile.html",
                         help="Output HTML file path.")
     args = parser.parse_args()
