@@ -13,6 +13,7 @@
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 
 from typing import Dict, List, Optional, Tuple
+import threading
 
 
 from camel.agents import ChatAgent
@@ -38,6 +39,8 @@ class OwlRolePlaying(RolePlaying):
         self.assistant_agent_kwargs: dict = kwargs.get("assistant_agent_kwargs", {})
 
         self.output_language = kwargs.get("output_language", None)
+        
+        self.stop_event = kwargs.get("stop_event", None)
 
         super().__init__(**kwargs)
 
@@ -62,6 +65,7 @@ class OwlRolePlaying(RolePlaying):
             user_agent_kwargs=self.user_agent_kwargs,
             output_language=self.output_language,
             # is_reasoning_task=self.is_reasoning_task
+            stop_event=self.stop_event
         )
 
     def _init_agents(
@@ -72,6 +76,7 @@ class OwlRolePlaying(RolePlaying):
         user_agent_kwargs: Optional[Dict] = None,
         output_language: Optional[str] = None,
         is_reasoning_task: bool = False,
+        stop_event: Optional[threading.Event] = None,
     ) -> None:
         r"""Initialize assistant and user agents with their system messages.
 
@@ -86,6 +91,9 @@ class OwlRolePlaying(RolePlaying):
                 pass to the user agent. (default: :obj:`None`)
             output_language (str, optional): The language to be output by the
                 agents. (default: :obj:`None`)
+            stop_event (Optional[threading.Event], optional): Event to signal
+                termination of the agent's operation. When set, the agent will
+                terminate its execution. (default: :obj:`None`)
         """
         if self.model is not None:
             if assistant_agent_kwargs is None:
@@ -107,6 +115,7 @@ class OwlRolePlaying(RolePlaying):
         self.assistant_agent = ChatAgent(
             init_assistant_sys_msg,
             output_language=output_language,
+            stop_event=stop_event,
             **(assistant_agent_kwargs or {}),
         )
         self.assistant_sys_msg = self.assistant_agent.system_message
@@ -114,6 +123,7 @@ class OwlRolePlaying(RolePlaying):
         self.user_agent = ChatAgent(
             init_user_sys_msg,
             output_language=output_language,
+            stop_event=stop_event,
             **(user_agent_kwargs or {}),
         )
         self.user_sys_msg = self.user_agent.system_message
@@ -442,6 +452,8 @@ def run_society(
     init_prompt = """
     Now please give me instructions to solve over overall task step by step. If the task requires some specific knowledge, please instruct me to use tools to complete the task.
         """
+    society.stop_event = stop_event
+    
     input_msg = society.init_chat(init_prompt)
     for _round in range(round_limit):
         assistant_response, user_response = society.step(input_msg, stop_event)
