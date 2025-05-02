@@ -250,7 +250,8 @@ class ScholarProfile(BaseModel):
 
 def generate_html_profile(input_text,
                           template_path: str = "template.html",
-                          output_file: str = "profile.html",
+                          output_file: str =
+                          "profile_without_url_provided.html",
                           base_url: str = "https://cemse.kaust.edu.sa") -> \
         None:
     """Fill an HTML template with profile data, some with agent rewriting,
@@ -314,40 +315,59 @@ def generate_html_profile(input_text,
 
 
 def run_profile_generation(task: str | None = None,
-                           html_path: str = "profile.html") -> None:
+                           white_list=None,
+                           black_list=None) -> None:
     """High‑level orchestration: execute the retrieval society, analyse
     the browsing history, and render the final HTML profile.
     """
+    if white_list is None:
+        white_list = []
+    if black_list is None:
+        black_list = []
+
     default_task = (
         """find Bernard‑Ghanem's information based on information you 
         searched in internet
         """
-
     )
+
+    # Dynamically add white/blacklist instructions
+    list_instructions = ""
+    if white_list:
+        white_sites = ', '.join(white_list)
+        list_instructions += (f"\nPlease only retrieve or browse information "
+                              f"from the following websites: {white_sites}.\n")
+    if black_list:
+        black_sites = ', '.join(black_list)
+        list_instructions += (f"\nPlease do not browse or retrieve any "
+                              f"information from the following websites: "
+                              f"{black_sites}.\n")
+
     section_plan = """
-    If there is no URLs provided, please first search websites (prioritizing 
-    official websites) 
-    and then browser them to get relevant information.
-    
-    Information summary focus on sections: "
-        "Personal Information, Biography, Research Interests, Awards and "
-        "Distinctions(Complete list of honors and corresponding years), 
+    If there is no URLs provided, please first search websites and then 
+    browse them to get relevant information.
+
+    Information summary focus on sections: 
+        Personal Information, Biography, Research Interests, Awards and 
+        Distinctions (Complete list of honors and corresponding years, 
+        honors could be best paper or something else significant), 
         Education (Complete education history and corresponding years), 
-        related links(Links to institutional or departmental homepages (e.g., 
-                    KAUST ECE department), 
-        related sites(Links to institutional or departmental homepages (e.g., 
-                    KAUST ECE department), 
-        Scholarly Identity Links(Links to unique scholarly identity profiles 
-        (e.g., ORCID, IEEE Xplore, DBLP)
-        
+        Related Links (Links to institutional or departmental homepages 
+        (e.g., xxx department)), 
+        Related Sites (Links to professional profiles  
+        (e.g., Google Scholar, ResearchGate, LinkedIn)), 
+        Scholarly Identity Links (Links to unique scholarly identity profiles 
+        (e.g., ORCID, IEEE Xplore, DBLP))
+
     DO NOT OMIT information in the summary.
-    Each section need to be as detailed as possible.
-    
+    Each section needs to be as detailed as possible.
+
     Final summary report please note "FINAL SUMMARY REPORT" at the beginning.
     """
-    task = task or default_task
 
-    society = construct_society(task + section_plan)
+    task = (task or default_task) + list_instructions + section_plan
+
+    society = construct_society(task)
 
     answer, chat_history, token_count = run_society(society, round_limit=9)
 
@@ -355,16 +375,19 @@ def run_profile_generation(task: str | None = None,
 
     logger.info(f"\033[94mToken count: {token_count}\033[0m")
 
-    # turn the raw answer into a polished HTML profile
-    generate_html_profile(final_summary, output_file=html_path)
+    # Turn the raw answer into a polished HTML profile
+    generate_html_profile(final_summary, output_file='profile.html')
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Generate an academic profile page.")
     parser.add_argument("--task", type=str, help="Seed task prompt")
-    parser.add_argument("--html", type=str, default="profile.html",
-                        help="Output HTML file path.")
-    args = parser.parse_args()
+    parser.add_argument("--whitelist", nargs='+', default=[],
+                        help="List of websites recommend to browse")
+    parser.add_argument("--blacklist", nargs='+', default=[],
+                        help="List of websites not allowed to browse")
 
-    run_profile_generation(task=args.task, html_path=args.html)
+    args = parser.parse_args()
+    run_profile_generation(task=args.task, white_list=args.whitelist,
+                           black_list=args.blacklist)

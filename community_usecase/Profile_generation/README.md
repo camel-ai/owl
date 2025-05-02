@@ -15,7 +15,11 @@ EXA_API_KEY = 'xxx'
 2. Run the script
 
 ```bash
-python run_profile_generation.py --task "Ahmed Eltawil, Professor at KAUST, Suggested Websites:..."
+python run_profile_generation.py \
+  --task "xxx, Professor at xxx, find full academic profile..." \
+  --whitelist http://xxx.com http://xxx.com \
+  --blacklist http://xxx.com http://xxx.com
+
 ```
 
 3. You can find the agent's complete thought process in the process_history.log file and the final generated HTML page named profile.html.
