@@ -204,6 +204,19 @@ class Education(BaseModel):
         """)
 
 
+class Publications(BaseModel):
+    pub_list: list[str] = Field(
+        description=""" 
+        TOP 10 publication paper list.
+        reformat each link in html structure like:
+        <dl class="field__item"><dt>ActivityNet: A Large-Scale Video 
+        Benchmark for Human Activity Understanding</dt><dd 
+        class="text-break">FC Heilbron, V Escorcia, B Ghanem, JC Niebles, 
+        <em>IEEE Conference on Computer Vision and Pattern Recognition</em>, 
+        2015 (Citations: 3239)</dd></dl><br>     
+        """)
+
+
 class Links(BaseModel):
     scholarly_identity_links: list[str] = Field(
         description="""Links to unique scholarly identity profiles (e.g., 
@@ -245,6 +258,7 @@ class ScholarProfile(BaseModel):
     research_interests: ResearchInterests
     awards_and_distinctions: AwardsAndDistinctions
     education: Education
+    publications: Publications
     links: Links
 
 
@@ -300,6 +314,8 @@ def generate_html_profile(input_text,
                  to_html_list(profile.links.related_sites))
         .replace("{{ related links }}",
                  to_html_list(profile.links.related_links))
+        .replace("{{ publications }}",
+                 to_html_list(profile.publications.pub_list))
         .replace("{{ slug }}", slug)
         .replace("{{ base_url }}", base_url)
         .replace("{{ share_url }}", share_url)
@@ -357,7 +373,10 @@ def run_profile_generation(task: str | None = None,
         Related Sites (Links to professional profiles  
         (e.g., Google Scholar, ResearchGate, LinkedIn)), 
         Scholarly Identity Links (Links to unique scholarly identity profiles 
-        (e.g., ORCID, IEEE Xplore, DBLP))
+        (e.g., ORCID, IEEE Xplore, DBLP)),
+        Representative Publications (The top 10 most cited publications 
+        from Google Scholar are listed to highlight the author's impactful 
+        research contributions)
 
     DO NOT OMIT information in the summary.
     Each section needs to be as detailed as possible.
