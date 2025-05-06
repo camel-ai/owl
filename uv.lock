@@ -14,6 +14,22 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "aci-sdk"
+version = "1.0.0b1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "griffe" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "tenacity" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/71/9d/0d956545331ac6760af30a7bc6492083a84b32f16faa89f28ee269a83dac/aci_sdk-1.0.0b1.tar.gz", hash = "sha256:9130bf196c680deda2004d71b091883bc468ea1649d71dbf676b9172c067d4ef", size = 63449 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e2/57/2f1cfb3ee6a84e355a09dd94a4c3c5d1dbe9dbb925950c6903cb8ef2a216/aci_sdk-1.0.0b1-py3-none-any.whl", hash = "sha256:f3d9f3de58c518ecf4fc44ebedf1e4a1e23a30df268782989d1ce8852bd47175", size = 31713 },
+]
+
+[[package]]
 name = "aiofiles"
 version = "24.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -257,7 +273,7 @@ wheels = [
 
 [[package]]
 name = "camel-ai"
-version = "0.2.52"
+version = "0.2.54"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama" },
@@ -270,13 +286,14 @@ dependencies = [
     { name = "pydantic" },
     { name = "tiktoken" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c0/a8/7231d11a72292e97f8e805d80e9c7c9b70df1ce63388bc0fe11352dd8e18/camel_ai-0.2.52.tar.gz", hash = "sha256:b033e737f8e50e35eb2bb6e945b4113483b8aa43ad21c8a432c380c59aefa46d", size = 542315 }
+sdist = { url = "https://files.pythonhosted.org/packages/53/87/e3f87c6fa0ee2bf27d62b1d82f0091d34a793b57e79158b9f2b9812e95e6/camel_ai-0.2.54.tar.gz", hash = "sha256:06f53e8312fb5040aa0fe2daf69b54feda6c51dbb12af2a2ea9a575d8c5d454b", size = 549261 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bf/61/27fe54b9b0736acb4328dc66764b675a835b4e14b7498c650f922c2bae3b/camel_ai-0.2.52-py3-none-any.whl", hash = "sha256:cd4e1e7d91d0511e7689f8a6033bb382e54fbf2d57b8133983452cbc77d4f5b8", size = 906573 },
+    { url = "https://files.pythonhosted.org/packages/cc/70/25605a9d9dd92f450cd5900f7469902fe4a1bf91455a3b4a84e6b8ad4203/camel_ai-0.2.54-py3-none-any.whl", hash = "sha256:dcb5fa588555f074d51ec3090893940aa258cd3008a698144ddcec57a60d5b9a", size = 916899 },
 ]
 
 [package.optional-dependencies]
 owl = [
+    { name = "aci-sdk" },
     { name = "anthropic" },
     { name = "beautifulsoup4" },
     { name = "chunkr-ai" },
@@ -1173,6 +1190,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/04/15/1612bb61506f44b6b8b6bebb6488702b1fe1432547e95dda57874303a1f5/greenlet-3.2.1-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:e934591a7a4084fa10ee5ef50eb9d2ac8c4075d5c9cf91128116b5dca49d43b1", size = 1119572 },
     { url = "https://files.pythonhosted.org/packages/cc/2f/002b99dacd1610e825876f5cbbe7f86740aa2a6b76816e5eca41c8457e85/greenlet-3.2.1-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:063bcf7f8ee28eb91e7f7a8148c65a43b73fbdc0064ab693e024b5a940070145", size = 1147442 },
     { url = "https://files.pythonhosted.org/packages/c0/ba/82a2c3b9868644ee6011da742156247070f30e952f4d33f33857458450f2/greenlet-3.2.1-cp312-cp312-win_amd64.whl", hash = "sha256:7132e024ebeeeabbe661cf8878aac5d2e643975c4feae833142592ec2f03263d", size = 296207 },
+]
+
+[[package]]
+name = "griffe"
+version = "1.7.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a9/3e/5aa9a61f7c3c47b0b52a1d930302992229d191bf4bc76447b324b731510a/griffe-1.7.3.tar.gz", hash = "sha256:52ee893c6a3a968b639ace8015bec9d36594961e156e23315c8e8e51401fa50b", size = 395137 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/58/c6/5c20af38c2a57c15d87f7f38bee77d63c1d2a3689f74fefaf35915dd12b2/griffe-1.7.3-py3-none-any.whl", hash = "sha256:c6b3ee30c2f0f17f30bcdef5068d6ab7a2a4f1b8bf1a3e74b56fffd21e1c5f75", size = 129303 },
 ]
 
 [[package]]
@@ -2347,7 +2376,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "camel-ai", extras = ["owl"], specifier = "==0.2.52" },
+    { name = "camel-ai", extras = ["owl"], specifier = "==0.2.54" },
     { name = "docx2markdown", specifier = ">=0.1.1" },
     { name = "gradio", specifier = ">=3.50.2" },
     { name = "mcp-server-fetch", specifier = "==2025.1.17" },
@@ -3836,6 +3865,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ec/fe/802052aecb21e3797b8f7902564ab6ea0d60ff8ca23952079064155d1ae1/tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c", size = 81090 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f", size = 35252 },
+]
+
+[[package]]
+name = "tenacity"
+version = "9.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0a/d4/2b0cd0fe285e14b36db076e78c93766ff1d529d70408bd1d2a5a84f1d929/tenacity-9.1.2.tar.gz", hash = "sha256:1169d376c297e7de388d18b4481760d478b0e99a777cad3a9c86e556f4b697cb", size = 48036 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/30/643397144bfbfec6f6ef821f36f33e57d35946c44a2352d3c9f0ae847619/tenacity-9.1.2-py3-none-any.whl", hash = "sha256:f77bf36710d8b73a50b2dd155c97b870017ad21afe6ab300326b0371b3b05138", size = 28248 },
 ]
 
 [[package]]

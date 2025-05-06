@@ -21,7 +21,7 @@ keywords = [
     "learning-systems"
 ]
 dependencies = [
-    "camel-ai[owl]==0.2.52",
+    "camel-ai[owl]==0.2.54",
     "docx2markdown>=0.1.1",
     "gradio>=3.50.2",
     "mcp-simple-arxiv==0.2.2",
