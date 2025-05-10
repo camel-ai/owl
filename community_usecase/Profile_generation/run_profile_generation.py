@@ -89,7 +89,7 @@ def construct_society(task: str) -> RolePlaying:
         web_agent_model=models["content_researcher"],
         planning_agent_model=models["planning"],
         channel="chromium",
-        # user_data_dir=None,
+        user_data_dir=r"C:\Users\13033\playwright_user_data",
     )
 
     tools = [
@@ -208,12 +208,20 @@ class Publications(BaseModel):
     pub_list: list[str] = Field(
         description=""" 
         TOP 10 publication paper list.
-        reformat each link in html structure like:
-        <dl class="field__item"><dt>ActivityNet: A Large-Scale Video 
-        Benchmark for Human Activity Understanding</dt><dd 
-        class="text-break">FC Heilbron, V Escorcia, B Ghanem, JC Niebles, 
-        <em>IEEE Conference on Computer Vision and Pattern Recognition</em>, 
-        2015 (Citations: 3239)</dd></dl><br>     
+        reformat each paper in html structure like:
+<dl class="field__item">
+  <dt>
+    <a href="https://example.com/activitynet" target="_blank">
+      ActivityNet: A Large-Scale Video Benchmark for Human Activity Understanding
+    </a>
+  </dt>
+  <dd class="text-break">
+    FC Heilbron, V Escorcia, B Ghanem, JC Niebles, 
+    <em>IEEE Conference on Computer Vision and Pattern Recognition</em>, 
+    2015 (Citations: 3239)
+  </dd>
+</dl><br>
+
         """)
 
 
@@ -264,8 +272,7 @@ class ScholarProfile(BaseModel):
 
 def generate_html_profile(input_text,
                           template_path: str = "template.html",
-                          output_file: str =
-                          "profile_without_url_provided.html",
+                          output_file: str = "profile_without_url_provided.html",
                           base_url: str = "https://cemse.kaust.edu.sa") -> \
         None:
     """Fill an HTML template with profile data, some with agent rewriting,
@@ -332,7 +339,7 @@ def generate_html_profile(input_text,
 
 def run_profile_generation(task: str | None = None,
                            white_list=None,
-                           black_list=None) -> None:
+                           black_list=None,output_file='profile.html') -> None:
     """High‑level orchestration: execute the retrieval society, analyse
     the browsing history, and render the final HTML profile.
     """
@@ -376,7 +383,7 @@ def run_profile_generation(task: str | None = None,
         (e.g., ORCID, IEEE Xplore, DBLP)),
         Representative Publications (The top 10 most cited publications 
         from Google Scholar are listed to highlight the author's impactful 
-        research contributions)
+        research contributions, and links of these papers)
 
     DO NOT OMIT information in the summary.
     Each section needs to be as detailed as possible.
@@ -395,13 +402,42 @@ def run_profile_generation(task: str | None = None,
     logger.info(f"\033[94mToken count: {token_count}\033[0m")
 
     # Turn the raw answer into a polished HTML profile
-    generate_html_profile(final_summary, output_file='profile.html')
+    generate_html_profile(final_summary, output_file=output_file)
 
 
+# people_name='Juergen Schmidhuber'
+# default_task = (
+#     f"""find {people_name}'s information based on information you
+#     searched in internet
+#     """
+# )
+# run_profile_generation(default_task,black_list=['http://kaust.edu.sa/'],output_file=f'{people_name}.html')
+# people_name='Peter Wonka'
+# default_task = (
+#     f"""find {people_name}'s information based on information you
+#     searched in internet
+#     """
+# )
+# run_profile_generation(default_task,black_list=['http://kaust.edu.sa/'],output_file=f'{people_name}.html')
+# people_name='Peter Richtarik'
+# default_task = (
+#     f"""find {people_name}'s information based on information you
+#     searched in internet
+#     """
+# )
+# run_profile_generation(default_task,black_list=['http://kaust.edu.sa/'],output_file=f'{people_name}.html')
+# people_name='Francesco Orabona'
+# default_task = (
+#     f"""find {people_name}'s information based on information you
+#     searched in internet
+#     """
+# )
+# run_profile_generation(default_task,black_list=['http://kaust.edu.sa/'],output_file=f'{people_name}.html')
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Generate an academic profile page.")
     parser.add_argument("--task", type=str, help="Seed task prompt")
+    parser.add_argument("--output_file", type=str, help="html page file name")
     parser.add_argument("--whitelist", nargs='+', default=[],
                         help="List of websites recommend to browse")
     parser.add_argument("--blacklist", nargs='+', default=[],
@@ -409,4 +445,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     run_profile_generation(task=args.task, white_list=args.whitelist,
-                           black_list=args.blacklist)
+                           black_list=args.blacklist,output_file=args.output_file)
