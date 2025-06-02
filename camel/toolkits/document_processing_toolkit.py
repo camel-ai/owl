@@ -34,18 +34,31 @@ class DocumentProcessingToolkit(BaseToolkit):
 
     This class provides method for processing docx, pdf, pptx, etc. It cannot process excel files.
     """
-    def __init__(self, cache_dir: Optional[str] = None):
-        self.image_tool = ImageAnalysisToolkit()
+    def __init__(
+        self, 
+        cache_dir: Optional[str] = None,
+        image_analysis_model: Optional[BaseModelBackend] = None,
+        text_processing_model: Optional[BaseModelBackend] = None,
+    ):
+        self.image_tool = ImageAnalysisToolkit(model=image_analysis_model)
         self.audio_tool = AudioAnalysisToolkit()
         self.excel_tool = ExcelToolkit()
         
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
         }
+        self.text_processing_model = text_processing_model
 
         self.cache_dir = "tmp/"
         if cache_dir:
             self.cache_dir = cache_dir
+        
+        if self.text_processing_model is None:
+            self.text_processing_model = ModelFactory.create(
+                model_platform=ModelPlatformType.OPENAI,
+                model_type=ModelType.O3_MINI,
+                model_config_dict={"temperature": 0.0}
+            )
     
     @retry((requests.RequestException))
     def extract_document_content(self, document_path: str, query: str = None) -> Tuple[bool, str]:
@@ -200,7 +213,7 @@ class DocumentProcessingToolkit(BaseToolkit):
                     return False, f"Error occurred while processing document: {e}"
     
     
-    def _post_process_result(self, result: str, query: str, process_model: BaseModelBackend = None) -> str:
+    def _post_process_result(self, result: str, query: str) -> str:
         r"""Identify whether the result is too long. If so, split it into multiple parts, and leverage a model to identify which part contains the relevant information.
         """
         import concurrent.futures
@@ -232,14 +245,7 @@ Query:
                 return True, part_idx, part
             else:
                 return False, part_idx, part
-        
-        
-        if process_model is None:
-            process_model = ModelFactory.create(
-                model_platform=ModelPlatformType.OPENAI,
-                model_type=ModelType.O3_MINI,
-                model_config_dict={"temperature": 0.0}
-            )
+                
             
         max_length = 200000
         split_length = 40000
@@ -251,7 +257,7 @@ Query:
             result_cache = {}
             # use concurrent.futures to process the parts
             with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
-                futures = [executor.submit(_identify_relevant_part, part_idx, part, query, process_model) for part_idx, part in enumerate(parts)]
+                futures = [executor.submit(_identify_relevant_part, part_idx, part, query, self.text_processing_model) for part_idx, part in enumerate(parts)]
                 for future in concurrent.futures.as_completed(futures):
                     is_relevant, part_idx, part = future.result()
                     if is_relevant:

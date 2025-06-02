@@ -231,7 +231,7 @@ class OwlSingleAgentWorker(SingleAgentWorker):
         print(f"======\n{Fore.GREEN}Reply from {self}:{Fore.RESET}")
         # if len(response.msg.content) == 0:
         #     return TaskState.FAILED
-        result_dict = json.loads(response.msg.content)
+        result_dict = ast.literal_eval(response.msg.content)
         task_result = TaskResult(**result_dict)
 
         color = Fore.RED if task_result.failed else Fore.GREEN

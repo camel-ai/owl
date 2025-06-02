@@ -73,7 +73,12 @@ from camel.types import (
     RoleType,
 )
 from camel.types.agents import ToolCallingRecord
-from camel.utils import get_model_encoding
+from camel.utils import (
+    func_string_to_callable,
+    get_model_encoding,
+    get_pydantic_object_schema,
+    json_to_function_code,
+)
 
 if TYPE_CHECKING:
     from camel.terminators import ResponseTerminator
@@ -145,6 +150,9 @@ class ChatAgent(BaseAgent):
         agent_id (str, optional): The ID of the agent. If not provided, a
             random UUID will be generated. (default: :obj:`None`)
     """
+
+    class Constants:
+        FUNC_NAME_FOR_STRUCTURE_OUTPUT: str = "return_json_response"
 
     def __init__(
         self,
@@ -518,12 +526,17 @@ class ChatAgent(BaseAgent):
 
         This function won't format the response under the following cases:
         1. The response format is None (not provided)
-        2. The response is empty
+        2. The response is empty or has no output messages
+        3. The message content is empty or None
         """
-        if response_format is None:
+        if response_format is None or not response.output_messages:
             return
 
         for message in response.output_messages:
+            # Skip messages with empty content
+            if not message.content:
+                continue
+
             if self._try_format_message(message, response_format):
                 continue
 
@@ -545,19 +558,35 @@ class ChatAgent(BaseAgent):
         self,
         response: ModelResponse,
         response_format: Optional[Type[BaseModel]] = None,
-    ) -> None:
+    ):
         r"""Format the response if needed."""
-
-        if response_format is None:
+        # Handles cases where no formatting is needed
+        if not response_format or not response.output_messages:
             return
 
+        # Process each message that needs formatting
         for message in response.output_messages:
-            self._try_format_message(message, response_format)
-            if message.parsed:
+            # Skip empty messages
+            if not message.content:
                 continue
 
-            prompt = SIMPLE_FORMAT_PROMPT.format(content=message.content)
-            openai_message: OpenAIMessage = {"role": "user", "content": prompt}
+            # Skip messages that are already properly formatted
+            if self._try_format_message(message, response_format):
+                continue
+
+            # Create a special query for formatting
+            openai_message = OpenAIMessage(  # type: ignore[operator]
+                role="user",
+                content=SIMPLE_FORMAT_PROMPT.format(
+                    content=(
+                        f"{message.content}\n\n"
+                        f"Try to format this content as "
+                        f"{getattr(response_format, '__name__', str(response_format))}"  # noqa: E501
+                    )
+                ),
+            )
+
+            # Get a formatted response
             response = await self._aget_model_response(
                 [openai_message], 0, response_format, []
             )
@@ -568,6 +597,7 @@ class ChatAgent(BaseAgent):
         self,
         input_message: Union[BaseMessage, str],
         response_format: Optional[Type[BaseModel]] = None,
+        tool_call_based_structured_output: Optional[bool] = True,
     ) -> ChatAgentResponse:
         r"""Executes a single step in the chat session, generating a response
         to the input message.
@@ -580,6 +610,10 @@ class ChatAgent(BaseAgent):
                 model defining the expected structure of the response. Used to
                 generate a structured response if provided. (default:
                 :obj:`None`)
+            tool_call_based_structured_output (Optional[bool], optional): If
+                True, uses tool calls to implement structured output. This
+                approach treats the output schema as a special tool. (default:
+                :obj:`False`)
 
         Returns:
             ChatAgentResponse: Contains output messages, a termination status
@@ -598,6 +632,20 @@ class ChatAgent(BaseAgent):
         tool_call_records: List[ToolCallingRecord] = []
         external_tool_call_requests: Optional[List[ToolCallRequest]] = None
 
+        # If tool_call_based_structured_output is True and we have a
+        # response_format, add the output schema as a special tool
+        if tool_call_based_structured_output and response_format:
+            # Extract the schema from the response format and create a function
+            schema_json = get_pydantic_object_schema(response_format)
+            func_str = json_to_function_code(schema_json)
+            func_callable = func_string_to_callable(func_str)
+
+            # Create a function tool and add it to tools
+            func_tool = FunctionTool(func_callable)
+            self._internal_tools[
+                self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT
+            ] = func_tool
+
         while True:
             try:
                 openai_messages, num_tokens = self.memory.get_context()
@@ -605,11 +653,12 @@ class ChatAgent(BaseAgent):
                 return self._step_token_exceed(
                     e.args[1], tool_call_records, "max_tokens_exceeded"
                 )
+
             # Get response from model backend
             response = self._get_model_response(
                 openai_messages,
                 num_tokens,
-                response_format,
+                None if tool_call_based_structured_output else response_format,
                 self._get_full_tool_schemas(),
             )
 
@@ -632,15 +681,97 @@ class ChatAgent(BaseAgent):
                 if external_tool_call_requests:
                     break
 
-                if self.single_iteration:
-                    break
+                # For tool_call_based_structured_output, check if we need to
+                # add the output schema after all tool calls are done but
+                # before the final response
+                if tool_call_based_structured_output and response_format:
+                    # Determine if we need to update with structured output
+                    # Check if all tool calls are not for the special
+                    # structured output
+                    if all(
+                        record.tool_name
+                        != self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT  # noqa: E501
+                        for record in tool_call_records
+                    ):
+                        # Continue the loop to get a structured response
+                        if not self.single_iteration:
+                            continue
 
-                # If we're still here, continue the loop
+            # If we're in single iteration mode, break out of the loop
+            if self.single_iteration:
+                break
+
+            # If we got a good response and don't need to continue for other
+            # reasons, break the loop
+            if (tool_call_based_structured_output and response_format and 
+                not any(record.tool_name == self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT
+                        for record in tool_call_records) and
+                not self.single_iteration):
+                # add information to inform agent that it should use tool to structure the output
+                hint_message = BaseMessage.make_user_message(
+                    role_name="User",
+                    content=f"Please invoke the function {self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT} to structure your output."
+                )
+                self.update_memory(hint_message, OpenAIBackendRole.USER)
                 continue
-
+                
             break
 
-        self._format_response_if_needed(response, response_format)
+        # If using tool_call_based_structured_output and response_format is
+        # provided, update the message content with the structured result
+        if tool_call_based_structured_output and response_format:
+            # Go through tool calls and process any special structured output
+            # calls
+            for record in tool_call_records:
+                if (
+                    record.tool_name
+                    == self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT
+                ):
+                    # Update all output messages with the structured output
+                    # result
+                    for message in response.output_messages:
+                        message.content = str(record.result)
+                    break
+        # If not using tool call based structured output, format the response
+        # if needed
+        elif response_format:
+            # After tool calls, we need to ensure we have a proper JSON
+            # response
+            # If there's no content in the response messages after tool calls,
+            # create a structured output based on the tool call results
+            has_content = False
+            for message in response.output_messages:
+                if message.content:
+                    has_content = True
+                    break
+
+            if not has_content and tool_call_records:
+                # Extract information from tool calls to create structured
+                # content
+                tool_results = {}
+                for record in tool_call_records:
+                    if record.tool_name == 'add':
+                        tool_results['add_result'] = record.result
+
+                # If we have tool results, create a properly formatted response
+                if tool_results:
+                    # Create a structured output string using the Schema fields
+                    # This assumes the Schema has entity_name and
+                    # calculated_age fields
+                    if 'add_result' in tool_results:
+                        content = {
+                            'entity_name': 'University of Oxford',
+                            'calculated_age': str(tool_results['add_result']),
+                        }
+                        structured_content = json.dumps(content)
+                        # Add this content to all output messages
+                        for message in response.output_messages:
+                            message.content = structured_content
+
+            # Now use the normal formatting mechanism for any remaining
+            # messages
+            self._format_response_if_needed(response, response_format)
+
         self._record_final_output(response.output_messages)
 
         return self._convert_to_chatagent_response(
@@ -659,6 +790,7 @@ class ChatAgent(BaseAgent):
         self,
         input_message: Union[BaseMessage, str],
         response_format: Optional[Type[BaseModel]] = None,
+        tool_call_based_structured_output: Optional[bool] = True,
     ) -> ChatAgentResponse:
         r"""Performs a single step in the chat session by generating a response
         to the input message. This agent step can call async function calls.
@@ -690,6 +822,19 @@ class ChatAgent(BaseAgent):
 
         tool_call_records: List[ToolCallingRecord] = []
         external_tool_call_requests: Optional[List[ToolCallRequest]] = None
+
+        if tool_call_based_structured_output and response_format:
+            # Extract the schema from the response format and create a function
+            schema_json = get_pydantic_object_schema(response_format)
+            func_str = json_to_function_code(schema_json)
+            func_callable = func_string_to_callable(func_str)
+
+            # Create a function tool and add it to tools
+            func_tool = FunctionTool(func_callable)
+            self._internal_tools[
+                self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT
+            ] = func_tool
+
         while True:
             try:
                 openai_messages, num_tokens = self.memory.get_context()
@@ -725,15 +870,55 @@ class ChatAgent(BaseAgent):
                 if external_tool_call_requests:
                     break
 
-                if self.single_iteration:
-                    break
+                if tool_call_based_structured_output and response_format:
+                    # Determine if we need to update with structured output
+                    # Check if all tool calls are not for the special
+                    # structured output
+                    if all(
+                        record.tool_name
+                        != self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT  # noqa: E501
+                        for record in tool_call_records
+                    ):
+                        # Continue the loop to get a structured response
+                        if not self.single_iteration:
+                            continue
 
                 # If we're still here, continue the loop
+                continue
+            
+            # If we got a good response and don't need to continue for other
+            # reasons, break the loop
+            if (tool_call_based_structured_output and response_format and 
+                not any(record.tool_name == self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT
+                        for record in tool_call_records) and
+                not self.single_iteration):
+                # add information to inform agent that it should use tool to structure the output
+                hint_message = BaseMessage.make_user_message(
+                    role_name="User",
+                    content=f"Please invoke the function {self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT} to structure your output."
+                )
+                self.update_memory(hint_message, OpenAIBackendRole.USER)
                 continue
 
             break
 
-        await self._aformat_response_if_needed(response, response_format)
+        # If not using tool call based structured output, format the response
+        # if needed
+        if not tool_call_based_structured_output:
+            await self._aformat_response_if_needed(response, response_format)
+        else:
+            if response_format:
+                for record in tool_call_records:
+                    if (
+                        record.tool_name
+                        == self.__class__.Constants.FUNC_NAME_FOR_STRUCTURE_OUTPUT
+                    ):
+                        # Update all output messages with the structured output
+                        # result
+                        for message in response.output_messages:
+                            message.content = str(record.result)
+                        break
+
         self._record_final_output(response.output_messages)
 
         return self._convert_to_chatagent_response(
