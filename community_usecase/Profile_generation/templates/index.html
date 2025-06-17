@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Generation</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      width: 600px;
+      max-width: 90%;
+    }
+
+    .container h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .input-group input,
+    .input-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .buttons button {
+      padding: 10px 20px;
+      background-color: #4facfe;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .buttons button:hover {
+      background-color: #00c3ff;
+    }
+
+    .buttons button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .identity-box, .results {
+      border: 2px dashed #4facfe;
+      padding: 15px;
+      border-radius: 10px;
+      background-color: #f0faff;
+      margin-top: 30px;
+      display: none;
+    }
+
+    .identity-box h3, .results h3 {
+      margin-top: 0;
+    }
+
+    .identity-box p {
+      margin-bottom: 10px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error {
+      border-color: #ff6f61;
+      background-color: #ffebee;
+      color: #d32f2f;
+    }
+
+    #tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      min-height: 40px;
+    }
+
+    .tag {
+      display: inline-block;
+      background-color: #e0f7fa;
+      color: #006064;
+      padding: 5px 10px;
+      border-radius: 20px;
+      margin: 5px;
+      font-size: 14px;
+      position: relative;
+      word-break: break-all;
+    }
+
+    .tag .remove {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #006064;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .add-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #4facfe;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-tag:hover {
+      background-color: #00c3ff;
+    }
+
+    .preview-button {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preview-button:hover {
+      background-color: #45a049;
+    }
+
+    .preview-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .success-message {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .profile-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .profile-button {
+      padding: 12px 25px;
+      background-color: #ff9800;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .profile-button:hover {
+      background-color: #f57c00;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #4facfe;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Profile Generation</h2>
+    <div class="input-group">
+      <label for="scholar-url">Google Scholar URL:</label>
+      <input type="text" id="scholar-url" value="" />
+    </div>
+    <div class="input-group">
+      <label for="blacklist">Page Blacklist (one URL per line):</label>
+      <textarea id="blacklist" rows="3"></textarea>
+      <div class="hint">Exclude these links during search</div>
+    </div>
+    <div class="buttons">
+      <button id="search-btn">Search</button>
+    </div>
+
+    <div id="identity-box" class="identity-box">
+      <h3>Identified Scholar:</h3>
+      <p id="scholar-info">Loading...</p>
+    </div>
+
+    <div id="results" class="results">
+      <h3>Candidate Pages Found:</h3>
+      <div id="tags-container">
+        <div class="add-tag" onclick="addNewUrl()">+</div>
+      </div>
+    </div>
+
+    <div id="confirm-section" class="buttons hidden" style="justify-content: center; margin-top: 30px;">
+      <button id="confirm-btn" class="preview-button">✓ Generate Profile</button>
+    </div>
+
+    <div id="success-message" class="success-message hidden">
+      <p>Profile generated successfully!</p>
+      <div class="profile-buttons">
+        <button class="profile-button" onclick="openProfile()">📄 View Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentWhiteList = [];
+    let currentScholarUrl = '';
+    let currentBlacklist = [];
+
+    // Search for scholar information
+    document.getElementById('search-btn').addEventListener('click', async function() {
+      const scholarUrl = document.getElementById('scholar-url').value.trim();
+      const blacklistText = document.getElementById('blacklist').value.trim();
+      const blacklist = blacklistText ? blacklistText.split('\n').filter(url => url.trim()) : [];
+      
+      if (!scholarUrl) {
+        alert('Please enter a Google Scholar URL');
+        return;
+      }
+
+      currentScholarUrl = scholarUrl;
+      currentBlacklist = blacklist;
+
+      const searchBtn = document.getElementById('search-btn');
+      const originalText = searchBtn.textContent;
+      searchBtn.innerHTML = '<div class="spinner"></div>Searching...';
+      searchBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/search_scholar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            scholar_url: scholarUrl,
+            blacklist: blacklist
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          // Display scholar info
+          document.getElementById('scholar-info').textContent = data.person_info;
+          document.getElementById('identity-box').style.display = 'block';
+          
+          // Display white list
+          currentWhiteList = data.white_list || [];
+          updateWhiteListDisplay();
+          document.getElementById('results').style.display = 'block';
+          document.getElementById('confirm-section').classList.remove('hidden');
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Network error: ' + error.message);
+      } finally {
+        searchBtn.textContent = originalText;
+        searchBtn.disabled = false;
+      }
+    });
+
+    // Generate profile
+    document.getElementById('confirm-btn').addEventListener('click', async function() {
+      const confirmBtn = document.getElementById('confirm-btn');
+      const originalText = confirmBtn.textContent;
+      confirmBtn.innerHTML = '<div class="spinner"></div>Generating Profile...';
+      confirmBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/generate_profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            scholar_url: currentScholarUrl,
+            blacklist: currentBlacklist,
+            white_list: currentWhiteList
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          document.getElementById('success-message').classList.remove('hidden');
+          document.getElementById('confirm-section').classList.add('hidden');
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Network error: ' + error.message);
+      } finally {
+        confirmBtn.textContent = originalText;
+        confirmBtn.disabled = false;
+      }
+    });
+
+    // Update white list display
+    function updateWhiteListDisplay() {
+      const container = document.getElementById('tags-container');
+      // Clear existing tags (keep add button)
+      const addButton = container.querySelector('.add-tag');
+      container.innerHTML = '';
+      
+      // Add tags for each URL
+      currentWhiteList.forEach((url, index) => {
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = `${url} <button class="remove" onclick="removeUrl(${index})">×</button>`;
+        container.appendChild(tag);
+      });
+      
+      // Re-add the add button
+      container.appendChild(addButton);
+    }
+
+    // Remove URL from white list
+    function removeUrl(index) {
+      currentWhiteList.splice(index, 1);
+      updateWhiteListDisplay();
+    }
+
+    // Add new URL to white list
+    function addNewUrl() {
+      const url = prompt('Enter new URL:');
+      if (url && url.trim()) {
+        currentWhiteList.push(url.trim());
+        updateWhiteListDisplay();
+      }
+    }
+
+    // Open profile in new window
+    function openProfile() {
+      window.open('/api/get_profile', '_blank');
+    }
+  </script>
+</body>
+</html>
