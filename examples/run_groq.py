@@ -142,7 +142,7 @@ def construct_society(question: str) -> OwlRolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    default_task = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+    default_task = "Open Brave search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task."
 
     # Construct and run the society
     # Note: This configuration uses GROQ_LLAMA_3_3_70B for tool-intensive roles (assistant, web, planning, video, image)

@@ -362,6 +362,9 @@ python examples/run_mini.py
 OWL 支持多种 LLM 后端，但功能可能因模型的工具调用和多模态能力而异。您可以使用以下脚本来运行不同的模型：
 
 ```bash
+# 使用 Claude 模型运行
+python examples/run_claude.py
+
 # 使用 Qwen 模型运行
 python examples/run_qwen_zh.py
 

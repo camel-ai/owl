@@ -16,12 +16,9 @@ import pathlib
 from dotenv import load_dotenv
 from camel.models import ModelFactory
 from camel.toolkits import (
-    AudioAnalysisToolkit,
     CodeExecutionToolkit,
     ExcelToolkit,
     ImageAnalysisToolkit,
-    SearchToolkit,
-    VideoAnalysisToolkit,
     BrowserToolkit,
     FileWriteToolkit,
 )
@@ -51,38 +48,33 @@ def construct_society(question: str) -> RolePlaying:
     # Create models for different components
     models = {
         "user": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
+            model_platform=ModelPlatformType.NOVITA,
+            model_type=ModelType.NOVITA_LLAMA_4_SCOUT_17B,
             model_config_dict={"temperature": 0},
         ),
         "assistant": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
+            model_platform=ModelPlatformType.NOVITA,
+            model_type=ModelType.NOVITA_LLAMA_4_SCOUT_17B,
             model_config_dict={"temperature": 0},
         ),
         "browsing": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
+            model_platform=ModelPlatformType.NOVITA,
+            model_type=ModelType.NOVITA_LLAMA_4_SCOUT_17B,
             model_config_dict={"temperature": 0},
         ),
         "planning": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
-            model_config_dict={"temperature": 0},
-        ),
-        "video": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
+            model_platform=ModelPlatformType.NOVITA,
+            model_type=ModelType.NOVITA_LLAMA_4_SCOUT_17B,
             model_config_dict={"temperature": 0},
         ),
         "image": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
+            model_platform=ModelPlatformType.NOVITA,
+            model_type=ModelType.NOVITA_LLAMA_4_SCOUT_17B,
             model_config_dict={"temperature": 0},
         ),
         "document": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
+            model_platform=ModelPlatformType.NOVITA,
+            model_type=ModelType.NOVITA_LLAMA_4_SCOUT_17B,
             model_config_dict={"temperature": 0},
         ),
     }
@@ -94,13 +86,8 @@ def construct_society(question: str) -> RolePlaying:
             web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
-        *VideoAnalysisToolkit(model=models["video"]).get_tools(),
-        *AudioAnalysisToolkit().get_tools(),  # This requires OpenAI Key
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
         *ImageAnalysisToolkit(model=models["image"]).get_tools(),
-        SearchToolkit().search_duckduckgo,
-        SearchToolkit().search_google,  # Comment this out if you don't have google search
-        SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
         *DocumentProcessingToolkit(model=models["document"]).get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),

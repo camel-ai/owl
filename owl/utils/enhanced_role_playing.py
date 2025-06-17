@@ -13,6 +13,7 @@
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 
 from typing import Dict, List, Optional, Tuple
+import threading
 
 
 from camel.agents import ChatAgent
@@ -72,6 +73,7 @@ class OwlRolePlaying(RolePlaying):
         user_agent_kwargs: Optional[Dict] = None,
         output_language: Optional[str] = None,
         is_reasoning_task: bool = False,
+        stop_event: Optional[threading.Event] = None,
     ) -> None:
         r"""Initialize assistant and user agents with their system messages.
 

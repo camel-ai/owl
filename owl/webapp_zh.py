@@ -245,6 +245,7 @@ MODULE_DESCRIPTIONS = {
     "run": "默认模式：使用OpenAI模型的默认的智能体协作模式，适合大多数任务。",
     "run_mini": "使用使用OpenAI模型最小化配置处理任务",
     "run_gemini": "使用 Gemini模型处理任务",
+    "run_claude": "使用 Claude模型处理任务",
     "run_deepseek_zh": "使用eepseek模型处理中文任务",
     "run_openai_compatible_model": "使用openai兼容模型处理任务",
     "run_ollama": "使用本地ollama模型处理任务",
@@ -254,6 +255,7 @@ MODULE_DESCRIPTIONS = {
     "run_groq": "使用groq模型处理任务",
     "run_ppio": "使用ppio模型处理任务",
     "run_together_ai": "使用together ai模型处理任务",
+    "run_novita_ai": "使用novita ai模型处理任务",
 }
 
 
@@ -623,6 +625,8 @@ def get_api_guide(key: str) -> str:
         return "https://chunkr.ai/"
     elif "firecrawl" in key_lower:
         return "https://www.firecrawl.dev/"
+    elif "novita" in key_lower:
+        return "https://novita.ai/settings/key-management?utm_source=github_owl&utm_medium=github_readme&utm_campaign=github_link"
     else:
         return ""
 

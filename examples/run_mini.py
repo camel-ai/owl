@@ -19,6 +19,7 @@ from camel.toolkits import (
     SearchToolkit,
     BrowserToolkit,
     FileWriteToolkit,
+    CodeExecutionToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
@@ -78,6 +79,7 @@ def construct_society(question: str) -> RolePlaying:
             web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
+        *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
         SearchToolkit().search_duckduckgo,
         SearchToolkit().search_wiki,
         *FileWriteToolkit(output_dir="./").get_tools(),
@@ -108,7 +110,7 @@ def construct_society(question: str) -> RolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Default research question
-    default_task = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
+    default_task = "Open Brave search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task."
 
     # Override default task if command line argument is provided
     task = sys.argv[1] if len(sys.argv) > 1 else default_task

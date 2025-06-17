@@ -12,13 +12,13 @@
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 
+from camel.loaders import UnstructuredIO
 from camel.toolkits.base import BaseToolkit
 from camel.toolkits.function_tool import FunctionTool
 from camel.toolkits import ImageAnalysisToolkit, ExcelToolkit
 from camel.utils import retry_on_error
 from camel.logger import get_logger
 from camel.models import BaseModelBackend
-from docx2markdown._docx_to_markdown import docx_to_markdown
 from chunkr_ai import Chunkr
 import requests
 import mimetypes
@@ -29,6 +29,7 @@ import os
 import subprocess
 import xmltodict
 import nest_asyncio
+import traceback
 
 nest_asyncio.apply()
 
@@ -52,6 +53,8 @@ class DocumentProcessingToolkit(BaseToolkit):
         if cache_dir:
             self.cache_dir = cache_dir
 
+        self.uio = UnstructuredIO()
+
     @retry_on_error()
     def extract_document_content(self, document_path: str) -> Tuple[bool, str]:
         r"""Extract the content of a given document (or url) and return the processed text.
@@ -63,7 +66,6 @@ class DocumentProcessingToolkit(BaseToolkit):
         Returns:
             Tuple[bool, str]: A tuple containing a boolean indicating whether the document was processed successfully, and the content of the document (if success).
         """
-        import asyncio
 
         logger.debug(
             f"Calling extract_document_content function with document_path=`{document_path}`"
@@ -115,71 +117,35 @@ class DocumentProcessingToolkit(BaseToolkit):
                 return True, content
 
         if self._is_webpage(document_path):
-            extracted_text = self._extract_webpage_content(document_path)
-            return True, extracted_text
+            try:
+                extracted_text = self._extract_webpage_content(document_path)
+                return True, extracted_text
+            except Exception:
+                try:
+                    elements = self.uio.parse_file_or_url(document_path)
+                    if elements is None:
+                        logger.error(f"Failed to parse the document: {document_path}.")
+                        return False, f"Failed to parse the document: {document_path}."
+                    else:
+                        # Convert elements list to string
+                        elements_str = "\n".join(str(element) for element in elements)
+                        return True, elements_str
+                except Exception:
+                    return False, "Failed to extract content from the webpage."
 
         else:
-            # judge if url
-            parsed_url = urlparse(document_path)
-            is_url = all([parsed_url.scheme, parsed_url.netloc])
-            if not is_url:
-                if not os.path.exists(document_path):
-                    return False, f"Document not found at path: {document_path}."
-
-            # if is docx file, use docx2markdown to convert it
-            if document_path.endswith(".docx"):
-                if is_url:
-                    tmp_path = self._download_file(document_path)
-                else:
-                    tmp_path = document_path
-
-                file_name = os.path.basename(tmp_path)
-                md_file_path = f"{file_name}.md"
-                docx_to_markdown(tmp_path, md_file_path)
-
-                # load content of md file
-                with open(md_file_path, "r") as f:
-                    extracted_text = f.read()
-                f.close()
-                return True, extracted_text
             try:
-                result = asyncio.run(self._extract_content_with_chunkr(document_path))
-                return True, result
+                elements = self.uio.parse_file_or_url(document_path)
+                if elements is None:
+                    logger.error(f"Failed to parse the document: {document_path}.")
+                    return False, f"Failed to parse the document: {document_path}."
+                else:
+                    # Convert elements list to string
+                    elements_str = "\n".join(str(element) for element in elements)
+                    return True, elements_str
 
             except Exception as e:
-                logger.warning(
-                    f"Error occurred while using Chunkr to process document: {e}"
-                )
-                if document_path.endswith(".pdf"):
-                    # try using pypdf to extract text from pdf
-                    try:
-                        from PyPDF2 import PdfReader
-
-                        if is_url:
-                            tmp_path = self._download_file(document_path)
-                            document_path = tmp_path
-
-                        # Open file in binary mode for PdfReader
-                        f = open(document_path, "rb")
-                        reader = PdfReader(f)
-                        extracted_text = ""
-                        for page in reader.pages:
-                            extracted_text += page.extract_text()
-                        f.close()
-
-                        return True, extracted_text
-
-                    except Exception as pdf_error:
-                        logger.error(
-                            f"Error occurred while processing pdf: {pdf_error}"
-                        )
-                        return (
-                            False,
-                            f"Error occurred while processing pdf: {pdf_error}",
-                        )
-
-                # If we get here, either it's not a PDF or PDF processing failed
-                logger.error(f"Error occurred while processing document: {e}")
+                logger.error(traceback.format_exc())
                 return False, f"Error occurred while processing document: {e}"
 
     def _is_webpage(self, url: str) -> bool:
