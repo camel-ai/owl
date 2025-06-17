@@ -48,7 +48,7 @@ python run_profile_generation.py --web
    - Click "Search" to find the scholar info and candidate URLs
    - Review and modify the candidate URLs as needed
    - Click "Generate Profile" to create the final profile
-   - Click "View Profile" to see the generated HTML
+   - **Use "Copy File Path" or "Open File Location" to access the generated HTML file**
 
 #### Command Line Interface
 
@@ -69,14 +69,28 @@ python run_profile_generation.py --task "https://scholar.google.com/citations?us
    - Remove unwanted URLs by clicking the × button
    - Add new URLs by clicking the + button
 6. **Generate Profile**: Click "Generate Profile" to start the AI-powered browsing and analysis
-7. **View Result**: Click "View Profile" to open the generated HTML profile
+7. **Access Generated File**: 
+   - **Important**: Use "Copy File Path" to copy the file location to your clipboard
+   - **Or** use "Open File Location" to see the exact file path
+   - **Then open the HTML file directly in your browser** for proper CSS styling
+
+## Why Direct File Opening?
+
+The generated HTML profile must be opened directly from the file system (not through the web server) to ensure:
+- ✅ Proper CSS styling and formatting
+- ✅ Correct loading of all visual elements
+- ✅ Full functionality of the profile page
+- ✅ Proper relative path resolution for assets
+
+**Note**: Opening the profile through the web API (like `http://localhost:5000/api/get_profile`) will cause CSS and styling issues.
 
 ## API Endpoints
 
 - `GET /` - Serve the web interface
 - `POST /api/search_scholar` - Search for scholar info and URLs
 - `POST /api/generate_profile` - Generate the final profile
-- `GET /api/get_profile` - Serve the generated HTML profile
+- `GET /api/get_profile` - Serve the generated HTML profile (for API use only)
+- `GET /api/get_file_path` - Get the absolute path of the generated file
 
 ## Files Structure
 
@@ -100,3 +114,4 @@ python run_profile_generation.py --task "https://scholar.google.com/citations?us
 - Make sure all API keys are properly configured
 - Check the console logs for detailed error information
 - Ensure the `templates/` directory exists and contains `index.html`
+- **If the generated profile looks unstyled**: Make sure you're opening the HTML file directly from your file system, not through the web interface
