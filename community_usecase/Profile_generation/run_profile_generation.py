@@ -734,6 +734,29 @@ def api_get_profile():
         logger.error(f"Error serving profile: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/get_file_path', methods=['GET'])
+def api_get_file_path():
+    """API endpoint to get the absolute path of the generated profile."""
+    try:
+        profile_path = 'scholar.html'
+        if os.path.exists(profile_path):
+            absolute_path = os.path.abspath(profile_path)
+            return jsonify({
+                'absolute_path': absolute_path,
+                'filename': profile_path,
+                'exists': True
+            })
+        else:
+            return jsonify({
+                'absolute_path': None,
+                'filename': profile_path,
+                'exists': False,
+                'error': 'File not found'
+            })
+    except Exception as e:
+        logger.error(f"Error getting file path: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/')
 def serve_frontend():

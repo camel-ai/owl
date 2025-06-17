@@ -270,8 +270,10 @@
 
     <div id="success-message" class="success-message hidden">
       <p>Profile generated successfully!</p>
+      <p id="file-path-info" style="font-size: 14px; color: #666; margin-top: 10px;"></p>
       <div class="profile-buttons">
-        <button class="profile-button" onclick="openProfile()">📄 View Profile</button>
+        <button class="profile-button" onclick="copyFilePath()">📋 Copy File Path</button>
+        <button class="profile-button" onclick="openFileLocation()">📁 Open File Location</button>
       </div>
     </div>
   </div>
@@ -280,6 +282,7 @@
     let currentWhiteList = [];
     let currentScholarUrl = '';
     let currentBlacklist = [];
+    let generatedFilePath = '';
 
     // Search for scholar information
     document.getElementById('search-btn').addEventListener('click', async function() {
@@ -358,6 +361,11 @@
         const data = await response.json();
         
         if (data.status === 'success') {
+          // Store the generated file path and show success message
+          generatedFilePath = data.output_file;
+          const filePathInfo = document.getElementById('file-path-info');
+          filePathInfo.innerHTML = `<strong>Generated file:</strong> ${generatedFilePath}<br><small>📝 Copy the file path or check the file location below to open the HTML profile directly in your browser for proper CSS styling</small>`;
+          
           document.getElementById('success-message').classList.remove('hidden');
           document.getElementById('confirm-section').classList.add('hidden');
         } else {
@@ -405,9 +413,48 @@
       }
     }
 
-    // Open profile in new window
-    function openProfile() {
-      window.open('/api/get_profile', '_blank');
+    // Copy file path to clipboard
+    function copyFilePath() {
+      if (!generatedFilePath) {
+        alert('No file path available');
+        return;
+      }
+      
+      navigator.clipboard.writeText(generatedFilePath).then(function() {
+        alert('File path copied to clipboard!');
+      }, function(err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = generatedFilePath;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('File path copied to clipboard!');
+      });
+    }
+
+    // Open file location (this will work on Windows if the path is absolute)
+    function openFileLocation() {
+      if (!generatedFilePath) {
+        alert('No file path available');
+        return;
+      }
+      
+      // Try to get absolute path from server
+      fetch('/api/get_file_path')
+        .then(response => response.json())
+        .then(data => {
+          if (data.absolute_path) {
+            const message = `File location: ${data.absolute_path}\n\nPlease navigate to this location in your file explorer and double-click the HTML file to open it in your browser.`;
+            alert(message);
+          } else {
+            alert(`File saved as: ${generatedFilePath}\n\nPlease look for this file in the application directory and open it directly in your browser.`);
+          }
+        })
+        .catch(error => {
+          alert(`File saved as: ${generatedFilePath}\n\nPlease look for this file in the application directory and open it directly in your browser.`);
+        });
     }
   </script>
 </body>
