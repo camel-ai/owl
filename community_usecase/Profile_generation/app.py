@@ -400,6 +400,8 @@ TASK_PROMPT = """
 > * Use clear section headings with Markdown syntax (`##`)
 > * Use bullet points or tables where appropriate for clarity
 > * Only include sections for which data is actually available on the given page—**do not include placeholder or empty sections**
+
+Do not perform any actions other than generating the file
 """
 
 def aggregate_markdown_files(directory: str) -> str:
