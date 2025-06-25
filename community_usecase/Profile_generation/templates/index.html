@@ -234,6 +234,41 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* Progress Bar Styles */
+    #progress-container {
+      margin-top: 20px;
+      display: none;
+    }
+
+    #progress-bar {
+      width: 100%;
+      height: 20px;
+    }
+
+    #progress-text {
+      text-align: center;
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .identity-box {
+      border: 2px dashed #4facfe;
+      padding: 15px;
+      border-radius: 10px;
+      background-color: #f0faff;
+      margin-top: 30px;
+      display: none;
+    }
+
+    .results {
+      border: 2px dashed #4facfe;
+      padding: 15px;
+      border-radius: 10px;
+      background-color: #f0faff;
+      margin-top: 30px;
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -250,6 +285,7 @@
     </div>
     <div class="buttons">
       <button id="search-btn">Search</button>
+      <button id="account-btn" style="margin-left:10px; background-color:#9c27b0;">Add Account Info</button>
     </div>
 
     <div id="identity-box" class="identity-box">
@@ -264,16 +300,21 @@
       </div>
     </div>
 
-    <div id="confirm-section" class="buttons hidden" style="justify-content: center; margin-top: 30px;">
+    <div id="confirm-section" class="buttons" style="justify-content: center; margin-top: 30px;">
       <button id="confirm-btn" class="preview-button">✓ Generate Profile</button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div id="progress-container" class="hidden" style="margin-top:20px;">
+      <progress id="progress-bar" value="0" max="100" style="width:100%; height:20px;"></progress>
+      <div id="progress-text" style="text-align:center; margin-top:5px; font-size:14px;">0%</div>
     </div>
 
     <div id="success-message" class="success-message hidden">
       <p>Profile generated successfully!</p>
       <p id="file-path-info" style="font-size: 14px; color: #666; margin-top: 10px;"></p>
-      <div class="profile-buttons">
+      <div class="profile-buttons" style="justify-content: center;">
         <button class="profile-button" onclick="copyFilePath()">📋 Copy File Path</button>
-        <button class="profile-button" onclick="openFileLocation()">📁 Open File Location</button>
       </div>
     </div>
   </div>
@@ -340,11 +381,32 @@
 
     // Generate profile
     document.getElementById('confirm-btn').addEventListener('click', async function() {
+      // read latest inputs in case user skipped search
+      const scholarInputVal = document.getElementById('scholar-url').value.trim();
+      if (scholarInputVal) {
+        currentScholarUrl = scholarInputVal;
+      }
+
+      const blacklistTextNow = document.getElementById('blacklist').value.trim();
+      currentBlacklist = blacklistTextNow ? blacklistTextNow.split('\n').filter(u=>u.trim()) : [];
+
+      // Ensure scholar URL is available (user might skip search step)
+      if (!currentScholarUrl) {
+        alert('Please enter a Google Scholar URL before generating the profile.');
+        return;
+      }
+        
+      if (currentWhiteList.length === 0) {
+        alert('Please add at least one candidate link before generating the profile.');
+        return;
+      }
+        
       const confirmBtn = document.getElementById('confirm-btn');
       const originalText = confirmBtn.textContent;
       confirmBtn.innerHTML = '<div class="spinner"></div>Generating Profile...';
       confirmBtn.disabled = true;
 
+      let success = false;
       try {
         const response = await fetch('/api/generate_profile', {
           method: 'POST',
@@ -360,20 +422,44 @@
 
         const data = await response.json();
         
-        if (data.status === 'success') {
-          // Store the generated file path and show success message
-          generatedFilePath = data.output_file;
-          const filePathInfo = document.getElementById('file-path-info');
-          filePathInfo.innerHTML = `<strong>Generated file:</strong> ${generatedFilePath}<br><small>📝 Copy the file path or check the file location below to open the HTML profile directly in your browser for proper CSS styling</small>`;
-          
-          document.getElementById('success-message').classList.remove('hidden');
-          document.getElementById('confirm-section').classList.add('hidden');
+        if (data.status === 'accepted') {
+          success = true; // request accepted
+          const jobId = data.job_id;
+          const totalSteps = data.total;
+
+          // init progress bar
+          document.getElementById('progress-container').classList.remove('hidden');
+          document.getElementById('progress-container').style.display = 'block';
+          updateProgress(0, totalSteps);
+
+          const intervalId = setInterval(async function() {
+            const res = await fetch(`/api/progress/${jobId}`);
+            const progData = await res.json();
+            if (progData.status === 'success') {
+              updateProgress(progData.current, progData.total);
+              if (progData.done) {
+                clearInterval(intervalId);
+                generatedFilePath = progData.output_file;
+                finishSuccess();
+                // reset button after success
+                confirmBtn.textContent = originalText;
+                confirmBtn.disabled = false;
+              }
+            } else {
+              clearInterval(intervalId);
+              alert('Progress error: ' + progData.error);
+              // reset button when error
+              confirmBtn.textContent = originalText;
+              confirmBtn.disabled = false;
+            }
+          }, 2000);
         } else {
           alert('Error: ' + data.error);
+          confirmBtn.textContent = originalText;
+          confirmBtn.disabled = false;
         }
       } catch (error) {
         alert('Network error: ' + error.message);
-      } finally {
         confirmBtn.textContent = originalText;
         confirmBtn.disabled = false;
       }
@@ -390,7 +476,7 @@
       currentWhiteList.forEach((url, index) => {
         const tag = document.createElement('div');
         tag.className = 'tag';
-        tag.innerHTML = `${url} <button class="remove" onclick="removeUrl(${index})">×</button>`;
+        tag.innerHTML = `<a href="${url}" target="_blank" style="color:inherit; text-decoration:underline;">${url}</a> <button class="remove" onclick="removeUrl(${index})">×</button>`;
         container.appendChild(tag);
       });
       
@@ -415,15 +501,17 @@
 
     // Copy file path to clipboard
     function copyFilePath() {
-      if (!generatedFilePath) {
-        alert('No file path available');
-        return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(generatedFilePath).then(function() {
+          alert('File path copied to clipboard!');
+        }).catch(function() {
+          fallbackCopy();
+        });
+      } else {
+        fallbackCopy();
       }
-      
-      navigator.clipboard.writeText(generatedFilePath).then(function() {
-        alert('File path copied to clipboard!');
-      }, function(err) {
-        // Fallback for older browsers
+
+      function fallbackCopy() {
         const textArea = document.createElement('textarea');
         textArea.value = generatedFilePath;
         document.body.appendChild(textArea);
@@ -431,31 +519,45 @@
         document.execCommand('copy');
         document.body.removeChild(textArea);
         alert('File path copied to clipboard!');
-      });
+      }
     }
 
-    // Open file location (this will work on Windows if the path is absolute)
-    function openFileLocation() {
-      if (!generatedFilePath) {
-        alert('No file path available');
-        return;
-      }
-      
-      // Try to get absolute path from server
-      fetch('/api/get_file_path')
-        .then(response => response.json())
-        .then(data => {
-          if (data.absolute_path) {
-            const message = `File location: ${data.absolute_path}\n\nPlease navigate to this location in your file explorer and double-click the HTML file to open it in your browser.`;
-            alert(message);
-          } else {
-            alert(`File saved as: ${generatedFilePath}\n\nPlease look for this file in the application directory and open it directly in your browser.`);
-          }
-        })
-        .catch(error => {
-          alert(`File saved as: ${generatedFilePath}\n\nPlease look for this file in the application directory and open it directly in your browser.`);
-        });
+    function updateProgress(current, total) {
+      const percent = Math.floor((current / total) * 100);
+      document.getElementById('progress-bar').value = percent;
+      document.getElementById('progress-text').textContent = `${percent}% (${current}/${total})`;
     }
+
+    function finishSuccess() {
+      const filePathInfo = document.getElementById('file-path-info');
+      filePathInfo.innerHTML = `<strong>Generated file:</strong> ${generatedFilePath}<br><small>📝 Copy the file path and open it directly in your browser for proper CSS styling.</small>`;
+      document.getElementById('success-message').classList.remove('hidden');
+      document.getElementById('confirm-section').classList.add('hidden');
+      document.getElementById('progress-container').classList.add('hidden');
+    }
+
+    // Add Account Info (open persistent browser)
+    document.getElementById('account-btn').addEventListener('click', async function() {
+      const btn = this;
+      const original = btn.textContent;
+      btn.innerHTML = '<div class="spinner"></div>Opening...';
+      btn.disabled = true;
+
+      try {
+        const resp = await fetch('/api/add_account_info', {method:'POST'});
+        const data = await resp.json();
+        if (data.status === 'success') {
+          alert('A browser window has been opened. Please log in and then close the window when finished.');
+        } else {
+          alert('Error: ' + (data.error || 'unknown'));
+        }
+      } catch(err) {
+        alert('Network error: ' + err.message);
+      } finally {
+        btn.textContent = original;
+        btn.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
