@@ -352,7 +352,54 @@ web_agent = ChatAgent(
 
 TASK_PROMPT = """
     
-    Write information of given web link into markdown file
+
+> Please extract and compile detailed academic and professional information from the provided webpage into a well-structured Markdown file. Focus on collecting the following categories, but **only include sections for which information is available on the page**. Do not write empty sections.
+>
+> ### Information to Include (if present):
+>
+> 1. **Personal Information**
+>
+>    * Full name
+>    * Current position(s)
+>    * Institutional affiliation(s)
+>    * Contact details (e.g., email, office address, phone number)
+> 2. **Biography**
+>
+>    * A concise narrative summary highlighting academic background, career development, and major milestones
+> 3. **Research Interests**
+>
+>    * Main research areas and topics of focus, both theoretical and applied
+> 4. **Awards and Distinctions**
+>
+>    * A complete chronological list of honors and recognitions (e.g., best paper awards, fellowships, keynote speeches, society memberships)
+>    * Include the full title of each award, the granting organization, and the year received
+> 5. **Education**
+>
+>    * Full academic history including degree(s) earned, field(s) of study, institutions, thesis titles (if available), and years of graduation
+> 6. **Related Links**
+>
+>    * Links to institutional or departmental pages (e.g., university faculty page, lab homepage)
+> 7. **Related Sites**
+>
+>    * Links to professional profiles (e.g., Google Scholar, ResearchGate, LinkedIn, Semantic Scholar)
+> 8. **Scholarly Identity Links**
+>
+>    * Unique identifiers from academic databases (e.g., ORCID, DBLP, IEEE Xplore, Scopus Author ID, Web of Science ResearcherID)
+> 9. **Representative Publications**
+>
+>    * From Google Scholar (if accessible), list the **top 10 most cited publications**
+>    * For each publication, include:
+>
+>      * Title
+>      * Authors
+>      * Venue and year
+>      * Citation count
+>
+> ### Formatting:
+>
+> * Use clear section headings with Markdown syntax (`##`)
+> * Use bullet points or tables where appropriate for clarity
+> * Only include sections for which data is actually available on the given page—**do not include placeholder or empty sections**
 """
 
 def aggregate_markdown_files(directory: str) -> str:
@@ -410,9 +457,8 @@ async def run_pipeline(start_url: str,
     # it can generate markdown files via the FileWriteToolkit.
 
     async def _process_link(idx: int, link: str):
-        prompt = f"{TASK_PROMPT}\nTarget link: {link}"
+        prompt = f"{TASK_PROMPT}\nTarget link: {link}, .md file write in {str(idx)}.md with write_to_file function. The output must be in the form of a Markdown (.md) file."
         logger.info(f"[{idx}/{len(links)}] Processing {link}")
-
         # Create dedicated toolkit & agent per task to avoid shared-state issues
         toolkit = BrowserNonVisualToolkit(headless=False)
         file_tool = FileWriteToolkit(output_dir=output_dir)
