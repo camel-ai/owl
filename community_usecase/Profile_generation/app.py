@@ -113,10 +113,8 @@ class Publications(BaseModel):
         reformat each paper in html structure like:
 <dl class="field__item">
   <dt>
-    <a href="https://example.com/activitynet" target="_blank">
       ActivityNet: A Large-Scale Video Benchmark for Human Activity 
       Understanding
-    </a>
   </dt>
   <dd class="text-break">
     FC Heilbron, V Escorcia, B Ghanem, JC Niebles, 
