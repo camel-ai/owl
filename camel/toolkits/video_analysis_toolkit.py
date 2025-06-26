@@ -61,7 +61,7 @@ class VideoAnalysisToolkit(BaseToolkit):
         Returns:
             str: The answer to the question.
         """
-        os.environ["GOOGLE_API_KEY"] = "AIzaSyAAxRMtgD_Zm-clKO6zqMUXnkdqi_NIZm0"
+        os.environ["GOOGLE_API_KEY"] = os.getenv('GOOGLE_API_KEY')
         
         import pathlib
         from google import genai
