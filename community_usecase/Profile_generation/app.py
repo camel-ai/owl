@@ -18,7 +18,8 @@ from typing import List, Tuple, Optional, Union, Any, Callable
 from pydantic import BaseModel, Field
 from camel.agents import ChatAgent
 from camel.models import ModelFactory
-from camel.toolkits import BrowserNonVisualToolkit,FileWriteToolkit,SearchToolkit,FunctionTool
+from camel.toolkits import BrowserNonVisualToolkit, FileWriteToolkit, \
+    SearchToolkit, FunctionTool
 from camel.types import ModelPlatformType, ModelType
 import requests
 from bs4 import BeautifulSoup
@@ -44,9 +45,10 @@ logging.basicConfig(
 logging.getLogger('camel.agents').setLevel(logging.INFO)
 logging.getLogger('camel.models').setLevel(logging.INFO)
 logging.getLogger('camel.toolkits').setLevel(logging.DEBUG)
-logging.getLogger('camel.toolkits.non_visual_browser_toolkit').setLevel(logging.DEBUG)
+logging.getLogger('camel.toolkits.non_visual_browser_toolkit').setLevel(
+    logging.DEBUG)
 
-USER_DATA_DIR = r"User_Data"
+USER_DATA_DIR = r"D:/User_Data"
 
 
 # ------------------ Pydantic Schemas ------------------
@@ -169,8 +171,11 @@ class ScholarProfile(BaseModel):
     education: Education
     publications: Publications
     links: Links
+
+
 class WebLinksResponse(BaseModel):
     links: List[str]
+
 
 def search_web_links(person_info: str, blacklist: List[str]) -> List[str]:
     # 构造黑名单规则字符串
@@ -188,7 +193,7 @@ def search_web_links(person_info: str, blacklist: List[str]) -> List[str]:
     - Their **personal homepage** (usually on a university or personal domain).
     - Their **academic profiles**, such as Google Scholar, ORCID, 
     ResearchGate, Semantic Scholar, etc.
-    - Their **social media**, such as X, Linkedin.
+    - Their **social media**, such as X (twitter), Linkedin.
 
     Requirements:
     - Respond in **JSON format**, with this structure:
@@ -216,9 +221,14 @@ def search_web_links(person_info: str, blacklist: List[str]) -> List[str]:
 
     # 提取并返回链接列表（如果解析失败则返回空）
     try:
-        return response.msgs[0].parsed.links
+        parsed_result = response.msgs[0].parsed
+        if isinstance(parsed_result, WebLinksResponse):
+            return parsed_result.links
+        else:
+            return []
     except Exception:
         return []
+
 
 def generate_html_profile(input_text,
                           template_path: str = "template.html",
@@ -241,6 +251,10 @@ def generate_html_profile(input_text,
         response_format=ScholarProfile,
     )
     profile = extraction_response.msgs[0].parsed
+
+    # Ensure profile is of correct type
+    if not isinstance(profile, ScholarProfile):
+        raise ValueError("Failed to parse scholar profile from response")
 
     def to_html_list(items: list[str]) -> str:
         if not items:
@@ -301,6 +315,7 @@ def generate_html_profile(input_text,
 
     logger.info(f"HTML profile generated at: {output_file}")
 
+
 def get_scholar_profile_info(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -329,13 +344,8 @@ def get_scholar_profile_info(url):
 
 model_backend = ModelFactory.create(
     model_platform=ModelPlatformType.OPENAI,
-    model_type=ModelType.GPT_4_1,
+    model_type=ModelType.GPT_4O,
     model_config_dict={"temperature": 0.0, "top_p": 1},
-)
-
-web_toolkit = BrowserNonVisualToolkit(
-    headless=False,
-    user_data_dir=USER_DATA_DIR
 )
 
 # Set up output directory
@@ -344,65 +354,53 @@ os.makedirs(output_dir, exist_ok=True)
 
 # Initialize the FileWriteToolkit with the output directory
 file_toolkit = FileWriteToolkit(output_dir=output_dir)
-web_agent = ChatAgent(
-    model=model_backend,
-    tools=[*web_toolkit.get_tools(), *file_toolkit.get_tools()],
-    max_iteration=10,
-)
 
 TASK_PROMPT = """
-    
 
-> Please extract and compile detailed academic and professional information from the provided webpage into a well-structured Markdown file. Focus on collecting the following categories, but **only include sections for which information is available on the page**. Do not write empty sections.
+> Please extract and compile detailed academic and professional information from the provided webpages. Extract different types of information and save them into separate Markdown files according to the specified categories.
 >
-> ### Information to Include (if present):
+> ### Information Categories and File Names:
 >
-> 1. **Personal Information**
->
+> 1. **Personal Information** → Save to: `personal_information.md`
 >    * Full name
 >    * Current position(s)
 >    * Institutional affiliation(s)
 >    * Contact details (e.g., email, office address, phone number)
-> 2. **Biography**
+>    * Social media profiles and personal URLs
 >
+> 2. **Biography** → Save to: `biography.md`
 >    * A concise narrative summary highlighting academic background, career development, and major milestones
-> 3. **Research Interests**
 >
+> 3. **Research Interests** → Save to: `research_interests.md`
 >    * Main research areas and topics of focus, both theoretical and applied
-> 4. **Awards and Distinctions**
+>    * Research keywords and specializations
 >
+> 4. **Awards and Distinctions** → Save to: `awards_distinctions.md`
 >    * A complete chronological list of honors and recognitions (e.g., best paper awards, fellowships, keynote speeches, society memberships)
 >    * Include the full title of each award, the granting organization, and the year received
-> 5. **Education**
 >
+> 5. **Education** → Save to: `education.md`
 >    * Full academic history including degree(s) earned, field(s) of study, institutions, thesis titles (if available), and years of graduation
-> 6. **Related Links**
 >
->    * Links to institutional or departmental pages (e.g., university faculty page, lab homepage)
-> 7. **Related Sites**
->
->    * Links to professional profiles (e.g., Google Scholar, ResearchGate, LinkedIn, Semantic Scholar)
-> 8. **Scholarly Identity Links**
->
->    * Unique identifiers from academic databases (e.g., ORCID, DBLP, IEEE Xplore, Scopus Author ID, Web of Science ResearcherID)
-> 9. **Representative Publications**
->
+> 6. **Publications** → Save to: `publications.md`
 >    * From Google Scholar (if accessible), list the **top 10 most cited publications**
->    * For each publication, include:
+>    * For each publication, include: Title, Authors, Venue and year, Citation count
 >
->      * Title
->      * Authors
->      * Venue and year
->      * Citation count
+> 7. **Professional Links** → Save to: `professional_links.md`
+>    * Related Links: Links to institutional or departmental pages (e.g., university faculty page, lab homepage)
+>    * Related Sites: Links to professional profiles (e.g., Google Scholar, ResearchGate, LinkedIn, Semantic Scholar)
+>    * Scholarly Identity Links: Unique identifiers from academic databases (e.g., ORCID, DBLP, IEEE Xplore, Scopus Author ID, Web of Science ResearcherID)
+>    * PLEASE USE get_page_links function to get these links but not generate fake links!
+> ### Instructions:
 >
-> ### Formatting:
->
+> * For each category, create a separate .md file using the write_to_file function
 > * Use clear section headings with Markdown syntax (`##`)
 > * Use bullet points or tables where appropriate for clarity
-> * Only include sections for which data is actually available on the given page—**do not include placeholder or empty sections**
+> * Only create files for categories where data is actually found on the webpages
+> * Do not create empty files - only save files that contain actual information
 
-Do not perform any actions other than generating the file
 """
+
 
 def aggregate_markdown_files(directory: str) -> str:
     """Read all markdown files in *directory* and concatenate them into one string.
@@ -423,12 +421,14 @@ def aggregate_markdown_files(directory: str) -> str:
                 logger.warning(f"Failed to read {file_path}: {e}")
     return "\n\n".join(contents)
 
+
 # -------------------- Pipeline (Async) --------------------
 
 async def run_pipeline(start_url: str,
                        blacklist: Optional[List[str]] = None,
                        links: Optional[List[str]] = None,
-                       progress_cb: Optional[Callable[[int], None]] = None) -> str:
+                       progress_cb: Optional[
+                           Callable[[int], None]] = None) -> str:
     """End-to-end pipeline to fetch scholar profile, crawl links and generate HTML.
 
     Args:
@@ -455,54 +455,69 @@ async def run_pipeline(start_url: str,
     links = links or search_web_links(person_info, blacklist)
     logger.info(f"Using {len(links)} links: {links}")
 
-    # Step 3: Visit each link concurrently with cloned agents so that
-    # it can generate markdown files via the FileWriteToolkit.
+    # Step 3: Process all links synchronously with a single agent
 
-    async def _process_link(idx: int, link: str):
-        prompt = f"{TASK_PROMPT}\nTarget link: {link}, .md file write in {str(idx)}.md with write_to_file function. The output must be in the form of a Markdown (.md) file."
-        logger.info(f"[{idx}/{len(links)}] Processing {link}")
-        # Create dedicated toolkit & agent per task to avoid shared-state issues
-        toolkit = BrowserNonVisualToolkit(headless=False)
-        file_tool = FileWriteToolkit(output_dir=output_dir)
-        agent = ChatAgent(
-            model=model_backend,
-            tools=[*toolkit.get_tools(), *file_tool.get_tools()],
-            max_iteration=10,
-        )
+    # Create links text for the prompt
+    links_text = "\n".join([f"- {link}" for link in links])
 
+    # Single prompt with all links
+    prompt = f"""Target links to process:
+{links_text}
+
+Please process all the above links and extract the information specified in the system message. 
+For each type of information found across all the links, create a separate .md file using the write_to_file function.
+Use the exact file names specified in the system message (e.g., personal_information.md, biography.md, research_interests.md, etc.).
+Aggregate information of the same type from all links into the same file.
+
+DO NOT generate fake links you have not seen in webpage.
+You need to use get_page_links function to get accurate link address of links in pages
+DO NOT get links for not related information.
+
+"""
+
+    logger.info(f"Processing {len(links)} links synchronously")
+
+    # Create single toolkit & agent with base user_data_dir
+    toolkit = BrowserNonVisualToolkit(headless=False,
+                                      user_data_dir=USER_DATA_DIR)
+    file_tool = FileWriteToolkit(output_dir=output_dir)
+    agent = ChatAgent(
+        system_message=TASK_PROMPT,
+        model=model_backend,
+        tools=[*toolkit.get_tools(), *file_tool.get_tools()],
+        max_iteration=20,
+        # Increased iteration limit for processing multiple links
+    )
+
+    try:
+        await agent.astep(prompt)
+
+        # progress increment - step 1: processing all links completed
+        if progress_cb:
+            progress_cb(1)
+    finally:
+        # Ensure browser session closes
         try:
-            await agent.astep(prompt)
-            
-            # progress increment
-            if progress_cb:
-                progress_cb(1)
-        finally:
-            # Ensure browser session closes
-            try:
-                await toolkit.close_browser()
-            except Exception:
-                pass
-
-    tasks = [asyncio.create_task(_process_link(idx, link))
-             for idx, link in enumerate(links, start=1)]
-
-    # Wait for all links to finish processing
-    await asyncio.gather(*tasks)
+            await toolkit.close_browser()
+        except Exception:
+            pass
 
     # Step 4: Aggregate all generated markdown files into one text block
     aggregated_markdown = aggregate_markdown_files(output_dir)
     if not aggregated_markdown:
-        logger.warning("No markdown content collected – skipping HTML generation.")
-        return
+        logger.warning(
+            "No markdown content collected – skipping HTML generation.")
+        return ""
 
     # Step 5: Feed the aggregated content to the profile HTML generator
     output_html = "profile.html"
     generate_html_profile(aggregated_markdown, output_file=output_html)
 
     if progress_cb:
-        progress_cb(1)  # final +1 step for html generation
+        progress_cb(1)  # step 2: html generation completed
 
     return os.path.abspath(output_html)
+
 
 # -------------------- Progress Tracking --------------------
 
@@ -522,7 +537,8 @@ class _ProgressRecord:
 _PROGRESS_STORE: dict[str, "_ProgressRecord"] = {}
 
 
-def _start_background_pipeline(job_id: str, scholar_url: str, blacklist: List[str], links: List[str]):
+def _start_background_pipeline(job_id: str, scholar_url: str,
+                               blacklist: List[str], links: List[str]):
     """Run pipeline in background thread and update progress store."""
 
     async def _run():
@@ -543,6 +559,7 @@ def _start_background_pipeline(job_id: str, scholar_url: str, blacklist: List[st
             record.done = True
 
     asyncio.run(_run())
+
 
 # -------------------- Flask Backend --------------------
 
@@ -565,7 +582,8 @@ def api_search_scholar():
     blacklist: List[str] = data.get("blacklist", [])
 
     if not scholar_url:
-        return jsonify({"status": "error", "error": "Missing 'scholar_url'"}), 400
+        return jsonify(
+            {"status": "error", "error": "Missing 'scholar_url'"}), 400
 
     try:
         person_info = get_scholar_profile_info(scholar_url)
@@ -588,17 +606,20 @@ def api_generate_profile():
     white_list: List[str] = data.get("white_list", [])
 
     if not scholar_url:
-        return jsonify({"status": "error", "error": "Missing 'scholar_url'"}), 400
+        return jsonify(
+            {"status": "error", "error": "Missing 'scholar_url'"}), 400
 
     # Launch background job for progress tracking
     job_id = str(uuid.uuid4())
-    total_steps = (len(white_list) if white_list else 0) + 1  # +1 for HTML gen
+    total_steps = 2  # 1 for processing all links + 1 for HTML gen
     _PROGRESS_STORE[job_id] = _ProgressRecord(total_steps)
 
-    thread = threading.Thread(target=_start_background_pipeline, args=(job_id, scholar_url, blacklist, white_list), daemon=True)
+    thread = threading.Thread(target=_start_background_pipeline, args=(
+        job_id, scholar_url, blacklist, white_list), daemon=True)
     thread.start()
 
-    return jsonify({"status": "accepted", "job_id": job_id, "total": total_steps})
+    return jsonify(
+        {"status": "accepted", "job_id": job_id, "total": total_steps})
 
 
 @app.route('/api/progress/<job_id>')
@@ -653,7 +674,8 @@ def api_add_account_info():
                     pass  # context may already be closed
                 _p.stop()
         except Exception as exc:
-            logger.exception("Failed to open Playwright persistent context: %s", exc)
+            logger.exception(
+                "Failed to open Playwright persistent context: %s", exc)
 
     threading.Thread(target=_open_browser, daemon=True).start()
     return jsonify({"status": "success"})
@@ -675,10 +697,12 @@ if __name__ == "__main__":
         # Run Flask server
         app.run(host="0.0.0.0", port=5000, debug=False)
 
+
 # -------------------- CLI Entry Point --------------------
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate an HTML scholar profile from a starting URL.")
+    parser = argparse.ArgumentParser(
+        description="Generate an HTML scholar profile from a starting URL.")
     parser.add_argument(
         "--url",
         default="https://scholar.google.com/citations?user=rVsGTeEAAAAJ",
