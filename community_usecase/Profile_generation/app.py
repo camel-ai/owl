@@ -18,7 +18,7 @@ from typing import List, Tuple, Optional, Union, Any, Callable
 from pydantic import BaseModel, Field
 from camel.agents import ChatAgent
 from camel.models import ModelFactory
-from camel.toolkits import BrowserNonVisualToolkit, FileWriteToolkit, \
+from camel.toolkits import HybridBrowserToolkit, FileWriteToolkit, \
     SearchToolkit, FunctionTool
 from camel.types import ModelPlatformType, ModelType
 import requests
@@ -44,9 +44,9 @@ logging.basicConfig(
 
 logging.getLogger('camel.agents').setLevel(logging.INFO)
 logging.getLogger('camel.models').setLevel(logging.INFO)
-logging.getLogger('camel.toolkits').setLevel(logging.DEBUG)
-logging.getLogger('camel.toolkits.non_visual_browser_toolkit').setLevel(
-    logging.DEBUG)
+logging.getLogger('camel.toolkits').setLevel(logging.INFO)
+# logging.getLogger('camel.toolkits.HybridBrowserToolkit').setLevel(
+#     logging.DEBUG)
 
 USER_DATA_DIR = r"D:/User_Data"
 
@@ -342,7 +342,7 @@ def get_scholar_profile_info(url):
 
 model_backend = ModelFactory.create(
     model_platform=ModelPlatformType.OPENAI,
-    model_type=ModelType.GPT_4O,
+    model_type=ModelType.GPT_4_1,
     model_config_dict={"temperature": 0.0, "top_p": 1},
 )
 
@@ -355,7 +355,9 @@ file_toolkit = FileWriteToolkit(output_dir=output_dir)
 
 TASK_PROMPT = """
 
-> Please extract and compile detailed academic and professional information from the provided webpages. Extract different types of information and save them into separate Markdown files according to the specified categories.
+> Please extract and compile detailed academic and professional information 
+from the provided webpages. Extract different types of information and save 
+them into separate Markdown files according to the specified categories.
 >
 > ### Information Categories and File Names:
 >
@@ -367,41 +369,62 @@ TASK_PROMPT = """
 >    * Social media profiles and personal URLs
 >
 > 2. **Biography** → Save to: `biography.md`
->    * A concise narrative summary highlighting academic background, career development, and major milestones
+>    * A concise narrative summary highlighting academic background, career 
+development, and major milestones
 >
 > 3. **Research Interests** → Save to: `research_interests.md`
 >    * Main research areas and topics of focus, both theoretical and applied
 >    * Research keywords and specializations
 >
 > 4. **Awards and Distinctions** → Save to: `awards_distinctions.md`
->    * A complete chronological list of honors and recognitions (e.g., best paper awards, fellowships, keynote speeches, society memberships)
->    * Include the full title of each award, the granting organization, and the year received
+>    * A complete chronological list of honors and recognitions (e.g., 
+best paper awards, fellowships, keynote speeches, society memberships)
+>    * Include the full title of each award, the granting organization, 
+and the year received
 >
 > 5. **Education** → Save to: `education.md`
->    * Full academic history including degree(s) earned, field(s) of study, institutions, thesis titles (if available), and years of graduation
+>    * Full academic history including degree(s) earned, field(s) of study, 
+institutions, thesis titles (if available), and years of graduation
 >
 > 6. **Publications** → Save to: `publications.md`
->    * From Google Scholar (if accessible), list the **top 10 most cited publications**
->    * For each publication, include: Title, Authors, Venue and year, Citation count
+>    * From Google Scholar (if accessible), list the **top 10 most cited 
+publications**
+>    * For each publication, include: Title, Authors, Venue and year, 
+Citation count
 >
 > 7. **Professional Links** → Save to: `professional_links.md`
->    * Related Links: Links to institutional or departmental pages (e.g., university faculty page, lab homepage)
->    * Related Sites: Links to professional profiles (e.g., Google Scholar, ResearchGate, LinkedIn, Semantic Scholar)
->    * Scholarly Identity Links: Unique identifiers from academic databases (e.g., ORCID, DBLP, IEEE Xplore, Scopus Author ID, Web of Science ResearcherID)
->    * PLEASE USE get_page_links function to get these links but not generate fake links!
+>    * Related Links: Links to institutional or departmental pages (e.g., 
+university faculty page, lab homepage)
+>    * Related Sites: Links to professional profiles (e.g., Google Scholar, 
+ResearchGate, LinkedIn, Semantic Scholar)
+>    * Scholarly Identity Links: Unique identifiers from academic databases 
+(e.g., ORCID, DBLP, IEEE Xplore, Scopus Author ID, Web of Science ResearcherID)
+>    * PLEASE not generate fake links, If you don't find the corresponding 
+link, then don't include it.
 > ### Instructions:
 >
-> * For each category, create a separate .md file using the write_to_file function
+> * For each category, create a separate .md file using the write_to_file 
+function
 > * Use clear section headings with Markdown syntax (`##`)
 > * Use bullet points or tables where appropriate for clarity
-> * Only create files for categories where data is actually found on the webpages
+> * Only create files for categories where data is actually found on the 
+webpages
 > * Do not create empty files - only save files that contain actual information
 
+You need to interact with each webpage, clicking to obtain useful information.
+For example, if you see a 'DBLP' link tag on the page like '- link "DBLP" [
+ref=e105]',
+ you should use the get_page_links tool to obtain the accurate DBLP page URL.
+get_page_links can only process element with 'link' tag!
+When you call a tool, all operations will only take place on the current page.
+ If you visit another page,
+  you can no longer input the reference from a previous page into the tool.
 """
 
 
 def aggregate_markdown_files(directory: str) -> str:
-    """Read all markdown files in *directory* and concatenate them into one string.
+    """Read all markdown files in *directory* and concatenate them into one
+    string.
 
     The individual file contents are separated by two newlines and prefixed
     with a markdown header indicating the file name so that downstream
@@ -427,13 +450,15 @@ async def run_pipeline(start_url: str,
                        links: Optional[List[str]] = None,
                        progress_cb: Optional[
                            Callable[[int], None]] = None) -> str:
-    """End-to-end pipeline to fetch scholar profile, crawl links and generate HTML.
+    """End-to-end pipeline to fetch scholar profile, crawl links and
+    generate HTML.
 
     Args:
         start_url: The Google Scholar (or similar) profile URL.
         blacklist: Optional list of domains that should be excluded when
             searching links.
-        links: Optional list of links to be used instead of searching for new ones.
+        links: Optional list of links to be used instead of searching for
+        new ones.
     """
     blacklist = blacklist or []
 
@@ -462,22 +487,30 @@ async def run_pipeline(start_url: str,
     prompt = f"""Target links to process:
 {links_text}
 
-Please process all the above links and extract the information specified in the system message. 
-For each type of information found across all the links, create a separate .md file using the write_to_file function.
-Use the exact file names specified in the system message (e.g., personal_information.md, biography.md, research_interests.md, etc.).
+Please process all the above links and extract the information specified in 
+the system message. 
+For each type of information found across all the websites, create a separate 
+.md file using the write_to_file function.
+Use the exact file names specified in the system message (e.g., 
+personal_information.md, biography.md, research_interests.md, etc.).
 Aggregate information of the same type from all links into the same file.
 
-DO NOT generate fake links you have not seen in webpage.
-You need to use get_page_links function to get accurate link address of links in pages
-DO NOT get links for not related information.
-
+DO NOT generate fake links in markdown file.
 """
 
     logger.info(f"Processing {len(links)} links synchronously")
+    custom_tools = [
+        "open_browser",
+        "close_browser",
+        "visit_page",
+        "click",
+        "type",
+        "get_page_links",
+    ]
 
-    # Create single toolkit & agent with base user_data_dir
-    toolkit = BrowserNonVisualToolkit(headless=False,
-                                      user_data_dir=USER_DATA_DIR)
+    toolkit = HybridBrowserToolkit(headless=False,
+                                   user_data_dir=USER_DATA_DIR,
+                                   enabled_tools=custom_tools)
     file_tool = FileWriteToolkit(output_dir=output_dir)
     agent = ChatAgent(
         system_message=TASK_PROMPT,
@@ -636,7 +669,8 @@ def api_progress(job_id: str):
 
 @app.route('/files/<path:filename>')
 def serve_generated_file(filename: str):
-    """Serve generated HTML/markdown files so that the browser can open them."""
+    """Serve generated HTML/markdown files so that the browser can open
+    them."""
     return send_from_directory(BASE_DIR, filename, as_attachment=False)
 
 
