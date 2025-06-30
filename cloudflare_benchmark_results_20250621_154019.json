@@ -1,0 +1,65 @@
+{
+  "total_tasks": 5,
+  "successful_tasks": 0,
+  "success_rate": 0.0,
+  "total_time_seconds": 0,
+  "total_tokens": 0,
+  "average_time_per_task": 0.0,
+  "results": [
+    {
+      "task_id": "math_01",
+      "question": "Calculate the compound interest on $1000 invested at 5% annual interest for 3 years. Show your work.",
+      "difficulty": 1,
+      "answer": null,
+      "success": false,
+      "error": "Missing or empty required API keys in environment variables: OPENAI_API_KEY.\nYou can obtain the API key from https://platform.openai.com/docs/overview",
+      "duration_seconds": 0,
+      "token_count": 0,
+      "timestamp": "2025-06-21 15:40:18"
+    },
+    {
+      "task_id": "reasoning_01",
+      "question": "If all roses are flowers, and some flowers are red, can we conclude that some roses are red? Explain your reasoning.",
+      "difficulty": 2,
+      "answer": null,
+      "success": false,
+      "error": "Missing or empty required API keys in environment variables: OPENAI_API_KEY.\nYou can obtain the API key from https://platform.openai.com/docs/overview",
+      "duration_seconds": 0,
+      "token_count": 0,
+      "timestamp": "2025-06-21 15:40:18"
+    },
+    {
+      "task_id": "coding_01",
+      "question": "Write a Python function that finds the second largest number in a list. Include error handling and create a test file.",
+      "difficulty": 2,
+      "answer": null,
+      "success": false,
+      "error": "Missing or empty required API keys in environment variables: OPENAI_API_KEY.\nYou can obtain the API key from https://platform.openai.com/docs/overview",
+      "duration_seconds": 0,
+      "token_count": 0,
+      "timestamp": "2025-06-21 15:40:19"
+    },
+    {
+      "task_id": "research_01",
+      "question": "Search for information about renewable energy trends in 2024 and create a summary with key statistics.",
+      "difficulty": 3,
+      "answer": null,
+      "success": false,
+      "error": "Missing or empty required API keys in environment variables: OPENAI_API_KEY.\nYou can obtain the API key from https://platform.openai.com/docs/overview",
+      "duration_seconds": 0,
+      "token_count": 0,
+      "timestamp": "2025-06-21 15:40:19"
+    },
+    {
+      "task_id": "document_01",
+      "question": "Create a professional business proposal document (PDF) for a solar energy consulting service, including executive summary, services, and pricing.",
+      "difficulty": 3,
+      "answer": null,
+      "success": false,
+      "error": "Missing or empty required API keys in environment variables: OPENAI_API_KEY.\nYou can obtain the API key from https://platform.openai.com/docs/overview",
+      "duration_seconds": 0,
+      "token_count": 0,
+      "timestamp": "2025-06-21 15:40:19"
+    }
+  ]
+}

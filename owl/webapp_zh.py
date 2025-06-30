@@ -256,6 +256,7 @@ MODULE_DESCRIPTIONS = {
     "run_ppio": "使用ppio模型处理任务",
     "run_together_ai": "使用together ai模型处理任务",
     "run_novita_ai": "使用novita ai模型处理任务",
+    "run_cloudflare_workers": "使用Cloudflare Workers AI模型处理任务",
 }
 
 
@@ -296,6 +297,11 @@ CHUNKR_API_KEY='Your_Key'
 # Firecrawl API (https://www.firecrawl.dev/)
 FIRECRAWL_API_KEY='Your_Key'
 #FIRECRAWL_API_URL="https://api.firecrawl.dev"
+
+# Cloudflare Workers AI API (https://developers.cloudflare.com/workers-ai/)
+CF_API_TOKEN='Your_Token'
+CF_ACCOUNT_ID='Your_Account_ID'
+CF_GATEWAY_NAME='arya-ai'
 """
 
 

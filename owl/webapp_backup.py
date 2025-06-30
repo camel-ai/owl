@@ -269,6 +269,7 @@ MODULE_DESCRIPTIONS = {
     "run_ollama": "使用本地ollama模型处理任务",
     "run_qwen_mini_zh": "使用qwen模型最小化配置处理任务",
     "run_qwen_zh": "使用qwen模型处理任务",
+    "run_cloudflare_workers": "使用Cloudflare Workers AI模型处理任务",
 }
 
 # 默认环境变量模板
@@ -301,6 +302,11 @@ CHUNKR_API_KEY=""
 # Firecrawl API (https://www.firecrawl.dev/)
 FIRECRAWL_API_KEY=""
 #FIRECRAWL_API_URL="https://api.firecrawl.dev"
+
+# Cloudflare Workers AI API (https://developers.cloudflare.com/workers-ai/)
+CF_API_TOKEN=""
+CF_ACCOUNT_ID=""
+CF_GATEWAY_NAME="arya-ai"
 """
 
 

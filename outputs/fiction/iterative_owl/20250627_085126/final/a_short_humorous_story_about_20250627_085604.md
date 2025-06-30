@@ -1,0 +1,3 @@
+# A short humorous story about a robot chef who keeps burning toast
+
+Error: The api_key client option must be set either by passing api_key to the client or by setting the GROQ_API_KEY environment variable

@@ -1,0 +1,3 @@
+# **Story Concept:** Reimagined the fairytale Humpty Dumpty into an adult after dark version of a subverted fairytale that contains adult themes Humpty is a owner of a strip club, a male strip club and is trying to find his way into other business opportunities. It should be hysterically, funny, sexually charged, and full of double entendre and Innuendo.
+
+Error: The api_key client option must be set either by passing api_key to the client or by setting the GROQ_API_KEY environment variable

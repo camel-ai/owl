@@ -253,6 +253,7 @@ MODULE_DESCRIPTIONS = {
     "run_azure_openai": "Azure OpenAIモデルを使用してタスクを処理します",
     "run_groq": "groqモデルを使用してタスクを処理します",
     "run_together_ai": "together aiモデルを使用してタスクを処理します",
+    "run_cloudflare_workers": "Cloudflare Workers AIモデルを使用してタスクを処理します",
 }
 
 
@@ -293,6 +294,11 @@ CHUNKR_API_KEY='あなたのキー'
 # Firecrawl API (https://www.firecrawl.dev/)
 FIRECRAWL_API_KEY='あなたのキー'
 #FIRECRAWL_API_URL="https://api.firecrawl.dev"
+
+# Cloudflare Workers AI API (https://developers.cloudflare.com/workers-ai/)
+CF_API_TOKEN='あなたのトークン'
+CF_ACCOUNT_ID='あなたのアカウントID'
+CF_GATEWAY_NAME='arya-ai'
 """
 
 

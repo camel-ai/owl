@@ -1,0 +1,5 @@
+CAMEL Terminal Session
+==================================================
+Working Directory: /Users/scottandcheese/owl
+==================================================
+
