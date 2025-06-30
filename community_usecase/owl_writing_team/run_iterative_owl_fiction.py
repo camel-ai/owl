@@ -9,7 +9,6 @@ from typing import Optional, Dict, Any, List, Tuple
 import json
 import requests
 from dotenv import load_dotenv
-import google.generativeai as genai
 import re
 
 # Add project root to Python path
@@ -33,14 +32,6 @@ CF_ACCOUNT_ID = os.getenv("CF_ACCOUNT_ID")
 MODEL_TYPE = os.getenv("MODEL_TYPE", "@cf/meta/llama-4-scout-17b-16e-instruct")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.8"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "10000"))
-
-# Google Gemini configuration
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-pro")
-
-# Configure Gemini
-if GOOGLE_API_KEY:
-    genai.configure(api_key=GOOGLE_API_KEY)
 
 # Iteration configuration - Raised for professional-grade fiction quality
 MAX_ITERATIONS = int(os.getenv("MAX_ITERATIONS", "5"))
@@ -127,34 +118,6 @@ def generate_text(prompt: str) -> str:
         logger.error(f"Request failed: {str(e)}")
         return f"Error: {str(e)}"
 
-def generate_draft_with_groq(prompt: str) -> str:
-    """Generate story draft using Groq, fallback to Cloudflare if unavailable"""
-    if not GROQ_API_KEY:
-        logger.info("GROQ_API_KEY not set, falling back to Cloudflare")
-        return generate_text(prompt)
-        
-    try:
-        client = Groq(api_key=GROQ_API_KEY)
-        content = []
-        
-        completion = client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=TEMPERATURE,
-            max_tokens=GROQ_MAX_TOKENS,
-            top_p=1,
-            stream=True,
-        )
-
-        for chunk in completion:
-            chunk_content = chunk.choices[0].delta.content
-            if chunk_content:
-                content.append(chunk_content)
-                
-        return "".join(content)
-    except Exception as e:
-        logger.error(f"Groq API error: {str(e)}, falling back to Cloudflare")
-        return generate_text(prompt)
 
 def score_content_quality(content: str, criteria: Dict[str, str]) -> Tuple[float, Dict[str, float], str]:
     """Score content quality across multiple dimensions"""
@@ -243,7 +206,6 @@ def iterative_content_generation(
     criteria: Dict[str, str], 
     output_dirs: Dict[str, Path],
     step_name: str,
-    use_groq: bool = False,
     max_iterations: int = MAX_ITERATIONS
 ) -> Tuple[str, List[Dict]]:
     """Generate content with iterative improvement based on quality scoring"""
@@ -262,11 +224,8 @@ def iterative_content_generation(
             last_feedback = iteration_history[-1]["feedback"]
             prompt = generate_improvement_prompt(current_content, last_feedback, iteration + 1)
         
-        # Generate content
-        if use_groq:
-            content = generate_draft_with_groq(prompt)
-        else:
-            content = generate_text(prompt)
+        # Generate content using Cloudflare Workers
+        content = generate_text(prompt)
         
         # Score the content
         overall_score, dimension_scores, feedback = score_content_quality(content, criteria)
@@ -384,50 +343,42 @@ def generate_iterative_owl_story(task: str, output_dirs: Dict[str, Path]) -> str
         {
             "name": "research",
             "prompt": f"Research and gather background information for this story prompt: {task}\n\nProvide relevant context, themes, and potential story elements.",
-            "file": ("research", "background_research.md"),
-            "use_groq": False
+            "file": ("research", "background_research.md")
         },
         {
             "name": "outline",
             "prompt": "Create a detailed story outline with act structure, plot points, and narrative arc.",
-            "file": ("plots", "story_outline.md"),
-            "use_groq": False
+            "file": ("plots", "story_outline.md")
         },
         {
             "name": "characters",
             "prompt": "Develop in-depth character profiles including backstories, motivations, and relationships.",
-            "file": ("characters", "character_profiles.md"),
-            "use_groq": False
+            "file": ("characters", "character_profiles.md")
         },
         {
             "name": "worldbuilding",
             "prompt": "Create detailed worldbuilding elements, setting descriptions, and atmosphere.",
-            "file": ("worldbuilding", "world_details.md"),
-            "use_groq": False
+            "file": ("worldbuilding", "world_details.md")
         },
         {
             "name": "scenes",
             "prompt": "Write detailed scene breakdowns with emotional beats and character interactions.",
-            "file": ("scenes", "scene_descriptions.md"),
-            "use_groq": False
+            "file": ("scenes", "scene_descriptions.md")
         },
         {
             "name": "draft",
             "prompt": "Write a compelling and engaging first draft incorporating all elements into a cohesive narrative.",
-            "file": ("drafts", "first_draft.md"),
-            "use_groq": True
+            "file": ("drafts", "first_draft.md")
         },
         {
             "name": "revision",
             "prompt": "Polish and refine the draft, focusing on pacing, dialogue, and emotional impact.",
-            "file": ("drafts", "revised_draft.md"),
-            "use_groq": True
+            "file": ("drafts", "revised_draft.md")
         },
         {
             "name": "final",
             "prompt": "Create the final polished version with enhanced prose and storytelling.",
-            "file": ("final", "final_story.md"),
-            "use_groq": True
+            "file": ("final", "final_story.md")
         }
     ]
     
@@ -455,8 +406,7 @@ Generate the {step['name']} phase content:"""
             full_prompt,
             step_criteria[step['name']],
             output_dirs,
-            step['name'],
-            step['use_groq']
+            step['name']
         )
         
         all_iteration_history[step['name']] = iteration_history

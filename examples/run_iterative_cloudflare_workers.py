@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import datetime
 import logging
+import time
 from typing import Optional, Dict, Any, List, Tuple
 import requests
 
@@ -43,10 +44,6 @@ CF_ASSISTANT_MODEL = os.getenv("CF_ASSISTANT_MODEL", "@cf/meta/llama-4-scout-17b
 CF_QUALITY_MODEL = os.getenv("CF_QUALITY_MODEL", "@cf/meta/llama-4-scout-17b-16e-instruct")
 
 # Google Gemini configuration  
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GEMINI_USER_MODEL = os.getenv("GEMINI_USER_MODEL", "gemini-1.5-pro")
-GEMINI_ASSISTANT_MODEL = os.getenv("GEMINI_ASSISTANT_MODEL", "gemini-1.5-pro")
-GEMINI_QUALITY_MODEL = os.getenv("GEMINI_QUALITY_MODEL", "gemini-1.5-pro")
 
 # Role assignments for hybrid mode
 # User Agent: Gemini Pro (excellent for task understanding and feedback)
@@ -334,7 +331,7 @@ IMPORTANT: You MUST create output files that demonstrate thorough task completio
             model_platform=ModelPlatformType.GEMINI,
             model_type=GEMINI_USER_MODEL,
             api_key=GOOGLE_API_KEY,
-            model_config_dict={"temperature": 0.4, "max_output_tokens": 8192},
+            model_config_dict={"temperature": 0.4, "max_tokens": 8192},
         )
         
         # Assistant Agent: Llama 4 Scout (fast execution with tools, large context)
@@ -354,14 +351,14 @@ IMPORTANT: You MUST create output files that demonstrate thorough task completio
             model_platform=ModelPlatformType.GEMINI,
             model_type=GEMINI_USER_MODEL,
             api_key=GOOGLE_API_KEY,
-            model_config_dict={"temperature": 0.5, "max_output_tokens": 8192},
+            model_config_dict={"temperature": 0.5, "max_tokens": 8192},
         )
         
         assistant_model = ModelFactory.create(
             model_platform=ModelPlatformType.GEMINI,
             model_type=GEMINI_ASSISTANT_MODEL,
             api_key=GOOGLE_API_KEY,
-            model_config_dict={"temperature": 0.7, "max_output_tokens": 8192},
+            model_config_dict={"temperature": 0.7, "max_tokens": 8192},
         )
         
         logger.info(f"💎 GEMINI MODE: {GEMINI_USER_MODEL}, {GEMINI_ASSISTANT_MODEL}")
@@ -525,6 +522,17 @@ def run_iterative_society(
                 "timestamp": datetime.datetime.now().isoformat()
             }
             iteration_history.append(iteration_data)
+
+        # Add a delay to avoid hitting API rate limits, especially on free tiers.
+        # The Gemini API free tier has a low requests-per-minute limit.
+        # The error log suggests a retry delay of 20-30 seconds.
+        if iteration < max_iterations:
+            delay = 30
+            logger.info(
+                f"Waiting for {delay} seconds before the next iteration to "
+                f"respect API rate limits..."
+            )
+            time.sleep(delay)
     
     # Generate iteration summary
     summary = {
