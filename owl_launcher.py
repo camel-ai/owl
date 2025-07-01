@@ -118,24 +118,24 @@ def select_owl_mode() -> Tuple[str, str, str]:
     print(f"\n✅ Selected: {selected['name']}")
     return selected['script'], selected['name'], selected['description']
 
-def show_hybrid_mode_info():
-    """Show information about hybrid multi-model mode"""
-    print_menu_header("🔥 HYBRID MULTI-MODEL SYSTEM")
+def show_dual_model_info():
+    """Show information about the dual model system"""
+    print_menu_header("🔥 DUAL MODEL SYSTEM")
     
-    print("🎯 This OWL system now uses BOTH models simultaneously:")
-    print("   💎 Gemini Pro: Task understanding and strategic thinking")  
-    print("   🦉 Llama 4 Scout: Fast execution with file operations")
-    print("   🔍 Dual Quality Assessment: Both models evaluate output")
+    print("🎯 This OWL system uses two models collaboratively:")
+    print("   💎 Qwen-3: Creative generation and refinement")
+    print("   🦉 Llama-4: Analysis and enhancement")
+    print("   🔍 Collaborative Improvement: Models build on each other's work")
     print()
     print("✨ Benefits:")
-    print("   • Best of both worlds - reasoning + speed")
-    print("   • More robust quality assessment")
-    print("   • Complementary AI perspectives")
+    print("   • Two-perspective content generation")
+    print("   • Enhanced quality through collaboration")
+    print("   • Complementary model strengths")
     print()
-    print("📋 Requirements:")
-    print("   • GOOGLE_API_KEY for Gemini")
-    print("   • CF_API_TOKEN + CF_ACCOUNT_ID for Cloudflare")
-    print("   • Both credentials enable full hybrid mode")
+    print("📋 Information:")
+    print("   • Uses Hugging Face Spaces for both models")
+    print("   • No authentication required")
+    print("   • Automatic model switching for best results")
     print()
 
 def select_quality_settings() -> Tuple[float, int]:

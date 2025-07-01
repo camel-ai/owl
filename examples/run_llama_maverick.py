@@ -13,7 +13,7 @@ def run_llama(task: str, system_message: str = "You are a helpful AI assistant."
     """
     try:
         # Initialize Gradio client with the full Hugging Face Space URL
-        space_url = "https://justa502man-llama4-maverick-17b.hf.space"
+        space_url = "https://huggingface.co/spaces/justa502man/meta-llama-Llama-4-Maverick-17B-128E-Instruct"
         print(f"🔄 Connecting to Hugging Face Space: {space_url}")
         client = Client(space_url)
         

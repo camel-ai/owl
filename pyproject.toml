@@ -7,7 +7,7 @@ name = "owl"
 version = "0.0.1"
 description = "Optimized Workforce Learning for General Multi-Agent Assistance in Real-World Task Automation"
 authors = [{ name = "CAMEL-AI.org" }]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<3.14"
 readme = "README.md"
 license = "Apache-2.0"
 keywords = [
@@ -21,14 +21,19 @@ keywords = [
     "learning-systems"
 ]
 dependencies = [
-    "camel-ai[owl]==0.2.57",
-    "docx2markdown>=0.1.1",
+    "camel-ai[owl]",,
+    "docx2markdown>=0.2.10",  # Specify a compatible version
     "gradio>=3.50.2",
+    "gradio-client>=0.10.0",
     "mcp-simple-arxiv==0.2.2",
     "mcp-server-fetch==2025.1.17",
     "xmltodict>=0.14.2",
     "firecrawl>=2.5.3",
     "mistralai>=1.7.0",
+    "transformers",
+    "torch",
+    "Pillow",
+    "huggingface-hub",
 ]
 
 [project.urls]
@@ -68,3 +73,29 @@ skip = '.git*,*.pdf,*.lock'
 check-hidden = true
 ignore-regex = '\bBrin\b'
 ignore-words-list = 'datas'
+
+ENV STREAMLIT_CONFIG_DIR="./.streamlit"
+
+# Dockerfile
+FROM python:3.11
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the requirements file
+COPY requirements.txt .
+
+# Install the dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the application code
+COPY . .
+
+# Set the environment variable
+ENV STREAMLIT_CONFIG_DIR="./.streamlit"
+
+# Expose the port
+EXPOSE 8501
+
+# Run the Streamlit app
+CMD streamlit run your_app.py

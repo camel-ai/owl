@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Model configuration
-MODEL_URL = "https://justa502man-llama4-maverick-17b.hf.space"
+MODEL_URLS = {
+    "qwen": "https://justa502man-qwen-qwen3-235b-a22b.hf.space",
+    "llama": "https://justa502man-llama4-maverick-17b.hf.space"
+}
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "512"))
 
@@ -40,20 +43,19 @@ def write_to_file(content: str, filename: str, directory: Path) -> bool:
         logger.error(f"Error writing to {filepath}: {str(e)}")
         return False
 
-def generate_text(prompt: str) -> str:
-    """Generate text using Llama Maverick model"""
+def generate_text(prompt: str, use_qwen: bool = False) -> str:
+    """Generate text using either Qwen or Llama model"""
     try:
-        print(f"🔄 Connecting to model at {MODEL_URL}")
-        client = Client(MODEL_URL)
+        model_url = MODEL_URLS["qwen"] if use_qwen else MODEL_URLS["llama"]
+        print(f"🔄 Connecting to model at {model_url}")
+        client = Client(model_url)
         
-        try:
+        if use_qwen:
             result = client.predict(
-                prompt,  # Direct task input
-                fn_index=0  # Use the first (default) function
+                prompt,
+                api_name="/predict"
             )
-        except Exception as api_error:
-            print(f"🚨 API Error: {str(api_error)}")
-            print("⚠️ Trying fallback configuration...")
+        else:
             result = client.predict(
                 prompt,
                 api_name="/chat"
@@ -67,7 +69,7 @@ def generate_text(prompt: str) -> str:
         logger.error(f"Hugging Face API error: {str(e)}")
         return f"Error: {str(e)}"
 
-def process_task(task: str) -> str:
+def process_task(task: str, use_qwen: bool = False) -> str:
     """Process the task and generate response"""
     print("📝 Preparing task...")
     full_prompt = f"""You are a helpful AI assistant. Please help with the following task:
@@ -76,7 +78,7 @@ def process_task(task: str) -> str:
 
 Provide a clear, thorough, and well-organized response."""
     
-    return generate_text(full_prompt)
+    return generate_text(full_prompt, use_qwen=use_qwen)
 
 def main():
     """Main function to process tasks"""
@@ -92,7 +94,14 @@ def main():
         print(f"Task: {task}")
         print("\n💭 Generating response...\n")
         
-        response = process_task(task)
+        # Try Qwen first, fallback to Llama if it fails
+        try:
+            print("🤖 Using Qwen model...")
+            response = process_task(task, use_qwen=True)
+        except Exception as qwen_error:
+            print(f"⚠️ Qwen error: {str(qwen_error)}")
+            print("🔄 Falling back to Llama model...")
+            response = process_task(task, use_qwen=False)
         
         # Save output
         timestamp = Path(sys.argv[0]).stem

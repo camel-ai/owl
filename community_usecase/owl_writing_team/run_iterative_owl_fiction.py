@@ -8,6 +8,7 @@ import logging
 from typing import Optional, Dict, Any, List, Tuple
 import json
 import requests
+from gradio_client import Client
 from dotenv import load_dotenv
 import re
 # Add project root to Python path
@@ -85,17 +86,26 @@ def write_to_file(content: str, filename: str, directory: Path) -> bool:
         logger.error(f"Error writing to {filepath}: {str(e)}")
         return False
 
-def generate_text(prompt: str) -> str:
-    """Generate text using Hugging Face Chat"""
+def generate_text(prompt: str, use_qwen: bool = True) -> str:
+    """Generate text using one of two Hugging Face models"""
     try:
-        client = Client("tencent/Hunyuan-T1")
-        result = client.predict(
-                message=prompt,
+        if use_qwen:
+            space_url = "https://justa502man-qwen-qwen3-235b-a22b.hf.space"
+            client = Client(space_url)
+            result = client.predict(
+                prompt,
+                api_name="/predict"
+            )
+        else:
+            space_url = "https://justa502man-llama4-maverick-17b.hf.space"
+            client = Client(space_url)
+            result = client.predict(
+                prompt,
                 api_name="/chat"
-        )
+            )
+            
         # Print for visibility
         print(result)
-            
         return result
             
     except Exception as e:
@@ -103,7 +113,7 @@ def generate_text(prompt: str) -> str:
         return f"Error: {str(e)}"
 
 
-def score_content_quality(content: str, criteria: Dict[str, str]) -> Tuple[float, Dict[str, float], str]:
+def score_content_quality(content: str, criteria: Dict[str, str], use_qwen: bool = False) -> Tuple[float, Dict[str, float], str]:
     """Score content quality across multiple dimensions"""
     quality_prompt = f"""
     Evaluate this content on a scale of 1-10 for each criterion:
@@ -130,7 +140,9 @@ def score_content_quality(content: str, criteria: Dict[str, str]) -> Tuple[float
     """
     
     try:
-        result = generate_text(quality_prompt)
+        # Use opposite model for evaluation than what was used for generation
+        result = generate_text(quality_prompt, use_qwen=use_qwen)
+        logger.info(f"Evaluation using: {'Qwen' if use_qwen else 'Llama'}")
         
         # Extract JSON from response with better error handling
         json_match = re.search(r'\{.*\}', result, re.DOTALL)
@@ -208,11 +220,15 @@ def iterative_content_generation(
             last_feedback = iteration_history[-1]["feedback"]
             prompt = generate_improvement_prompt(current_content, last_feedback, iteration + 1)
         
-        # Generate content using Hugging Face
-        content = generate_text(prompt)
+        # Alternate between models for generation and evaluation
+        use_qwen_for_generation = (iteration % 2 == 0)  # Qwen on even iterations, Llama on odd
+        content = generate_text(prompt, use_qwen=use_qwen_for_generation)
         
-        # Score the content
-        overall_score, dimension_scores, feedback = score_content_quality(content, criteria)
+        # Use the opposite model for evaluation
+        overall_score, dimension_scores, feedback = score_content_quality(content, criteria, use_qwen=(not use_qwen_for_generation))
+        
+        # Log which model was used
+        logger.info(f"Generation using: {'Qwen' if use_qwen_for_generation else 'Llama'}")
         
         # Record iteration data
         iteration_data = {

@@ -1,4 +1,4 @@
-camel-ai[owl]==0.2.57
+camel-ai[owl]
 docx2markdown>=0.1.1
 gradio>=3.50.2
 gradio-client>=0.9.0

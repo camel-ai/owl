@@ -1,3 +1,3 @@
 # Task Response
 
-Error: name 'Client' is not defined
+Error: Could not fetch config for https://justa502man-qwen-qwen3-235b-a22b.hf.space/
