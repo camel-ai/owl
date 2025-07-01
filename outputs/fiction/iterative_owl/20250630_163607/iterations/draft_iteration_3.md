@@ -1,0 +1,1 @@
+Error: HTTPSConnectionPool(host='justa502man-qwen-qwen3-235b-a22b.hf-spaces.com', port=443): Max retries exceeded with url: /predict (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x103c64f70>: Failed to resolve 'justa502man-qwen-qwen3-235b-a22b.hf-spaces.com' ([Errno 8] nodename nor servname provided, or not known)"))

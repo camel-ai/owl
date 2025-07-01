@@ -70,13 +70,13 @@ def select_owl_mode() -> Tuple[str, str, str]:
     modes = [
         {
             "name": "🎭 Fiction Writing System",
-            "description": "Professional fiction writing powered by Cloudflare Scout",
+            "description": "Professional fiction writing with iterative improvement",
             "script": "community_usecase/owl_writing_team/run_iterative_owl_fiction.py",
             "example": "Write a sci-fi story about time travel"
         },
         {
             "name": "🔧 General Task System", 
-            "description": "General task automation with Cloudflare Scout",
+            "description": "General purpose AI agent with quality iteration",
             "script": "examples/run_iterative_cloudflare_workers.py",
             "example": "Create a Python web scraper with documentation"
         },
@@ -118,21 +118,24 @@ def select_owl_mode() -> Tuple[str, str, str]:
     print(f"\n✅ Selected: {selected['name']}")
     return selected['script'], selected['name'], selected['description']
 
-def show_system_info():
-    """Show information about the Cloudflare Scout system"""
-    print_menu_header("🦉 CLOUDFLARE SCOUT SYSTEM")
+def show_hybrid_mode_info():
+    """Show information about hybrid multi-model mode"""
+    print_menu_header("🔥 HYBRID MULTI-MODEL SYSTEM")
     
-    print("🎯 This OWL system uses Cloudflare's Llama Scout model:")
-    print("   🦉 Llama 4 Scout: Advanced language model for story generation")
-    print("   🔍 Iterative Quality Assessment")
+    print("🎯 This OWL system now uses BOTH models simultaneously:")
+    print("   💎 Gemini Pro: Task understanding and strategic thinking")  
+    print("   🦉 Llama 4 Scout: Fast execution with file operations")
+    print("   🔍 Dual Quality Assessment: Both models evaluate output")
     print()
     print("✨ Benefits:")
-    print("   • Professional-grade fiction writing")
-    print("   • High-quality iterative refinement")
-    print("   • Consistent story generation")
+    print("   • Best of both worlds - reasoning + speed")
+    print("   • More robust quality assessment")
+    print("   • Complementary AI perspectives")
     print()
     print("📋 Requirements:")
+    print("   • GOOGLE_API_KEY for Gemini")
     print("   • CF_API_TOKEN + CF_ACCOUNT_ID for Cloudflare")
+    print("   • Both credentials enable full hybrid mode")
     print()
 
 def select_quality_settings() -> Tuple[float, int]:
@@ -242,14 +245,15 @@ def get_task_input() -> str:
         return task
 
 def build_command(script_path: str, task: str, quality_threshold: float, max_iterations: int) -> List[str]:
-    """Build the command to execute with quality settings"""
+    """Build the command to execute with hybrid multi-model configuration"""
     project_root = Path(__file__).parent.absolute()
     full_script_path = project_root / script_path
     
-    # Set environment variables for quality settings
+    # Set environment variables for hybrid multi-model mode
     env_vars = {
         "MAX_ITERATIONS": str(max_iterations),
-        "QUALITY_THRESHOLD": str(quality_threshold)
+        "QUALITY_THRESHOLD": str(quality_threshold),
+        "USE_HYBRID_MODELS": "true"  # Always use hybrid mode
     }
     
     # Update environment
@@ -345,9 +349,9 @@ def main():
             # Step 1: Select OWL mode
             script_path, script_name, description = select_owl_mode()
             
-            # Step 2: Show system info for iterative scripts
+            # Step 2: Show hybrid mode info for iterative scripts
             if "iterative" in script_path:
-                show_system_info()
+                show_hybrid_mode_info()
                 quality_threshold, max_iterations = select_quality_settings()
             else:
                 quality_threshold, max_iterations = 7.5, 3

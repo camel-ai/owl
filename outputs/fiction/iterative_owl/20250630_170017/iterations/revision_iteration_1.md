@@ -1,0 +1,1 @@
+Error: HTTPConnectionPool(host='localhost', port=8501): Max retries exceeded with url: /predict (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x105cf2140>: Failed to establish a new connection: [Errno 61] Connection refused'))

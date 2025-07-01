@@ -1,0 +1,1 @@
+Error: HTTPSConnectionPool(host='huggingchat.ai', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x103a2fac0>: Failed to resolve 'huggingchat.ai' ([Errno 8] nodename nor servname provided, or not known)"))

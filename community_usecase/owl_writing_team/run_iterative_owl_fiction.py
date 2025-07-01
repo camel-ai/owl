@@ -10,7 +10,6 @@ import json
 import requests
 from dotenv import load_dotenv
 import re
-
 # Add project root to Python path
 project_root = Path(__file__).parent.parent.parent.absolute()
 if str(project_root) not in sys.path:
@@ -26,10 +25,9 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-# Cloudflare configuration
-CF_API_TOKEN = os.getenv("CF_API_TOKEN")
-CF_ACCOUNT_ID = os.getenv("CF_ACCOUNT_ID")
-MODEL_TYPE = os.getenv("MODEL_TYPE", "@cf/meta/llama-4-scout-17b-16e-instruct")
+# Hugging Face configuration
+HF_TOKEN = os.getenv("HF_TOKEN")
+HF_MODEL = os.getenv("HF_MODEL", "Qwen/Qwen3-235B-A22B")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.8"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "10000"))
 
@@ -88,34 +86,20 @@ def write_to_file(content: str, filename: str, directory: Path) -> bool:
         return False
 
 def generate_text(prompt: str) -> str:
-    """Generate text using Cloudflare Workers AI"""
-    url = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/ai/run/{MODEL_TYPE}"
-    
-    headers = {
-        "Authorization": f"Bearer {CF_API_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    
-    data = {
-        "prompt": prompt,
-        "temperature": TEMPERATURE,
-        "max_tokens": MAX_TOKENS
-    }
-    
+    """Generate text using Hugging Face Chat"""
     try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        result = response.json()
-        
-        if result.get("success", False):
-            return result.get("result", {}).get("response", "")
-        else:
-            error_msg = str(result.get("errors", ["Unknown error"])[0])
-            logger.error(f"API Error: {error_msg}")
-            return f"Error: {error_msg}"
+        client = Client("tencent/Hunyuan-T1")
+        result = client.predict(
+                message=prompt,
+                api_name="/chat"
+        )
+        # Print for visibility
+        print(result)
+            
+        return result
             
     except Exception as e:
-        logger.error(f"Request failed: {str(e)}")
+        logger.error(f"Hugging Face API error: {str(e)}")
         return f"Error: {str(e)}"
 
 
@@ -224,7 +208,7 @@ def iterative_content_generation(
             last_feedback = iteration_history[-1]["feedback"]
             prompt = generate_improvement_prompt(current_content, last_feedback, iteration + 1)
         
-        # Generate content using Cloudflare Workers
+        # Generate content using Hugging Face
         content = generate_text(prompt)
         
         # Score the content

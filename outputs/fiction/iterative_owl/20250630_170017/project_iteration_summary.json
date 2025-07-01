@@ -1,0 +1,232 @@
+{
+  "task": "a story about a cat who learns to fly",
+  "timestamp": "2025-06-30T17:00:17.786570",
+  "iteration_statistics": {
+    "research": {
+      "total_iterations": 5,
+      "final_score": 5.0,
+      "initial_score": 5.0,
+      "improvement": 0.0
+    },
+    "outline": {
+      "total_iterations": 5,
+      "final_score": 5.0,
+      "initial_score": 5.0,
+      "improvement": 0.0
+    },
+    "characters": {
+      "total_iterations": 5,
+      "final_score": 5.0,
+      "initial_score": 5.0,
+      "improvement": 0.0
+    },
+    "worldbuilding": {
+      "total_iterations": 5,
+      "final_score": 5.0,
+      "initial_score": 5.0,
+      "improvement": 0.0
+    },
+    "scenes": {
+      "total_iterations": 5,
+      "final_score": 5.0,
+      "initial_score": 5.0,
+      "improvement": 0.0
+    },
+    "draft": {
+      "total_iterations": 5,
+      "final_score": 5.0,
+      "initial_score": 5.0,
+      "improvement": 0.0
+    },
+    "revision": {
+      "total_iterations": 5,
+      "final_score": 5.0,
+      "initial_score": 5.0,
+      "improvement": 0.0
+    },
+    "final": {
+      "total_iterations": 5,
+      "final_score": 5.0,
+      "initial_score": 5.0,
+      "improvement": 0.0
+    }
+  },
+  "quality_progression": {
+    "research": [
+      {
+        "iteration": 1,
+        "score": 5.0
+      },
+      {
+        "iteration": 2,
+        "score": 5.0
+      },
+      {
+        "iteration": 3,
+        "score": 5.0
+      },
+      {
+        "iteration": 4,
+        "score": 5.0
+      },
+      {
+        "iteration": 5,
+        "score": 5.0
+      }
+    ],
+    "outline": [
+      {
+        "iteration": 1,
+        "score": 5.0
+      },
+      {
+        "iteration": 2,
+        "score": 5.0
+      },
+      {
+        "iteration": 3,
+        "score": 5.0
+      },
+      {
+        "iteration": 4,
+        "score": 5.0
+      },
+      {
+        "iteration": 5,
+        "score": 5.0
+      }
+    ],
+    "characters": [
+      {
+        "iteration": 1,
+        "score": 5.0
+      },
+      {
+        "iteration": 2,
+        "score": 5.0
+      },
+      {
+        "iteration": 3,
+        "score": 5.0
+      },
+      {
+        "iteration": 4,
+        "score": 5.0
+      },
+      {
+        "iteration": 5,
+        "score": 5.0
+      }
+    ],
+    "worldbuilding": [
+      {
+        "iteration": 1,
+        "score": 5.0
+      },
+      {
+        "iteration": 2,
+        "score": 5.0
+      },
+      {
+        "iteration": 3,
+        "score": 5.0
+      },
+      {
+        "iteration": 4,
+        "score": 5.0
+      },
+      {
+        "iteration": 5,
+        "score": 5.0
+      }
+    ],
+    "scenes": [
+      {
+        "iteration": 1,
+        "score": 5.0
+      },
+      {
+        "iteration": 2,
+        "score": 5.0
+      },
+      {
+        "iteration": 3,
+        "score": 5.0
+      },
+      {
+        "iteration": 4,
+        "score": 5.0
+      },
+      {
+        "iteration": 5,
+        "score": 5.0
+      }
+    ],
+    "draft": [
+      {
+        "iteration": 1,
+        "score": 5.0
+      },
+      {
+        "iteration": 2,
+        "score": 5.0
+      },
+      {
+        "iteration": 3,
+        "score": 5.0
+      },
+      {
+        "iteration": 4,
+        "score": 5.0
+      },
+      {
+        "iteration": 5,
+        "score": 5.0
+      }
+    ],
+    "revision": [
+      {
+        "iteration": 1,
+        "score": 5.0
+      },
+      {
+        "iteration": 2,
+        "score": 5.0
+      },
+      {
+        "iteration": 3,
+        "score": 5.0
+      },
+      {
+        "iteration": 4,
+        "score": 5.0
+      },
+      {
+        "iteration": 5,
+        "score": 5.0
+      }
+    ],
+    "final": [
+      {
+        "iteration": 1,
+        "score": 5.0
+      },
+      {
+        "iteration": 2,
+        "score": 5.0
+      },
+      {
+        "iteration": 3,
+        "score": 5.0
+      },
+      {
+        "iteration": 4,
+        "score": 5.0
+      },
+      {
+        "iteration": 5,
+        "score": 5.0
+      }
+    ]
+  }
+}
