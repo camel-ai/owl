@@ -25,6 +25,7 @@ from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
 import re  # For regular expression operations
+import tempfile  # 添加此行，用于处理临时文件
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -314,12 +315,13 @@ def validate_input(question: str) -> bool:
     return True
 
 
-def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
+def run_owl(question: str, example_module: str, uploaded_file=None) -> Tuple[str, str, str]:
     """运行OWL系统并返回结果
 
     Args:
         question: 用户问题
         example_module: 要导入的示例模块名（如 "run_terminal_zh" 或 "run_deep"）
+        uploaded_file: 上传的文件（可选）- 当使用type="binary"时，这是字节数据
 
     Returns:
         Tuple[...]: 回答、令牌计数、状态
@@ -335,6 +337,73 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
         # 确保环境变量已加载
         load_dotenv(find_dotenv(), override=True)
         logging.info(f"处理问题: '{question}', 使用模块: {example_module}")
+        
+        # 处理上传的文件
+        if uploaded_file is not None:
+            try:
+                # 创建临时目录保存上传的文件
+                tmp_dir = tempfile.mkdtemp(prefix="owl_upload_")
+                logging.info(f"创建临时目录: {tmp_dir}")
+                
+                # 生成一个唯一的文件名
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                
+                # 简单地根据文件内容的前几个字节来猜测文件类型
+                file_ext = ".bin"  # 默认扩展名
+                
+                # 简单的文件类型检测，不依赖magic库
+                if len(uploaded_file) > 4:
+                    # PDF 文件通常以 %PDF 开头
+                    if uploaded_file[:4] == b'%PDF':
+                        file_ext = ".pdf"
+                    # ZIP 文件 (可能是DOCX, XLSX等)
+                    elif uploaded_file[:4] == b'PK\x03\x04':
+                        # 尝试根据文件名确定具体类型
+                        file_ext = ".zip"  # 默认为zip
+                    # 纯文本文件检测 (如果前100个字节都是可打印ASCII或常见Unicode)
+                    elif all(c < 128 and c >= 32 or c in (9, 10, 13) for c in uploaded_file[:100]):
+                        file_ext = ".txt"
+                
+                file_name = f"uploaded_file_{timestamp}{file_ext}"
+                
+                # 生成安全的文件路径
+                file_path = os.path.normpath(os.path.join(tmp_dir, file_name))
+                
+                logging.info(f"准备保存文件: {file_path}")
+                
+                # 保存文件内容
+                try:
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file)
+                    
+                    # 检查文件是否成功写入
+                    if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+                        raise ValueError("文件保存失败或文件为空")
+                    
+                    logging.info(f"文件已成功保存: {file_path}, 大小: {os.path.getsize(file_path)} 字节")
+                    
+                    # 将文件路径添加到问题中（使用规范化的路径，避免系统差异）
+                    normalized_path = file_path.replace('\\', '/')
+                    if "文件路径:" not in question and "file path:" not in question.lower():
+                        question = f"{question}\n文件路径: {normalized_path}"
+                    
+                    logging.info(f"更新后的问题: '{question}'")
+                    
+                except Exception as e:
+                    logging.error(f"保存文件时出错: {str(e)}")
+                    return (
+                        f"保存文件时出错: {str(e)}",
+                        "0",
+                        f"❌ 错误: 文件保存失败 - {str(e)}",
+                    )
+                
+            except Exception as e:
+                logging.error(f"处理上传文件时出错: {str(e)}")
+                return (
+                    f"处理上传文件时出错: {str(e)}",
+                    "0",
+                    f"❌ 错误: 文件处理失败 - {str(e)}",
+                )
 
         # 检查模块是否在MODULE_DESCRIPTIONS中
         if example_module not in MODULE_DESCRIPTIONS:
@@ -778,8 +847,7 @@ def create_ui():
             logging.error(f"清空日志文件时出错: {str(e)}")
             return ""
 
-    # 创建一个实时日志更新函数
-    def process_with_live_logs(question, module_name):
+    def process_with_live_logs(question, module_name, uploaded_file=None):
         """处理问题并实时更新日志"""
         global CURRENT_PROCESS
 
@@ -791,7 +859,7 @@ def create_ui():
 
         def process_in_background():
             try:
-                result = run_owl(question, module_name)
+                result = run_owl(question, module_name, uploaded_file)
                 result_queue.put(result)
             except Exception as e:
                 result_queue.put((f"发生错误: {str(e)}", "0", f"❌ 错误: {str(e)}"))
@@ -1071,6 +1139,23 @@ def create_ui():
                     value="打开百度搜索，总结一下camel-ai的camel框架的github star、fork数目等，并把数字用plot包写成python文件保存到本地，并运行生成的python文件。",
                 )
 
+               
+                file_upload = gr.File(
+                    label="上传文件（可选）",
+                    file_types=["pdf", "docx", "txt", "csv", "xlsx", "json", "py", "ipynb"],
+                    file_count="single",
+                    type="binary",  # 使用binary类型
+                )
+                
+                # 文件上传说明 - 更新说明以包含Windows兼容性
+                gr.Markdown("""
+                    <div style="background-color: #e7f3fe; border-left: 6px solid #2196F3; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+                      <strong>文件上传说明：</strong> 上传文件后，系统会自动将文件保存到临时目录并添加文件路径到您的问题中。
+                      支持多种文件格式，包括PDF、Word文档、文本文件、CSV、Excel、Python代码等。
+                      <br><strong>注意：</strong> 文件会被保存在临时目录，系统重启后可能会被清除。
+                    </div>
+                """)
+
                 # 增强版模块选择下拉菜单
                 # 只包含MODULE_DESCRIPTIONS中定义的模块
                 module_dropdown = gr.Dropdown(
@@ -1214,10 +1299,10 @@ def create_ui():
 
                     refresh_button.click(fn=update_env_table, outputs=[env_table])
 
-        # 设置事件处理
+     
         run_button.click(
             fn=process_with_live_logs,
-            inputs=[question_input, module_dropdown],
+            inputs=[question_input, module_dropdown, file_upload],
             outputs=[token_count_output, status_output, log_display2],
         )
 
