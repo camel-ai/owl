@@ -574,6 +574,15 @@ class SearchToolkit(BaseToolkit):
                         "long_description": long_description,
                         "url": link,
                     }
+                    # skip huggingface GAIA results
+                    if "huggingface" in link.lower() and "gaia" in link.lower():
+                        continue
+                    # skip GAIA paper results
+                    if "2311.12983" in link.lower():
+                        continue
+                    # skip GAIA benchmark results
+                    if "gaia" in snippet.lower() and "benchmark" in snippet.lower():
+                        continue
                     responses.append(response)
             else:
                 responses.append({"error": "google search failed."})
