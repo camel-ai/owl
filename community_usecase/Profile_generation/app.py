@@ -350,9 +350,6 @@ model_backend = ModelFactory.create(
 output_dir = "./file_write_outputs"
 os.makedirs(output_dir, exist_ok=True)
 
-# Initialize the FileWriteToolkit with the output directory
-file_toolkit = FileWriteToolkit(output_dir=output_dir)
-
 TASK_PROMPT = """
 
 > Please extract and compile detailed academic and professional information 
@@ -509,9 +506,11 @@ DO NOT generate fake links in markdown file.
     ]
 
     toolkit = HybridBrowserToolkit(headless=False,
+                                   stealth=True,
+                                   browser_log_to_file=True,
                                    user_data_dir=USER_DATA_DIR,
                                    enabled_tools=custom_tools)
-    file_tool = FileWriteToolkit(output_dir=output_dir)
+    file_tool = FileWriteToolkit(working_directory=output_dir)
     agent = ChatAgent(
         system_message=TASK_PROMPT,
         model=model_backend,
@@ -676,7 +675,7 @@ def serve_generated_file(filename: str):
 
 @app.route("/api/add_account_info", methods=["POST"])
 def api_add_account_info():
-    """Launch a persistent Playwright browser so that user can log in manually.
+    """Launch a persistent browser using HybridBrowserToolkit so that user can log in manually.
 
     The browser is started in a detached background thread so that the Flask
     request thread returns immediately. The browser session will reuse the
@@ -685,29 +684,40 @@ def api_add_account_info():
     """
 
     def _open_browser():
-        try:
-            from playwright.sync_api import sync_playwright
-            _p = sync_playwright().start()
-            context = _p.chromium.launch_persistent_context(
-                USER_DATA_DIR,
-                headless=False,
-                args=["--start-maximized"],
-            )
-
-            # Wait until the browser context itself is closed by the user.
-            # This will keep the thread alive and prevent the window from
-            # disappearing immediately.
+        async def _async_open():
             try:
-                context.wait_for_event("close", timeout=0)
-            finally:
-                try:
-                    context.close()
-                except Exception:
-                    pass  # context may already be closed
-                _p.stop()
-        except Exception as exc:
-            logger.exception(
-                "Failed to open Playwright persistent context: %s", exc)
+                # Create HybridBrowserToolkit instance
+                toolkit = HybridBrowserToolkit(
+                    headless=False,
+                    stealth=True,
+                    browser_log_to_file=True,
+                    user_data_dir=USER_DATA_DIR,
+                    enabled_tools=["open_browser"]
+                )
+
+                # Get the open_browser tool and call it directly
+                tools = toolkit.get_tools()
+                open_browser_tool = None
+                for tool in tools:
+                    if tool.get_function_name() == "open_browser":
+                        open_browser_tool = tool
+                        break
+
+                if open_browser_tool:
+                    # Call open_browser directly with await
+                    await open_browser_tool.func()
+                    logger.info(
+                        "Browser opened for manual login. Browser will stay open for user interaction.")
+                else:
+                    logger.error("Could not find open_browser tool")
+
+            except Exception as exc:
+                logger.exception(
+                    "Failed to open browser using HybridBrowserToolkit: %s",
+                    exc)
+
+        # Run the async function
+        asyncio.run(_async_open())
 
     threading.Thread(target=_open_browser, daemon=True).start()
     return jsonify({"status": "success"})
