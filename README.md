@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/camel-ai-owl-badge.png)](https://mseep.ai/app/camel-ai-owl)
+
 <h1 align="center">
 	🦉 OWL: Optimized Workforce Learning for General Multi-Agent Assistance in Real-World Task Automation
 </h1>
