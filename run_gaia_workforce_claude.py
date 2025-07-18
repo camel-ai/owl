@@ -105,10 +105,7 @@ Here are some tips that help you perform web search:
 """,
         model=web_model,
         tools=[
-            FunctionTool(search_toolkit.search_google),
-            FunctionTool(search_toolkit.search_wiki),
-            FunctionTool(search_toolkit.search_wiki_revisions),
-            FunctionTool(search_toolkit.search_archived_webpage),
+            FunctionTool(search_toolkit.web_search),
             FunctionTool(document_processing_toolkit.extract_document_content),
             FunctionTool(browser_simulator_toolkit.browse_url) ,
             FunctionTool(video_analysis_toolkit.ask_question_about_video),
