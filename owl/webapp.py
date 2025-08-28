@@ -25,6 +25,7 @@ from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
 import re
+import inspect
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -316,14 +317,18 @@ def validate_input(question: str) -> bool:
 
 
 def run_owl(
-    question: str, example_module: str, uploaded_file: str = None
+    question: str,
+    example_module: str,
+    uploaded_file: str = None,
+    selected_toolkits: list[str] = None,
 ) -> Tuple[str, str, str]:
     """Run the OWL system and return results
 
     Args:
         question: User question
-        example_module: Example module name to import (e.g., "run_terminal_zh" or "run_deep")
+        example_module: Example module name to import
         uploaded_file: Path to the file uploaded by the user.
+        selected_toolkits: A list of toolkit names to be used.
 
     Returns:
         Tuple[...]: Answer, token count, status
@@ -364,6 +369,8 @@ def run_owl(
         try:
             logging.info(f"Importing module: {module_path}")
             module = importlib.import_module(module_path)
+            # Reload the module to ensure latest changes are used
+            importlib.reload(module)
         except ImportError as ie:
             logging.error(f"Unable to import module {module_path}: {str(ie)}")
             return (
@@ -395,7 +402,20 @@ def run_owl(
         # Build society simulation
         try:
             logging.info("Building society simulation...")
-            society = module.construct_society(question)
+
+            # Inspect the signature of the target construct_society function
+            sig = inspect.signature(module.construct_society)
+
+            if "selected_toolkits" in sig.parameters:
+                # If the function accepts the argument, pass it
+                logging.info(f"Passing selected toolkits: {selected_toolkits}")
+                society = module.construct_society(
+                    question, selected_toolkits=selected_toolkits
+                )
+            else:
+                # Otherwise, call it without the argument for backward compatibility
+                logging.info("Target module does not support toolkit selection.")
+                society = module.construct_society(question)
 
         except Exception as e:
             logging.error(f"Error occurred while building society simulation: {str(e)}")
@@ -847,7 +867,9 @@ def create_ui():
             return ""
 
     # Create a real-time log update function
-    def process_with_live_logs(question, module_name, uploaded_file=None):
+    def process_with_live_logs(
+        question, module_name, uploaded_file=None, selected_toolkits=None
+    ):
         """Process questions and update logs in real-time"""
         global CURRENT_PROCESS
 
@@ -859,7 +881,9 @@ def create_ui():
 
         def process_in_background():
             try:
-                result = run_owl(question, module_name, uploaded_file)
+                result = run_owl(
+                    question, module_name, uploaded_file, selected_toolkits
+                )
                 result_queue.put(result)
             except Exception as e:
                 result_queue.put(
@@ -1189,6 +1213,24 @@ def create_ui():
                     elem_classes="module-info",
                 )
 
+                # Add toolkit selection UI
+                toolkit_choices = [
+                    "Browser",
+                    "Video Analysis",
+                    "Audio Analysis",
+                    "Code Execution",
+                    "Image Analysis",
+                    "Web Search",
+                    "Excel",
+                    "Document Processing",
+                    "File Write",
+                ]
+                toolkit_checkboxes = gr.CheckboxGroup(
+                    label="Select Toolkits to Use (for 'run' module)",
+                    choices=toolkit_choices,
+                    value=toolkit_choices,  # Default to all selected
+                )
+
                 with gr.Row():
                     run_button = gr.Button(
                         "Run", variant="primary", elem_classes="primary"
@@ -1355,7 +1397,12 @@ def create_ui():
         # Set up event handling
         run_button.click(
             fn=process_with_live_logs,
-            inputs=[question_input, module_dropdown, file_upload_component],
+            inputs=[
+                question_input,
+                module_dropdown,
+                file_upload_component,
+                toolkit_checkboxes,
+            ],
             outputs=[token_count_output, status_output, log_display2],
         ).then(fn=refresh_history_list, outputs=[history_dropdown])
 

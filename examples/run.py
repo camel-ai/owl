@@ -38,11 +38,16 @@ load_dotenv(dotenv_path=str(env_path))
 set_log_level(level="DEBUG")
 
 
-def construct_society(question: str) -> RolePlaying:
+def construct_society(
+    question: str, selected_toolkits: list[str] = None
+) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
 
     Args:
         question (str): The task or question to be addressed by the society.
+        selected_toolkits (list[str], optional): A list of toolkit names to
+            be used. If None, all default toolkits are used.
+            Defaults to None.
 
     Returns:
         RolePlaying: A configured society of agents ready to address the question.
@@ -87,24 +92,40 @@ def construct_society(question: str) -> RolePlaying:
         ),
     }
 
-    # Configure toolkits
-    tools = [
-        *BrowserToolkit(
-            headless=False,  # Set to True for headless mode (e.g., on remote servers)
+    # Define all available toolkits
+    all_toolkits = {
+        "Browser": BrowserToolkit(
+            headless=False,
             web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
-        *VideoAnalysisToolkit(model=models["video"]).get_tools(),
-        *AudioAnalysisToolkit().get_tools(),  # This requires OpenAI Key
-        *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
-        *ImageAnalysisToolkit(model=models["image"]).get_tools(),
-        SearchToolkit().search_duckduckgo,
-        SearchToolkit().search_google,  # Comment this out if you don't have google search
-        SearchToolkit().search_wiki,
-        *ExcelToolkit().get_tools(),
-        *DocumentProcessingToolkit(model=models["document"]).get_tools(),
-        *FileWriteToolkit(output_dir="./").get_tools(),
-    ]
+        "Video Analysis": VideoAnalysisToolkit(model=models["video"]).get_tools(),
+        "Audio Analysis": AudioAnalysisToolkit().get_tools(),
+        "Code Execution": CodeExecutionToolkit(
+            sandbox="subprocess", verbose=True
+        ).get_tools(),
+        "Image Analysis": ImageAnalysisToolkit(model=models["image"]).get_tools(),
+        "Web Search": [
+            SearchToolkit().search_duckduckgo,
+            SearchToolkit().search_google,
+            SearchToolkit().search_wiki,
+        ],
+        "Excel": ExcelToolkit().get_tools(),
+        "Document Processing": DocumentProcessingToolkit(
+            model=models["document"]
+        ).get_tools(),
+        "File Write": FileWriteToolkit(output_dir="./").get_tools(),
+    }
+
+    # Configure toolkits based on selection
+    if selected_toolkits is None:
+        # Use all tools if no selection is made
+        tools = [tool for tool_list in all_toolkits.values() for tool in tool_list]
+    else:
+        tools = []
+        for toolkit_name in selected_toolkits:
+            if toolkit_name in all_toolkits:
+                tools.extend(all_toolkits[toolkit_name])
 
     # Configure agent roles and parameters
     user_agent_kwargs = {"model": models["user"]}
