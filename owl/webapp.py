@@ -319,25 +319,21 @@ def validate_input(question: str) -> bool:
 def run_owl(
     question: str,
     example_module: str,
-    uploaded_file: str = None,
-    selected_toolkits: list[str] = None,
+    model_name: str = None,
+    temperature: float = 0.0,
 ) -> Tuple[str, str, str]:
     """Run the OWL system and return results
 
     Args:
         question: User question
         example_module: Example module name to import
-        uploaded_file: Path to the file uploaded by the user.
-        selected_toolkits: A list of toolkit names to be used.
+        model_name (str, optional): The name of the model to use.
+        temperature (float, optional): The temperature for the model.
 
     Returns:
         Tuple[...]: Answer, token count, status
     """
     global CURRENT_PROCESS
-
-    # If a file is uploaded, append its path to the question
-    if uploaded_file:
-        question += f"\n\nHere is the file path for the task: {uploaded_file}"
 
     # Validate input
     if not validate_input(question):
@@ -405,17 +401,18 @@ def run_owl(
 
             # Inspect the signature of the target construct_society function
             sig = inspect.signature(module.construct_society)
+            kwargs = {"question": question}
 
-            if "selected_toolkits" in sig.parameters:
-                # If the function accepts the argument, pass it
-                logging.info(f"Passing selected toolkits: {selected_toolkits}")
-                society = module.construct_society(
-                    question, selected_toolkits=selected_toolkits
-                )
-            else:
-                # Otherwise, call it without the argument for backward compatibility
-                logging.info("Target module does not support toolkit selection.")
-                society = module.construct_society(question)
+            if "model_name" in sig.parameters:
+                kwargs["model_name"] = model_name
+                logging.info(f"Passing model_name: {model_name}")
+
+            if "temperature" in sig.parameters:
+                kwargs["temperature"] = temperature
+                logging.info(f"Passing temperature: {temperature}")
+
+            # Call the function with the supported arguments
+            society = module.construct_society(**kwargs)
 
         except Exception as e:
             logging.error(f"Error occurred while building society simulation: {str(e)}")
@@ -792,44 +789,6 @@ def save_env_table_changes(data):
         return f"❌ Save failed: {str(e)}"
 
 
-def get_history_runs():
-    """Scans the history directory and returns a list of past run names."""
-    history_dir = os.path.join(os.path.dirname(__file__), "history")
-    if not os.path.exists(history_dir):
-        return []
-
-    runs = [
-        d
-        for d in os.listdir(history_dir)
-        if os.path.isdir(os.path.join(history_dir, d))
-    ]
-    # Sort by name, which is a timestamp, in reverse order
-    runs.sort(reverse=True)
-    return runs
-
-
-def view_history_run(run_name):
-    """Reads the answer and log for a given history run."""
-    if not run_name:
-        return "No run selected.", "No run selected."
-
-    run_dir = os.path.join(os.path.dirname(__file__), "history", run_name)
-    answer_path = os.path.join(run_dir, "answer.txt")
-    log_path = os.path.join(run_dir, "log.txt")
-
-    answer = "Could not find answer.txt."
-    if os.path.exists(answer_path):
-        with open(answer_path, "r", encoding="utf-8") as f:
-            answer = f.read()
-
-    log = "Could not find log.txt."
-    if os.path.exists(log_path):
-        with open(log_path, "r", encoding="utf-8") as f:
-            log = f.read()
-
-    return answer, log
-
-
 def get_env_var_value(key):
     """Get the actual value of an environment variable
 
@@ -868,7 +827,7 @@ def create_ui():
 
     # Create a real-time log update function
     def process_with_live_logs(
-        question, module_name, uploaded_file=None, selected_toolkits=None
+        question, module_name, model_name=None, temperature=None
     ):
         """Process questions and update logs in real-time"""
         global CURRENT_PROCESS
@@ -881,9 +840,7 @@ def create_ui():
 
         def process_in_background():
             try:
-                result = run_owl(
-                    question, module_name, uploaded_file, selected_toolkits
-                )
+                result = run_owl(question, module_name, model_name, temperature)
                 result_queue.put(result)
             except Exception as e:
                 result_queue.put(
@@ -916,31 +873,6 @@ def create_ui():
 
             # Final update of conversation record
             logs2 = get_latest_logs(100, LOG_QUEUE)
-
-            # Save results to history
-            if "Error" not in status:
-                try:
-                    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                    run_history_dir = os.path.join(
-                        os.path.dirname(__file__), "history", timestamp
-                    )
-                    os.makedirs(run_history_dir, exist_ok=True)
-
-                    with open(
-                        os.path.join(run_history_dir, "answer.txt"),
-                        "w",
-                        encoding="utf-8",
-                    ) as f:
-                        f.write(answer)
-
-                    with open(
-                        os.path.join(run_history_dir, "log.txt"), "w", encoding="utf-8"
-                    ) as f:
-                        f.write(logs2)
-
-                    logging.info(f"Saved run results to {run_history_dir}")
-                except Exception as e:
-                    logging.error(f"Failed to save history: {e}")
 
             # Set different indicators based on status
             if "Error" in status:
@@ -1183,17 +1115,11 @@ def create_ui():
             with gr.Column(scale=0.5):
                 question_input = gr.Textbox(
                     lines=5,
-                    placeholder="Enter your task here, or upload a file and ask a question about it.",
+                    placeholder="Please enter your question...",
                     label="Question",
                     elem_id="question_input",
                     show_copy_button=True,
-                    value="Please summarize the key points from the attached document.",
-                )
-
-                # Add file upload component
-                file_upload_component = gr.File(
-                    label="Upload File (Optional)",
-                    type="filepath",  # Ensure it returns a file path
+                    value="Open Brave search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task.",
                 )
 
                 # Enhanced module selection dropdown
@@ -1213,24 +1139,6 @@ def create_ui():
                     elem_classes="module-info",
                 )
 
-                # Add toolkit selection UI
-                toolkit_choices = [
-                    "Browser",
-                    "Video Analysis",
-                    "Audio Analysis",
-                    "Code Execution",
-                    "Image Analysis",
-                    "Web Search",
-                    "Excel",
-                    "Document Processing",
-                    "File Write",
-                ]
-                toolkit_checkboxes = gr.CheckboxGroup(
-                    label="Select Toolkits to Use (for 'run' module)",
-                    choices=toolkit_choices,
-                    value=toolkit_choices,  # Default to all selected
-                )
-
                 with gr.Row():
                     run_button = gr.Button(
                         "Run", variant="primary", elem_classes="primary"
@@ -1246,13 +1154,12 @@ def create_ui():
 
                 # Example questions
                 examples = [
-                    "Please summarize the key points from the attached document.",
-                    "Analyze the data in the attached spreadsheet and identify any trends.",
+                    "Open Brave search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task.",
                     "Browse Amazon and find a product that is attractive to programmers. Please provide the product name and price",
                     "Write a hello world python file and save it locally",
                 ]
 
-                gr.Examples(examples=examples, inputs=[question_input])
+                gr.Examples(examples=examples, inputs=question_input)
 
                 gr.HTML("""
                         <div class="footer" id="about">
@@ -1280,21 +1187,6 @@ def create_ui():
                         clear_logs_button2 = gr.Button(
                             "Clear Record", variant="secondary"
                         )
-
-                with gr.TabItem("History"):
-                    with gr.Group():
-                        with gr.Row():
-                            history_dropdown = gr.Dropdown(
-                                label="Select a past run to view",
-                                choices=get_history_runs(),
-                            )
-                            refresh_history_button = gr.Button("🔄 Refresh")
-                        view_history_button = gr.Button("View Run Details")
-                    with gr.Group():
-                        gr.Markdown("### Final Answer")
-                        history_answer_display = gr.Markdown("No run selected.")
-                        gr.Markdown("### Full Log")
-                        history_log_display = gr.Markdown("No run selected.")
 
                 with gr.TabItem("Environment Variable Management", id="env-settings"):
                     with gr.Group(elem_classes="env-manager-container"):
@@ -1379,32 +1271,17 @@ def create_ui():
 
                     refresh_button.click(fn=update_env_table, outputs=[env_table])
 
-        # History tab event handlers
-        def refresh_history_list():
-            runs = get_history_runs()
-            return gr.Dropdown.update(choices=runs, value=runs[0] if runs else None)
-
-        refresh_history_button.click(
-            fn=refresh_history_list, outputs=[history_dropdown]
-        )
-
-        view_history_button.click(
-            fn=view_history_run,
-            inputs=[history_dropdown],
-            outputs=[history_answer_display, history_log_display],
-        )
-
         # Set up event handling
         run_button.click(
             fn=process_with_live_logs,
             inputs=[
                 question_input,
                 module_dropdown,
-                file_upload_component,
-                toolkit_checkboxes,
+                model_name_dropdown,
+                temperature_slider,
             ],
             outputs=[token_count_output, status_output, log_display2],
-        ).then(fn=refresh_history_list, outputs=[history_dropdown])
+        )
 
         # Module selection updates description
         module_dropdown.change(
@@ -1455,12 +1332,6 @@ def main():
 
         # Initialize .env file (if it doesn't exist)
         init_env_file()
-
-        # Create history directory if it doesn't exist
-        history_dir = os.path.join(os.path.dirname(__file__), "history")
-        os.makedirs(history_dir, exist_ok=True)
-        logging.info(f"History directory ensured at: {history_dir}")
-
         app = create_ui()
 
         app.queue()
