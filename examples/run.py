@@ -38,60 +38,52 @@ load_dotenv(dotenv_path=str(env_path))
 set_log_level(level="DEBUG")
 
 
-def construct_society(
-    question: str, model_name: str = None, temperature: float = 0.0
-) -> RolePlaying:
+def construct_society(question: str) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
 
     Args:
         question (str): The task or question to be addressed by the society.
-        model_name (str, optional): The name of the model to use. If None,
-            a default is used.
-        temperature (float, optional): The temperature for the model.
 
     Returns:
         RolePlaying: A configured society of agents ready to address the question.
     """
-    # Set model and temperature
-    model_type = getattr(ModelType, model_name, ModelType.GPT_4O)
-    model_config = {"temperature": temperature}
 
     # Create models for different components
     models = {
         "user": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=model_type,
-            model_config_dict=model_config,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
         ),
         "assistant": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=model_type,
-            model_config_dict=model_config,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
         ),
         "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=model_type,
-            model_config_dict=model_config,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
         ),
         "planning": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=model_type,
-            model_config_dict=model_config,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
         ),
         "video": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=model_type,
-            model_config_dict=model_config,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
         ),
         "image": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=model_type,
-            model_config_dict=model_config,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
         ),
         "document": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=model_type,
-            model_config_dict=model_config,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
         ),
     }
 

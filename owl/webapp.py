@@ -25,7 +25,6 @@ from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
 import re
-import inspect
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -258,6 +257,7 @@ MODULE_DESCRIPTIONS = {
     "run_ppio": "Using ppio model to process tasks",
     "run_together_ai": "Using together ai model to process tasks",
     "run_novita_ai": "Using novita ai model to process tasks",
+    "run_openrouter": "Using a custom model from OpenRouter.",
 }
 
 
@@ -283,6 +283,9 @@ QWEN_API_KEY='Your_Key'
 
 # DeepSeek API (https://platform.deepseek.com/api_keys)
 DEEPSEEK_API_KEY='Your_Key'
+
+# OpenRouter API (https://openrouter.ai/keys)
+OPENROUTER_API_KEY='Your_Key'
 
 #===========================================
 # Tools & Services API
@@ -317,18 +320,15 @@ def validate_input(question: str) -> bool:
 
 
 def run_owl(
-    question: str,
-    example_module: str,
-    model_name: str = None,
-    temperature: float = 0.0,
+    question: str, example_module: str, openrouter_model_name: str = None
 ) -> Tuple[str, str, str]:
     """Run the OWL system and return results
 
     Args:
         question: User question
         example_module: Example module name to import
-        model_name (str, optional): The name of the model to use.
-        temperature (float, optional): The temperature for the model.
+        openrouter_model_name (str, optional): The name of the OpenRouter
+            model to use.
 
     Returns:
         Tuple[...]: Answer, token count, status
@@ -403,13 +403,9 @@ def run_owl(
             sig = inspect.signature(module.construct_society)
             kwargs = {"question": question}
 
-            if "model_name" in sig.parameters:
-                kwargs["model_name"] = model_name
-                logging.info(f"Passing model_name: {model_name}")
-
-            if "temperature" in sig.parameters:
-                kwargs["temperature"] = temperature
-                logging.info(f"Passing temperature: {temperature}")
+            if "openrouter_model_name" in sig.parameters:
+                kwargs["openrouter_model_name"] = openrouter_model_name
+                logging.info(f"Passing openrouter_model_name: {openrouter_model_name}")
 
             # Call the function with the supported arguments
             society = module.construct_society(**kwargs)
@@ -634,6 +630,7 @@ def is_api_related(key: str) -> bool:
         "hugging",
         "chunkr",
         "firecrawl",
+        "openrouter",
     ]
 
     # Check if it contains API-related keywords (case insensitive)
@@ -668,6 +665,8 @@ def get_api_guide(key: str) -> str:
         return "https://www.firecrawl.dev/"
     elif "novita" in key_lower:
         return "https://novita.ai/settings/key-management?utm_source=github_owl&utm_medium=github_readme&utm_campaign=github_link"
+    elif "openrouter" in key_lower:
+        return "https://openrouter.ai/keys"
     else:
         return ""
 
@@ -826,9 +825,7 @@ def create_ui():
             return ""
 
     # Create a real-time log update function
-    def process_with_live_logs(
-        question, module_name, model_name=None, temperature=None
-    ):
+    def process_with_live_logs(question, module_name, openrouter_model_name=None):
         """Process questions and update logs in real-time"""
         global CURRENT_PROCESS
 
@@ -840,7 +837,7 @@ def create_ui():
 
         def process_in_background():
             try:
-                result = run_owl(question, module_name, model_name, temperature)
+                result = run_owl(question, module_name, openrouter_model_name)
                 result_queue.put(result)
             except Exception as e:
                 result_queue.put(
@@ -1139,6 +1136,13 @@ def create_ui():
                     elem_classes="module-info",
                 )
 
+                openrouter_model_name_textbox = gr.Textbox(
+                    label="OpenRouter Model Name",
+                    placeholder="e.g., mistralai/mistral-7b-instruct",
+                    value="mistralai/mistral-7b-instruct",
+                    visible=False,  # Initially hidden
+                )
+
                 with gr.Row():
                     run_button = gr.Button(
                         "Run", variant="primary", elem_classes="primary"
@@ -1274,20 +1278,20 @@ def create_ui():
         # Set up event handling
         run_button.click(
             fn=process_with_live_logs,
-            inputs=[
-                question_input,
-                module_dropdown,
-                model_name_dropdown,
-                temperature_slider,
-            ],
+            inputs=[question_input, module_dropdown, openrouter_model_name_textbox],
             outputs=[token_count_output, status_output, log_display2],
         )
 
-        # Module selection updates description
+        # Module selection updates description and UI visibility
+        def handle_module_change(module_name):
+            description = update_module_description(module_name)
+            openrouter_visible = module_name == "run_openrouter"
+            return description, gr.update(visible=openrouter_visible)
+
         module_dropdown.change(
-            fn=update_module_description,
+            fn=handle_module_change,
             inputs=module_dropdown,
-            outputs=module_description,
+            outputs=[module_description, openrouter_model_name_textbox],
         )
 
         # Conversation record related event handling
