@@ -772,6 +772,44 @@ def save_env_table_changes(data):
         return f"❌ Save failed: {str(e)}"
 
 
+def get_history_runs():
+    """Scans the history directory and returns a list of past run names."""
+    history_dir = os.path.join(os.path.dirname(__file__), "history")
+    if not os.path.exists(history_dir):
+        return []
+
+    runs = [
+        d
+        for d in os.listdir(history_dir)
+        if os.path.isdir(os.path.join(history_dir, d))
+    ]
+    # Sort by name, which is a timestamp, in reverse order
+    runs.sort(reverse=True)
+    return runs
+
+
+def view_history_run(run_name):
+    """Reads the answer and log for a given history run."""
+    if not run_name:
+        return "No run selected.", "No run selected."
+
+    run_dir = os.path.join(os.path.dirname(__file__), "history", run_name)
+    answer_path = os.path.join(run_dir, "answer.txt")
+    log_path = os.path.join(run_dir, "log.txt")
+
+    answer = "Could not find answer.txt."
+    if os.path.exists(answer_path):
+        with open(answer_path, "r", encoding="utf-8") as f:
+            answer = f.read()
+
+    log = "Could not find log.txt."
+    if os.path.exists(log_path):
+        with open(log_path, "r", encoding="utf-8") as f:
+            log = f.read()
+
+    return answer, log
+
+
 def get_env_var_value(key):
     """Get the actual value of an environment variable
 
@@ -854,6 +892,31 @@ def create_ui():
 
             # Final update of conversation record
             logs2 = get_latest_logs(100, LOG_QUEUE)
+
+            # Save results to history
+            if "Error" not in status:
+                try:
+                    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                    run_history_dir = os.path.join(
+                        os.path.dirname(__file__), "history", timestamp
+                    )
+                    os.makedirs(run_history_dir, exist_ok=True)
+
+                    with open(
+                        os.path.join(run_history_dir, "answer.txt"),
+                        "w",
+                        encoding="utf-8",
+                    ) as f:
+                        f.write(answer)
+
+                    with open(
+                        os.path.join(run_history_dir, "log.txt"), "w", encoding="utf-8"
+                    ) as f:
+                        f.write(logs2)
+
+                    logging.info(f"Saved run results to {run_history_dir}")
+                except Exception as e:
+                    logging.error(f"Failed to save history: {e}")
 
             # Set different indicators based on status
             if "Error" in status:
@@ -1176,6 +1239,21 @@ def create_ui():
                             "Clear Record", variant="secondary"
                         )
 
+                with gr.TabItem("History"):
+                    with gr.Group():
+                        with gr.Row():
+                            history_dropdown = gr.Dropdown(
+                                label="Select a past run to view",
+                                choices=get_history_runs(),
+                            )
+                            refresh_history_button = gr.Button("🔄 Refresh")
+                        view_history_button = gr.Button("View Run Details")
+                    with gr.Group():
+                        gr.Markdown("### Final Answer")
+                        history_answer_display = gr.Markdown("No run selected.")
+                        gr.Markdown("### Full Log")
+                        history_log_display = gr.Markdown("No run selected.")
+
                 with gr.TabItem("Environment Variable Management", id="env-settings"):
                     with gr.Group(elem_classes="env-manager-container"):
                         gr.Markdown("""
@@ -1259,12 +1337,27 @@ def create_ui():
 
                     refresh_button.click(fn=update_env_table, outputs=[env_table])
 
+        # History tab event handlers
+        def refresh_history_list():
+            runs = get_history_runs()
+            return gr.Dropdown.update(choices=runs, value=runs[0] if runs else None)
+
+        refresh_history_button.click(
+            fn=refresh_history_list, outputs=[history_dropdown]
+        )
+
+        view_history_button.click(
+            fn=view_history_run,
+            inputs=[history_dropdown],
+            outputs=[history_answer_display, history_log_display],
+        )
+
         # Set up event handling
         run_button.click(
             fn=process_with_live_logs,
             inputs=[question_input, module_dropdown, file_upload_component],
             outputs=[token_count_output, status_output, log_display2],
-        )
+        ).then(fn=refresh_history_list, outputs=[history_dropdown])
 
         # Module selection updates description
         module_dropdown.change(
@@ -1315,6 +1408,12 @@ def main():
 
         # Initialize .env file (if it doesn't exist)
         init_env_file()
+
+        # Create history directory if it doesn't exist
+        history_dir = os.path.join(os.path.dirname(__file__), "history")
+        os.makedirs(history_dir, exist_ok=True)
+        logging.info(f"History directory ensured at: {history_dir}")
+
         app = create_ui()
 
         app.queue()
