@@ -315,17 +315,24 @@ def validate_input(question: str) -> bool:
     return True
 
 
-def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
+def run_owl(
+    question: str, example_module: str, uploaded_file: str = None
+) -> Tuple[str, str, str]:
     """Run the OWL system and return results
 
     Args:
         question: User question
         example_module: Example module name to import (e.g., "run_terminal_zh" or "run_deep")
+        uploaded_file: Path to the file uploaded by the user.
 
     Returns:
         Tuple[...]: Answer, token count, status
     """
     global CURRENT_PROCESS
+
+    # If a file is uploaded, append its path to the question
+    if uploaded_file:
+        question += f"\n\nHere is the file path for the task: {uploaded_file}"
 
     # Validate input
     if not validate_input(question):
@@ -802,7 +809,7 @@ def create_ui():
             return ""
 
     # Create a real-time log update function
-    def process_with_live_logs(question, module_name):
+    def process_with_live_logs(question, module_name, uploaded_file=None):
         """Process questions and update logs in real-time"""
         global CURRENT_PROCESS
 
@@ -814,7 +821,7 @@ def create_ui():
 
         def process_in_background():
             try:
-                result = run_owl(question, module_name)
+                result = run_owl(question, module_name, uploaded_file)
                 result_queue.put(result)
             except Exception as e:
                 result_queue.put(
@@ -1089,11 +1096,17 @@ def create_ui():
             with gr.Column(scale=0.5):
                 question_input = gr.Textbox(
                     lines=5,
-                    placeholder="Please enter your question...",
+                    placeholder="Enter your task here, or upload a file and ask a question about it.",
                     label="Question",
                     elem_id="question_input",
                     show_copy_button=True,
-                    value="Open Brave search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task.",
+                    value="Please summarize the key points from the attached document.",
+                )
+
+                # Add file upload component
+                file_upload_component = gr.File(
+                    label="Upload File (Optional)",
+                    type="filepath",  # Ensure it returns a file path
                 )
 
                 # Enhanced module selection dropdown
@@ -1128,12 +1141,13 @@ def create_ui():
 
                 # Example questions
                 examples = [
-                    "Open Brave search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task.",
+                    "Please summarize the key points from the attached document.",
+                    "Analyze the data in the attached spreadsheet and identify any trends.",
                     "Browse Amazon and find a product that is attractive to programmers. Please provide the product name and price",
                     "Write a hello world python file and save it locally",
                 ]
 
-                gr.Examples(examples=examples, inputs=question_input)
+                gr.Examples(examples=examples, inputs=[question_input])
 
                 gr.HTML("""
                         <div class="footer" id="about">
@@ -1248,7 +1262,7 @@ def create_ui():
         # Set up event handling
         run_button.click(
             fn=process_with_live_logs,
-            inputs=[question_input, module_dropdown],
+            inputs=[question_input, module_dropdown, file_upload_component],
             outputs=[token_count_output, status_output, log_display2],
         )
 
