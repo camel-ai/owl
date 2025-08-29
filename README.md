@@ -594,6 +594,26 @@ Here are some tasks you can try with OWL:
 - "Summarize the main points from this research paper: [paper URL]"
 - "Create a data visualization for this dataset: [dataset path]"
 
+# 🚀 Advanced Usage
+
+## Autonomous Developer Agent
+
+OWL now includes an experimental autonomous developer agent that can perform upgrades and modify its own codebase. This "Daemon Developer" runs in a continuous loop to improve the application.
+
+**Capabilities:**
+- **Code Introspection**: Can list, read, and search through its own source code files.
+- **Self-Upgrade from Git**: Can check for remote `git` updates and apply them safely using a backup-test-restore workflow.
+- **Self-Modification**: Can work on a "backlog" of development tasks by programmatically modifying its own code.
+
+**How to Run:**
+
+You can start this agent from the Web UI:
+1.  Start the web application: `python owl/webapp.py`
+2.  From the "Select Function Module" dropdown, choose `run_developer_daemon`.
+3.  Click "Run".
+
+> **Warning**: This is a persistent process that will run indefinitely in your terminal. To stop it, you will need to press `Ctrl+C` in the terminal where you launched the web app.
+
 # 🧰 Toolkits and Capabilities
 
 ## Model Context Protocol (MCP)

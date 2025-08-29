@@ -251,6 +251,7 @@ MODULE_DESCRIPTIONS = {
     "run_mistral": "Using Mistral models to process tasks",
     "run_openai_compatible_model": "Using openai compatible model to process tasks",
     "run_ollama": "Use a local model served by Ollama. Make sure Ollama is running.",
+    "run_developer_daemon": "Run the autonomous developer agent. WARNING: This is a persistent process that runs in a loop.",
     "run_qwen_mini_zh": "Using qwen model with minimal configuration to process tasks",
     "run_qwen_zh": "Using qwen model to process tasks",
     "run_azure_openai": "Using azure openai model to process tasks",
