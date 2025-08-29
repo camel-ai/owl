@@ -493,6 +493,65 @@ python examples/run_azure_openai.py
 python examples/run_ollama.py
 ```
 
+### Using with OpenRouter
+
+[OpenRouter](https://openrouter.ai/) provides access to a wide variety of models through a single API. OWL integrates with OpenRouter, including advanced features like API key pooling and rotation.
+
+**1. Setup OpenRouter API Key:**
+
+Get your API key from the [OpenRouter website](https://openrouter.ai/keys). Add it to your `.env` file:
+
+```
+OPENROUTER_API_KEY='your-key-here'
+```
+
+For enhanced reliability, you can provide a comma-separated list of keys. The system will automatically rotate through them and put failing keys on a temporary cooldown.
+
+```
+OPENROUTER_API_KEY='key1,key2,key3'
+```
+
+**2. Run via Web UI:**
+
+1.  Start the web application: `python owl/webapp.py`
+2.  From the "Select Function Module" dropdown, choose `run_openrouter`.
+3.  A new text box will appear. Enter the model identifier from OpenRouter (e.g., `mistralai/mistral-7b-instruct`).
+4.  Enter your question and click "Run".
+
+### Using with Local Models (Ollama)
+
+You can run OWL with local models served by [Ollama](https://ollama.com/). This allows you to run the entire system on your own machine, even without an internet connection.
+
+**1. Setup Ollama:**
+
+First, make sure you have Ollama installed and running. You can download it from the [Ollama website](https://ollama.com/).
+
+After installation, pull the models you want to use. For example, to get the Llama 3 and Llava (for vision) models, run the following commands in your terminal:
+
+```bash
+ollama run llama3
+ollama run llava
+```
+
+**2. Run via Web UI:**
+
+The easiest way to use a local model is through the web interface:
+
+1.  Start the web application: `python owl/webapp.py`
+2.  From the "Select Function Module" dropdown, choose `run_ollama`.
+3.  A new text box will appear. Enter the name of the text model you want to use (e.g., `llama3`). The vision model is currently defaulted to `llava`.
+4.  Enter your question and click "Run".
+
+**3. (Optional) Custom Server URL:**
+
+If your Ollama server is not running on the default `http://localhost:11434`, you can configure the URL by setting an environment variable:
+
+```bash
+export OLLAMA_API_BASE_URL="http://your-ollama-host:11434"
+```
+
+You can also add this line to your `.env` file.
+
 For a simpler version that only requires an LLM API key, you can try our minimal example:
 
 ```bash
@@ -659,10 +718,10 @@ python owl/webapp_jp.py
 
 ## Features
 
-- **Easy Model Selection**: Choose between different models (OpenAI, Qwen, DeepSeek, etc.)
-- **Environment Variable Management**: Configure your API keys and other settings directly from the UI
-- **Interactive Chat Interface**: Communicate with OWL agents through a user-friendly interface
-- **Task History**: View the history and results of your interactions
+- **Real-time Conversation Streaming**: Watch the agent conversation unfold in real-time in the "Conversation" tab.
+- **Easy Model Selection**: Choose between different models and providers (OpenAI, OpenRouter, Ollama, etc.).
+- **Environment Variable Management**: Configure your API keys and other settings directly from the UI.
+- **Full Log Viewer**: Access the detailed, raw logs in the "Full Logs" tab for debugging.
 
 The web interface is built using Gradio and runs locally on your machine. No data is sent to external servers beyond what's required for the model API calls you configure.
 
