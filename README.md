@@ -667,6 +667,7 @@ Key toolkits include:
 - **CodeExecutionToolkit**: Python code execution and evaluation
 - **SearchToolkit**: Web searches (Google, DuckDuckGo, Wikipedia)
 - **DocumentProcessingToolkit**: Document parsing (PDF, DOCX, etc.)
+- **CSVToolkit**: Read, write, and query data in CSV files.
 
 Additional specialized toolkits: ArxivToolkit, GitHubToolkit, GoogleMapsToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, RedditToolkit, WeatherToolkit, and more. For a complete list, see the [CAMEL toolkits documentation](https://docs.camel-ai.org/key_modules/tools.html#built-in-toolkits).
 
