@@ -615,7 +615,11 @@ You can start this agent from the Web UI:
 > **Warning**: This is a persistent process that will run indefinitely in your terminal. To stop it, you will need to press `Ctrl+C` in the terminal where you launched the web app.
 
 **Security Considerations:**
-This feature is highly experimental and grants the AI agent significant control over its own source code and execution environment. While safeguards are in place (restricting file writes and script execution to specific project directories), this capability carries inherent risks. It should be used with caution, and it is strongly recommended to run it in a sandboxed or containerized environment.
+This feature is highly experimental and grants the AI agent significant control over its own source code and execution environment. While safeguards are in place (restricting file writes and script execution to specific project directories), this capability carries inherent risks.
+
+As an additional security measure, high-risk tools (`write_file` and `run_upgrade_from_git`) now require **human-in-the-loop confirmation**. When the agent attempts to use these tools, it will print a security prompt in the terminal where the app is running and wait for you to type `yes` before proceeding.
+
+It is strongly recommended to run this agent in a sandboxed or containerized environment and to carefully review any action before approving it.
 
 # 🧰 Toolkits and Capabilities
 

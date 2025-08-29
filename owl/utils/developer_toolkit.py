@@ -20,6 +20,15 @@ class DeveloperToolkit:
     and upgrade its own codebase.
     """
 
+    def _confirm_action(self, prompt: str) -> bool:
+        """Displays a prompt and waits for user confirmation from the console."""
+        print("\n" + "="*50)
+        print("SECURITY PROMPT: Human approval required.")
+        print(prompt)
+        print("="*50)
+        response = input("Please type 'yes' to approve or anything else to cancel: ")
+        return response.lower() == "yes"
+
     def _run_command(self, command: list[str]) -> Tuple[int, str, str]:
         """Helper to run a shell command and capture output."""
         # Security Guardrail: Restrict shell script execution to the `scripts` dir
@@ -87,7 +96,8 @@ class DeveloperToolkit:
     def write_file(self, file_path: str, content: str) -> str:
         """Writes content to a specified file, overwriting it if it exists.
         For security, this tool can only write to files within the 'owl',
-        'examples', and 'scripts' directories.
+        'examples', and 'scripts' directories. This action requires human
+        approval.
 
         Args:
             file_path (str): The path to the file to write to.
@@ -100,22 +110,29 @@ class DeveloperToolkit:
         allowed_dirs = ["owl", "examples", "scripts"]
         working_dir = os.getcwd()
 
-        # Resolve the absolute path of the target file
         absolute_path = os.path.abspath(file_path)
 
-        # Check if the resolved path is within one of the allowed directories
-        is_safe = False
-        for allowed_dir in allowed_dirs:
-            allowed_path = os.path.join(working_dir, allowed_dir)
-            if absolute_path.startswith(allowed_path):
-                is_safe = True
-                break
+        is_safe = any(
+            absolute_path.startswith(os.path.join(working_dir, d))
+            for d in allowed_dirs
+        )
 
         if not is_safe:
             return (
-                "Error: For security reasons, file writing is restricted to "
-                "the 'owl', 'examples', and 'scripts' directories."
+                "Error: Security policy restricts file writing to the 'owl', "
+                "'examples', and 'scripts' directories."
             )
+
+        # Human-in-the-Loop Confirmation
+        prompt = (
+            f"The agent wants to write to the file '{file_path}'.\n"
+            "This will OVERWRITE the file if it exists.\n"
+            "--- PREVIEW OF CONTENT ---\n"
+            f"{content[:500]}\n"
+            "--- END PREVIEW ---"
+        )
+        if not self._confirm_action(prompt):
+            return "Action cancelled by user."
 
         try:
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -166,10 +183,22 @@ class DeveloperToolkit:
         """
         Runs the full, safe upgrade process from the git repository.
         This involves backing up, upgrading, testing, and restoring on failure.
+        This action requires human approval.
 
         Returns:
             str: A detailed log of the entire upgrade process and its outcome.
         """
+        prompt = (
+            "The agent wants to initiate the self-upgrade process from git.\n"
+            "This will execute the following steps:\n"
+            "  1. Backup current code\n"
+            "  2. Pull latest code from git\n"
+            "  3. Run tests\n"
+            "  4. Restore backup if tests fail"
+        )
+        if not self._confirm_action(prompt):
+            return "Action cancelled by user."
+
         print("Starting safe git upgrade process...")
 
         # 1. Backup

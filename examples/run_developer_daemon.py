@@ -82,6 +82,8 @@ def main():
         task_prompt = f"""
         Your goal is to continuously improve this application. Your workflow for this cycle is as follows:
 
+        **IMPORTANT NOTE:** Some of your tools, like `write_file` and `run_upgrade_from_git`, are high-risk and require human approval before they can execute. You must check the output of these tools carefully. If the output says 'Action cancelled by user', you must stop the current task and report the cancellation.
+
         1.  **Check for External Updates:** First, call the `check_for_git_updates` tool to see if there are any new commits in the main repository.
 
         2.  **Apply External Updates (if any):** If updates are available, call the `run_upgrade_from_git` tool to safely apply them. This tool handles backup, upgrade, testing, and restore automatically. Report the result of this process and your cycle is complete.
