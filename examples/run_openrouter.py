@@ -16,7 +16,6 @@ import sys
 import pathlib
 
 from dotenv import load_dotenv
-from camel.models import ModelFactory
 from camel.toolkits import (
     CodeExecutionToolkit,
     ExcelToolkit,
@@ -29,19 +28,20 @@ from camel.societies import RolePlaying
 from camel.logger import set_log_level
 
 from owl.utils import run_society, DocumentProcessingToolkit
+from owl.key_manager import KeyManager, ResilientOpenAICompatibleModel
 
 base_dir = pathlib.Path(__file__).parent.parent
 env_path = base_dir / "owl" / ".env"
 load_dotenv(dotenv_path=str(env_path))
 
-set_log_level(level="DEBUG")
+set_log_level(level="INFO")
 
 
 def construct_society(
     question: str, openrouter_model_name: str = "mistralai/mistral-7b-instruct"
 ) -> RolePlaying:
     r"""Construct a society of agents based on the given question, using
-    OpenRouter as the model provider.
+    OpenRouter as the model provider with resilient key management.
 
     Args:
         question (str): The task or question to be addressed by the society.
@@ -51,11 +51,14 @@ def construct_society(
     Returns:
         RolePlaying: A configured society of agents ready to address the question.
     """
-    # Define model configurations
-    model = ModelFactory.create(
+    # Initialize the key manager for OpenRouter API keys
+    key_manager = KeyManager(key_env_var="OPENROUTER_API_KEY")
+
+    # Define model configurations using the resilient model
+    model = ResilientOpenAICompatibleModel(
+        key_manager=key_manager,
         model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
         model_type=openrouter_model_name,
-        api_key=os.getenv("OPENROUTER_API_KEY"),
         url="https://openrouter.ai/api/v1",
         model_config_dict={"temperature": 0.2},
     )
