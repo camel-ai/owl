@@ -41,69 +41,60 @@ load_dotenv(dotenv_path=str(env_path))
 set_log_level(level="DEBUG")
 
 
-def construct_society(question: str) -> RolePlaying:
+import os
+
+
+def construct_society(
+    question: str, ollama_model_name: str = "llama3"
+) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
 
     Args:
         question (str): The task or question to be addressed by the society.
+        ollama_model_name (str, optional): The name of the Ollama model to
+            use for text-based tasks. Defaults to "llama3".
 
     Returns:
         RolePlaying: A configured society of agents ready to address the question.
     """
+    # Get Ollama server URL from environment variable or use default
+    ollama_url = os.getenv("OLLAMA_API_BASE_URL", "http://localhost:11434/v1")
 
-    # Create models for different components
-    models = {
-        "user": ModelFactory.create(
-            model_platform=ModelPlatformType.OLLAMA,
-            model_type="qwen2.5:72b",
-            url="http://localhost:11434/v1",
-            model_config_dict={"temperature": 0.8, "max_tokens": 1000000},
-        ),
-        "assistant": ModelFactory.create(
-            model_platform=ModelPlatformType.OLLAMA,
-            model_type="qwen2.5:72b",
-            url="http://localhost:11434/v1",
-            model_config_dict={"temperature": 0.2, "max_tokens": 1000000},
-        ),
-        "browsing": ModelFactory.create(
-            model_platform=ModelPlatformType.OLLAMA,
-            model_type="llava:latest",
-            url="http://localhost:11434/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
-        ),
-        "planning": ModelFactory.create(
-            model_platform=ModelPlatformType.OLLAMA,
-            model_type="qwen2.5:72b",
-            url="http://localhost:11434/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
-        ),
-        "image": ModelFactory.create(
-            model_platform=ModelPlatformType.OLLAMA,
-            model_type="llava:latest",
-            url="http://localhost:11434/v1",
-            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
-        ),
-    }
+    # Use the user-specified model for text-based tasks
+    text_model = ModelFactory.create(
+        model_platform=ModelPlatformType.OLLAMA,
+        model_type=ollama_model_name,
+        url=ollama_url,
+        model_config_dict={"temperature": 0.2},
+    )
+
+    # Use a dedicated vision model for image analysis tasks
+    # Note: The user must have 'llava' pulled via Ollama for this to work.
+    vision_model = ModelFactory.create(
+        model_platform=ModelPlatformType.OLLAMA,
+        model_type="llava",
+        url=ollama_url,
+        model_config_dict={"temperature": 0.2},
+    )
 
     # Configure toolkits
     tools = [
         *BrowserToolkit(
-            headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["browsing"],
-            planning_agent_model=models["planning"],
+            headless=True,
+            web_agent_model=text_model,
+            planning_agent_model=text_model,
         ).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
-        *ImageAnalysisToolkit(model=models["image"]).get_tools(),
+        *ImageAnalysisToolkit(model=vision_model).get_tools(),
         SearchToolkit().search_duckduckgo,
-        # SearchToolkit().search_google,  # Comment this out if you don't have google search
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
-    # Configure agent roles and parameters
-    user_agent_kwargs = {"model": models["user"]}
-    assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
+    # Configure agent roles and parameters, using the same text model for both
+    user_agent_kwargs = {"model": text_model}
+    assistant_agent_kwargs = {"model": text_model, "tools": tools}
 
     # Configure task parameters
     task_kwargs = {

@@ -493,6 +493,40 @@ python examples/run_azure_openai.py
 python examples/run_ollama.py
 ```
 
+### Using with Local Models (Ollama)
+
+You can run OWL with local models served by [Ollama](https://ollama.com/). This allows you to run the entire system on your own machine, even without an internet connection.
+
+**1. Setup Ollama:**
+
+First, make sure you have Ollama installed and running. You can download it from the [Ollama website](https://ollama.com/).
+
+After installation, pull the models you want to use. For example, to get the Llama 3 and Llava (for vision) models, run the following commands in your terminal:
+
+```bash
+ollama run llama3
+ollama run llava
+```
+
+**2. Run via Web UI:**
+
+The easiest way to use a local model is through the web interface:
+
+1.  Start the web application: `python owl/webapp.py`
+2.  From the "Select Function Module" dropdown, choose `run_ollama`.
+3.  A new text box will appear. Enter the name of the text model you want to use (e.g., `llama3`). The vision model is currently defaulted to `llava`.
+4.  Enter your question and click "Run".
+
+**3. (Optional) Custom Server URL:**
+
+If your Ollama server is not running on the default `http://localhost:11434`, you can configure the URL by setting an environment variable:
+
+```bash
+export OLLAMA_API_BASE_URL="http://your-ollama-host:11434"
+```
+
+You can also add this line to your `.env` file.
+
 For a simpler version that only requires an LLM API key, you can try our minimal example:
 
 ```bash

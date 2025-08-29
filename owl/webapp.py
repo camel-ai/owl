@@ -250,7 +250,7 @@ MODULE_DESCRIPTIONS = {
     "run_deepseek_zh": "Using deepseek model to process Chinese tasks",
     "run_mistral": "Using Mistral models to process tasks",
     "run_openai_compatible_model": "Using openai compatible model to process tasks",
-    "run_ollama": "Using local ollama model to process tasks",
+    "run_ollama": "Use a local model served by Ollama. Make sure Ollama is running.",
     "run_qwen_mini_zh": "Using qwen model with minimal configuration to process tasks",
     "run_qwen_zh": "Using qwen model to process tasks",
     "run_azure_openai": "Using azure openai model to process tasks",
@@ -324,6 +324,7 @@ def run_owl(
     question: str,
     example_module: str,
     openrouter_model_name: str = None,
+    ollama_model_name: str = None,
     message_queue: queue.Queue = None,
 ) -> Tuple[str, str, str]:
     """Run the OWL system and return results.
@@ -333,6 +334,7 @@ def run_owl(
         example_module: Example module name to import.
         openrouter_model_name (str, optional): The name of the OpenRouter
             model to use.
+        ollama_model_name (str, optional): The name of the Ollama model to use.
         message_queue (queue.Queue, optional): A queue to stream messages
             back to the UI.
 
@@ -412,6 +414,10 @@ def run_owl(
             if "openrouter_model_name" in sig.parameters:
                 kwargs["openrouter_model_name"] = openrouter_model_name
                 logging.info(f"Passing openrouter_model_name: {openrouter_model_name}")
+
+            if "ollama_model_name" in sig.parameters:
+                kwargs["ollama_model_name"] = ollama_model_name
+                logging.info(f"Passing ollama_model_name: {ollama_model_name}")
 
             # Call the function with the supported arguments
             society = module.construct_society(**kwargs)
@@ -836,7 +842,9 @@ def create_ui():
             logging.error(f"Error clearing log file: {str(e)}")
             return ""
 
-    def stream_conversation(question, module_name, openrouter_model_name=None):
+    def stream_conversation(
+        question, module_name, openrouter_model_name=None, ollama_model_name=None
+    ):
         """
         Streams the agent conversation to the chatbot UI and updates logs.
         """
@@ -854,7 +862,13 @@ def create_ui():
         def process_in_background():
             try:
                 # Pass the chat_queue to run_owl
-                result = run_owl(question, module_name, openrouter_model_name, chat_queue)
+                result = run_owl(
+                    question,
+                    module_name,
+                    openrouter_model_name,
+                    ollama_model_name,
+                    chat_queue,
+                )
                 result_queue.put(result)
             except Exception as e:
                 result_queue.put(
@@ -1153,7 +1167,14 @@ def create_ui():
                     label="OpenRouter Model Name",
                     placeholder="e.g., mistralai/mistral-7b-instruct",
                     value="mistralai/mistral-7b-instruct",
-                    visible=False,  # Initially hidden
+                    visible=False,
+                )
+
+                ollama_model_name_textbox = gr.Textbox(
+                    label="Ollama Model Name",
+                    placeholder="e.g., llama3, mistral",
+                    value="llama3",
+                    visible=False,
                 )
 
                 with gr.Row():
@@ -1303,7 +1324,12 @@ def create_ui():
         # Set up event handling for the run button
         run_button.click(
             fn=stream_conversation,
-            inputs=[question_input, module_dropdown, openrouter_model_name_textbox],
+            inputs=[
+                question_input,
+                module_dropdown,
+                openrouter_model_name_textbox,
+                ollama_model_name_textbox,
+            ],
             outputs=[chatbot_display, token_count_output, status_output],
         )
 
@@ -1311,12 +1337,21 @@ def create_ui():
         def handle_module_change(module_name):
             description = update_module_description(module_name)
             openrouter_visible = module_name == "run_openrouter"
-            return description, gr.update(visible=openrouter_visible)
+            ollama_visible = module_name == "run_ollama"
+            return (
+                description,
+                gr.update(visible=openrouter_visible),
+                gr.update(visible=ollama_visible),
+            )
 
         module_dropdown.change(
             fn=handle_module_change,
             inputs=module_dropdown,
-            outputs=[module_description, openrouter_model_name_textbox],
+            outputs=[
+                module_description,
+                openrouter_model_name_textbox,
+                ollama_model_name_textbox,
+            ],
         )
 
         # --- Chatbot Tab ---
