@@ -11,90 +11,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
-# run_ollama.py by tj-scripts（https://github.com/tj-scripts）
-
+import os
 import sys
+import pathlib
+
 from dotenv import load_dotenv
-from camel.models import ModelFactory
 from camel.toolkits import (
     CodeExecutionToolkit,
     ExcelToolkit,
-    ImageAnalysisToolkit,
     SearchToolkit,
     BrowserToolkit,
     FileWriteToolkit,
 )
 from camel.types import ModelPlatformType
-
-from owl.utils import run_society
-
 from camel.societies import RolePlaying
-
 from camel.logger import set_log_level
 
-import pathlib
+from owl.utils import run_society, DocumentProcessingToolkit
+from owl.key_manager import KeyManager, ResilientOpenAICompatibleModel
 
 base_dir = pathlib.Path(__file__).parent.parent
 env_path = base_dir / "owl" / ".env"
 load_dotenv(dotenv_path=str(env_path))
 
-set_log_level(level="DEBUG")
-
-
-import os
+set_log_level(level="INFO")
 
 
 def construct_society(
-    question: str, ollama_model_name: str = "llama3"
+    question: str, openrouter_model_name: str = "mistralai/mistral-7b-instruct"
 ) -> RolePlaying:
-    r"""Construct a society of agents based on the given question.
+    r"""Construct a society of agents based on the given question, using
+    OpenRouter as the model provider with resilient key management.
 
     Args:
         question (str): The task or question to be addressed by the society.
-        ollama_model_name (str, optional): The name of the Ollama model to
-            use for text-based tasks. Defaults to "llama3".
+        openrouter_model_name (str, optional): The name of the model on
+            OpenRouter to use. Defaults to "mistralai/mistral-7b-instruct".
 
     Returns:
         RolePlaying: A configured society of agents ready to address the question.
     """
-    # Get Ollama server URL from environment variable or use default
-    ollama_url = os.getenv("OLLAMA_API_BASE_URL", "http://localhost:11434/v1")
+    # Initialize the key manager for OpenRouter API keys
+    key_manager = KeyManager(key_env_var="OPENROUTER_API_KEY")
 
-    # Use the user-specified model for text-based tasks
-    text_model = ModelFactory.create(
-        model_platform=ModelPlatformType.OLLAMA,
-        model_type=ollama_model_name,
-        url=ollama_url,
-        model_config_dict={"temperature": 0.2},
-    )
-
-    # Use a dedicated vision model for image analysis tasks
-    # Note: The user must have 'llava' pulled via Ollama for this to work.
-    vision_model = ModelFactory.create(
-        model_platform=ModelPlatformType.OLLAMA,
-        model_type="llava",
-        url=ollama_url,
+    # Define model configurations using the resilient model
+    model = ResilientOpenAICompatibleModel(
+        key_manager=key_manager,
+        model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+        model_type=openrouter_model_name,
+        url="https://openrouter.ai/api/v1",
         model_config_dict={"temperature": 0.2},
     )
 
     # Configure toolkits
     tools = [
         *BrowserToolkit(
-            headless=True,
-            web_agent_model=text_model,
-            planning_agent_model=text_model,
+            headless=False,
+            web_agent_model=model,
+            planning_agent_model=model,
         ).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
-        *ImageAnalysisToolkit(model=vision_model).get_tools(),
         SearchToolkit().search_duckduckgo,
+        SearchToolkit().search_google,
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
+        *DocumentProcessingToolkit(model=model).get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
-    # Configure agent roles and parameters, using the same text model for both
-    user_agent_kwargs = {"model": text_model}
-    assistant_agent_kwargs = {"model": text_model, "tools": tools}
+    # Configure agent roles and parameters
+    user_agent_kwargs = {"model": model}
+    assistant_agent_kwargs = {"model": model, "tools": tools}
 
     # Configure task parameters
     task_kwargs = {
@@ -116,14 +103,15 @@ def construct_society(
 
 def main():
     r"""Main function to run the OWL system with an example question."""
-    # Default research question
-    default_task = "Open Brave search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task."
+    # Example research question
+    default_task = "Use the search tool to find the capital of France and write it to a file named 'capital.txt'."
 
     # Override default task if command line argument is provided
     task = sys.argv[1] if len(sys.argv) > 1 else default_task
 
     # Construct and run the society
     society = construct_society(task)
+
     answer, chat_history, token_count = run_society(society)
 
     # Output the result
