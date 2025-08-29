@@ -614,6 +614,9 @@ You can start this agent from the Web UI:
 
 > **Warning**: This is a persistent process that will run indefinitely in your terminal. To stop it, you will need to press `Ctrl+C` in the terminal where you launched the web app.
 
+**Security Considerations:**
+This feature is highly experimental and grants the AI agent significant control over its own source code and execution environment. While safeguards are in place (restricting file writes and script execution to specific project directories), this capability carries inherent risks. It should be used with caution, and it is strongly recommended to run it in a sandboxed or containerized environment.
+
 # 🧰 Toolkits and Capabilities
 
 ## Model Context Protocol (MCP)

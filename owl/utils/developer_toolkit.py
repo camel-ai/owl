@@ -22,6 +22,13 @@ class DeveloperToolkit:
 
     def _run_command(self, command: list[str]) -> Tuple[int, str, str]:
         """Helper to run a shell command and capture output."""
+        # Security Guardrail: Restrict shell script execution to the `scripts` dir
+        if command[0] == "bash" or command[0].endswith(".sh"):
+            script_path = os.path.abspath(command[1])
+            allowed_dir = os.path.abspath("scripts")
+            if not script_path.startswith(allowed_dir):
+                return -1, "", f"Error: Security policy prevents execution of scripts outside the 'scripts/' directory."
+
         try:
             process = subprocess.run(
                 command,
@@ -79,6 +86,8 @@ class DeveloperToolkit:
 
     def write_file(self, file_path: str, content: str) -> str:
         """Writes content to a specified file, overwriting it if it exists.
+        For security, this tool can only write to files within the 'owl',
+        'examples', and 'scripts' directories.
 
         Args:
             file_path (str): The path to the file to write to.
@@ -87,6 +96,27 @@ class DeveloperToolkit:
         Returns:
             str: A success or error message.
         """
+        # Security Guardrail: Prevent writing to arbitrary locations
+        allowed_dirs = ["owl", "examples", "scripts"]
+        working_dir = os.getcwd()
+
+        # Resolve the absolute path of the target file
+        absolute_path = os.path.abspath(file_path)
+
+        # Check if the resolved path is within one of the allowed directories
+        is_safe = False
+        for allowed_dir in allowed_dirs:
+            allowed_path = os.path.join(working_dir, allowed_dir)
+            if absolute_path.startswith(allowed_path):
+                is_safe = True
+                break
+
+        if not is_safe:
+            return (
+                "Error: For security reasons, file writing is restricted to "
+                "the 'owl', 'examples', and 'scripts' directories."
+            )
+
         try:
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, "w", encoding="utf-8") as f:
