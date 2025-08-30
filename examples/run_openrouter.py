@@ -57,7 +57,6 @@ def construct_society(
     # Define model configurations using the resilient model
     model = ResilientOpenAICompatibleModel(
         key_manager=key_manager,
-        model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
         model_type=openrouter_model_name,
         url="https://openrouter.ai/api/v1",
         model_config_dict={"temperature": 0.2},

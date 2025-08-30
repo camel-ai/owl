@@ -62,7 +62,6 @@ def construct_society(
 
     # Use the user-specified model for text-based tasks
     text_model = ModelFactory.create(
-        model_platform=ModelPlatformType.OLLAMA,
         model_type=ollama_model_name,
         url=ollama_url,
         model_config_dict={"temperature": 0.2},
@@ -71,7 +70,6 @@ def construct_society(
     # Use a dedicated vision model for image analysis tasks
     # Note: The user must have 'llava' pulled via Ollama for this to work.
     vision_model = ModelFactory.create(
-        model_platform=ModelPlatformType.OLLAMA,
         model_type="llava",
         url=ollama_url,
         model_config_dict={"temperature": 0.2},
