@@ -493,7 +493,31 @@ python examples/run_azure_openai.py
 python examples/run_ollama.py
 ```
 
-<<
+### Using with OpenRouter
+
+[OpenRouter](https://openrouter.ai/) provides access to a wide variety of models through a single API. OWL integrates with OpenRouter, including advanced features like API key pooling and rotation.
+
+**1. Setup OpenRouter API Key:**
+
+Get your API key from the [OpenRouter website](https://openrouter.ai/keys). Add it to your `.env` file:
+
+```
+OPENROUTER_API_KEY='your-key-here'
+```
+
+For enhanced reliability, you can provide a comma-separated list of keys. The system will automatically rotate through them and put failing keys on a temporary cooldown.
+
+```
+OPENROUTER_API_KEY='key1,key2,key3'
+```
+
+**2. Run via Web UI:**
+
+1.  Start the web application: `python owl/webapp.py`
+2.  From the "Select Function Module" dropdown, choose `run_openrouter`.
+3.  A new text box will appear. Enter the model identifier from OpenRouter (e.g., `mistralai/mistral-7b-instruct`).
+4.  Enter your question and click "Run".
+
 ### Using with Local Models (Ollama)
 
 You can run OWL with local models served by [Ollama](https://ollama.com/). This allows you to run the entire system on your own machine, even without an internet connection.
