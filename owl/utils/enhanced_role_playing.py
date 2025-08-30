@@ -439,9 +439,13 @@ class OwlGAIARolePlaying(OwlRolePlaying):
         )
 
 
+import queue
+
+
 def run_society(
     society: OwlRolePlaying,
     round_limit: int = 15,
+    message_queue: Optional[queue.Queue] = None,
 ) -> Tuple[str, List[dict], dict]:
     overall_completion_token_count = 0
     overall_prompt_token_count = 0
@@ -479,6 +483,10 @@ def run_society(
         }
 
         chat_history.append(_data)
+
+        # If a message queue is provided, put the data into the queue
+        if message_queue:
+            message_queue.put(_data)
         logger.info(
             f"Round #{_round} user_response:\n {user_response.msgs[0].content if user_response.msgs and len(user_response.msgs) > 0 else ''}"
         )
