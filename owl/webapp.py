@@ -1389,7 +1389,7 @@ def create_ui():
 
 
 # Main function
-def main():
+def main(port: int = 7860, share: bool = False):
     try:
         # Initialize logging system
         global LOG_FILE
@@ -1409,7 +1409,9 @@ def main():
 
         app.queue()
         app.launch(
-            share=False,
+            server_name="0.0.0.0",
+            server_port=port,
+            share=share,
             favicon_path=os.path.join(
                 os.path.dirname(__file__), "assets", "owl-favicon.ico"
             ),
