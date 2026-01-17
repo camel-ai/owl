@@ -21,26 +21,6 @@
 
 <hr>
 
-<div align="center" style="background-color: #e3f2fd; padding: 20px; border-radius: 15px; border: 3px solid #1976d2; margin: 25px 0;">
-  <h2 style="color: #1976d2; margin: 0 0 15px 0; font-size: 1.8em;">
-    🚀 <b>Eigentの紹介：世界初のマルチエージェント・ワークフォース・デスクトップアプリケーション</b> 🚀
-  </h2>
-  <p style="font-size: 1.2em; margin: 10px 0; line-height: 1.6;">
-    <b>Eigent</b>は、最も複雑なワークフローを自動化されたタスクに変換できるカスタムAIワークフォースの構築、管理、展開を可能にします。
-  </p>
-  <p style="font-size: 1.1em; margin: 15px 0;">
-    ✨ <b>100%オープンソース</b> • 🔧 <b>完全にカスタマイズ可能</b> • 🔒 <b>プライバシー重視</b> • ⚡ <b>並列実行</b>
-  </p>
-  <p style="font-size: 1em; margin: 15px 0; font-style: italic;">
-    CAMEL-AIの高く評価されているオープンソースプロジェクトをベースに構築されたEigentは、並列実行、カスタマイズ、プライバシー保護を通じて生産性を向上させるマルチエージェント・ワークフォースを導入します。
-  </p>
-  <div style="margin-top: 20px;">
-    <a href="https://github.com/eigent-ai/eigent" style="background-color: #d81b60; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 5px;">🔗 Eigentリポジトリを見る</a>
-    <a href="https://www.eigent.ai/" style="background-color: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 5px;">詳細を見る</a>
-    <a href="https://www.eigent.ai/download" style="background-color: #43a047; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 5px;">今すぐ始める</a>
-  </div>
-</div>
-
 <hr>
 
 <div align="center">
@@ -82,7 +62,6 @@
 # 📋 目次
 
 - [📋 目次](#-目次)
-- [🚀 Eigent: マルチエージェント・ワークフォース・デスクトップアプリケーション](#-eigent-マルチエージェントワークフォースデスクトップアプリケーション)
 - [🔥 ニュース](#-ニュース)
 - [🎬 デモビデオ](#-デモビデオ)
 - [✨️ コア機能](#-コア機能)
@@ -100,45 +79,6 @@
 - [❓ FAQ](#-faq)
 - [📚 CAMEL依存関係の探索](#-camel依存関係の探索)
 - [⭐ Star History](#-star-history)
-
-# 🚀 Eigent: マルチエージェント・ワークフォース・デスクトップアプリケーション
-
-<div align="center" style="background-color: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
-
-**[Eigent](https://github.com/eigent-ai/eigent)**は、AIエージェントとの作業方法を革新しています。世界初のマルチエージェント・ワークフォース・デスクトップアプリケーションとして、Eigentは複雑なワークフローを自動化された知的プロセスに変換します。
-
-### なぜEigentなのか？
-
-- **🤖 マルチエージェントコラボレーション**: シームレスに連携する特化型AIエージェントを展開
-- **🚀 並列実行**: 複数のタスクを同時に処理できるエージェントで生産性を向上
-- **🎨 完全なカスタマイズ**: 特定のニーズに合わせてAIワークフォースを構築・設定
-- **🔒 プライバシー重視の設計**: データはマシン上に保持され、クラウド依存なし
-- **💯 100%オープンソース**: 完全な透明性とコミュニティ主導の開発
-
-### 主要機能
-
-- **カスタムワークフローの構築**: エージェントが自律的に実行できる複雑な多段階プロセスを設計
-- **AIチームの管理**: 異なる専門性を持つ複数のエージェントを協調させる
-- **即座に展開**: アイデアから実行まで数分で実現
-- **進捗状況の監視**: エージェントの活動とタスクの完了状況をリアルタイムで確認
-
-### ユースケース
-
-- 📊 **データ分析**: 複雑なデータ処理と分析ワークフローを自動化
-- 🔍 **リサーチ**: 情報の収集、統合、レポート作成をエージェントに任せる
-- 💻 **開発**: AI駆動の開発チームでコーディングタスクを加速
-- 📝 **コンテンツ作成**: 大規模なコンテンツの生成、編集、最適化
-- 🤝 **ビジネス自動化**: 繰り返しのビジネスプロセスを自動化ワークフローに変換
-
-### Eigentを始める
-
-EigentはOWLフレームワークの上に構築され、CAMEL-AIの強力なマルチエージェント機能を活用しています。
-
-🔗 **[Eigentリポジトリを訪問](https://github.com/eigent-ai/eigent)**して、コードベースの探索、貢献、または独自のAIワークフォースの構築について詳しく学んでください。
-
-[インストールガイド](#️-インストール)に従って、今すぐ独自のAIワークフォースの構築を始めましょう！
-
-</div>
 
 # 🔥 ニュース
 

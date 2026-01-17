@@ -1,38 +1,10 @@
 <div align="center">
 
-[![][eigent-banner]][eigent-site]
-
-### **OWL is now [Eigent](https://github.com/eigent-ai/eigent) - The Open Source Cowork Desktop Application**
-
-We've transformed OWL's powerful multi-agent framework into a **full-featured desktop application** with a beautiful UI, zero-setup experience, and enterprise-ready features.
-
-[![Download Eigent][download-shield]][eigent-download]
-[![GitHub Stars][eigent-star-shield]][eigent-github]
-[![Discord][discord-image]][discord-url]
-
-| What You Loved in OWL | What's New in Eigent |
-|:--:|:--:|
-| Multi-agent collaboration | Desktop app with intuitive UI |
-| GAIA benchmark #1 | Zero technical setup required |
-| Powerful toolkits | Built-in MCP tools marketplace |
-| Open source | Enterprise features (SSO, etc.) |
-
-<a href="https://github.com/eigent-ai/eigent">
-  <img src="https://img.shields.io/badge/🚀_Go_to_Eigent_Repository-363AF5?style=for-the-badge&logoColor=white" alt="Go to Eigent"/>
-</a>
-<a href="https://www.eigent.ai/download">
-  <img src="https://img.shields.io/badge/⬇️_Download_Eigent_Desktop-43a047?style=for-the-badge&logoColor=white" alt="Download Eigent"/>
-</a>
-
----
-
 </div>
 
 <h1 align="center">
 	🦉 OWL: Optimized Workforce Learning for General Multi-Agent Assistance in Real-World Task Automation
 </h1>
-
-> **Note:** OWL remains available for research and benchmarking purposes. For production use and the best user experience, we recommend [Eigent](https://github.com/eigent-ai/eigent).
 
 <div align="center">
 
@@ -63,7 +35,6 @@ We've transformed OWL's powerful multi-agent framework into a **full-featured de
 [Citation](https://github.com/camel-ai/owl#citation) |
 [Contributing](https://github.com/camel-ai/owl/graphs/contributors) |
 [CAMEL-AI](https://www.camel-ai.org/) |
-**[➡️ Eigent](https://github.com/eigent-ai/eigent)**
 
 </h4>
 
@@ -76,8 +47,6 @@ We've transformed OWL's powerful multi-agent framework into a **full-featured de
 <div align="center">
 
 🦉 OWL is a cutting-edge framework for multi-agent collaboration that pushes the boundaries of task automation, built on top of the [CAMEL-AI Framework](https://github.com/camel-ai/camel).
-
-**🎉 OWL has evolved into [Eigent](https://github.com/eigent-ai/eigent) - a desktop application with UI, zero-setup, and enterprise features!**
 
 Our vision is to revolutionize how AI agents collaborate to solve real-world tasks. By leveraging dynamic agent interactions, OWL enables more natural, efficient, and robust task automation across diverse domains.
 
@@ -94,7 +63,6 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 # 📋 Table of Contents
 
 - [📋 Table of Contents](#-table-of-contents)
-- [🚀 Eigent: Multi-Agent Workforce Desktop Application](#-eigent-multi-agent-workforce-desktop-application)
 - [🔥 News](#-news)
 - [🎬 Demo Video](#-demo-video)
 - [✨️ Core Features](#️-core-features)
@@ -146,20 +114,6 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   - [Accessing CAMEL Source Code](#accessing-camel-source-code)
 - [🖊️ Cite](#️-cite)
 - [⭐ Star History](#-star-history)
-
-# 🚀 Eigent: The Evolution of OWL
-
-> **Looking for a ready-to-use desktop application?** OWL has evolved into **[Eigent](https://github.com/eigent-ai/eigent)** - featuring a beautiful UI, zero-setup experience, and enterprise-ready capabilities.
-
-| Feature | OWL (This Repo) | Eigent |
-|---------|----------------|--------|
-| Interface | Python scripts | Desktop App with UI |
-| Setup | Manual configuration | Zero setup required |
-| MCP Tools | Manual installation | Built-in marketplace |
-| Enterprise | - | SSO, Access Control |
-| Best for | Research & Benchmarking | Production use |
-
-**👉 [Download Eigent Desktop](https://www.eigent.ai/download) | [View Eigent Repository](https://github.com/eigent-ai/eigent)**
 
 # 🔥 News
 
@@ -705,8 +659,6 @@ To take on an issue, simply leave a comment stating your interest.
 
 # 🔥 Community
 
-> **💡 Tip:** For the best multi-agent experience with a desktop UI, check out **[Eigent](https://github.com/eigent-ai/eigent)** - the evolution of OWL!
-
 Join us ([*Discord*](https://discord.camel-ai.org/) or [*WeChat*](https://ghli.org/camel/wechat.png)) in pushing the boundaries of finding the scaling laws of agents.
 
 Join us for further discussions!
@@ -782,13 +734,6 @@ If you find this repo useful, please cite:
 [star-url]: https://github.com/camel-ai/owl/stargazers
 [package-license-image]: https://img.shields.io/badge/License-Apache_2.0-blue.svg
 [package-license-url]: https://github.com/camel-ai/owl/blob/main/licenses/LICENSE
-
-[eigent-banner]: https://eigent-ai.github.io/.github/assets/head.png
-[eigent-site]: https://www.eigent.ai
-[eigent-download]: https://www.eigent.ai/download
-[eigent-github]: https://github.com/eigent-ai/eigent
-[download-shield]: https://img.shields.io/badge/Download%20Eigent-363AF5?style=for-the-badge
-[eigent-star-shield]: https://img.shields.io/github/stars/eigent-ai/eigent?style=for-the-badge&color=F5F4F0&labelColor=gray&logo=github
 
 [colab-url]: https://colab.research.google.com/drive/1AzP33O8rnMW__7ocWJhVBXjKziJXPtim?usp=sharing
 [colab-image]: https://colab.research.google.com/assets/colab-badge.svg

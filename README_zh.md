@@ -19,31 +19,6 @@
 
 </div>
 
-
-<hr>
-
-<div align="center" style="background-color: #e3f2fd; padding: 20px; border-radius: 15px; border: 3px solid #1976d2; margin: 25px 0;">
-  <h2 style="color: #1976d2; margin: 0 0 15px 0; font-size: 1.8em;">
-    🚀 <b>隆重介绍 Eigent：全球首个多智能体桌面应用程序</b> 🚀
-  </h2>
-  <p style="font-size: 1.2em; margin: 10px 0; line-height: 1.6;">
-    <b>Eigent</b> 赋予您构建、管理和部署自定义Agent的能力，可以将最复杂的工作流程转变为自动化任务。
-  </p>
-  <p style="font-size: 1.1em; margin: 15px 0;">
-    ✨ <b>100% 开源</b> • 🔧 <b>完全可定制</b> • 🔒 <b>隐私优先</b> • ⚡ <b>并行执行</b>
-  </p>
-  <p style="font-size: 1em; margin: 15px 0; font-style: italic;">
-    基于 CAMEL-AI的开源项目构建，Eigent 引入了通过并行执行、定制化和隐私保护来提高生产力的多智能体。
-  </p>
-  <div style="margin-top: 20px;">
-    <a href="https://github.com/eigent-ai/eigent" style="background-color: #d81b60; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 5px;">🔗 访问 Eigent 仓库</a>
-    <a href="https://www.eigent.ai/" style="background-color: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 5px;">了解更多</a>
-    <a href="https://www.eigent.ai/download" style="background-color: #43a047; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 0 5px;">立即开始</a>
-  </div>
-</div>
-
-<hr>
-
 <div align="center">
 <h4 align="center">
 
@@ -85,7 +60,6 @@
 # 📋 目录
 
 - [📋 目录](#-目录)
-- [🚀 Eigent: 多智能体力工桌表面应用程序](#-eigent-多智能体力工桌表面应用程序)
 - [🔥 新闻](#-新闻)
 - [🎬 演示视频](#-演示视频)
 - [✨️ 核心功能](#-核心功能)
@@ -103,43 +77,6 @@
 - [❓ 常见问题](#-常见问题)
 - [📚 探索 CAMEL 依赖](#-探索-camel-依赖)
 - [⭐ Star History](#-star-history)
-
-# 🚀 Eigent: 多智能体力工桌表面应用程序
-
-<div align="center" style="background-color: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
-
-**[Eigent](https://github.com/eigent-ai/eigent)** 正在彻底改变我们与 AI 智能体协作的方式。作为全球首个多智能体力工桌表面应用程序，Eigent 将复杂的工作流程转变为自动化、智能化的流程。
-
-### 为什么选择 Eigent？
-
-- **🤖 多智能体协作**：部署多个专业化 AI 智能体，它们可以无缝协作
-- **🚀 并行执行**：通过智能体同时处理多项任务来提高生产力
-- **🎨 完全定制**：构建和配置您的 AI 力工以满足特定需求
-- **🔒 隐私优先设计**：您的数据保留在本地设备上 - 无需依赖云服务
-- **💯 100% 开源**：完全透明和社区驱动的开发
-
-### 核心能力
-
-- **构建自定义工作流程**：设计智能体可以自主执行的复杂多步流程
-- **管理 AI 团队**：协调具有不同专业特长的多个智能体协同工作
-- **立即部署**：从想法到执行，几分钟内完成
-- **监控进度**：实时可见智能体活动和任务完成情况
-
-### 使用场景
-
-- 📊 **数据分析**：自动化复杂的数据处理和分析工作流程
-- 🔍 **研究**：部署智能体收集、综合和报告信息
-- 💻 **开发**：使用 AI 驱动的开发团队加速编码任务
-- 📝 **内容创作**：大规模生成、编辑和优化内容
-- 🤝 **业务自动化**：将重复性业务流程转变为自动化工作流程
-
-### 开始使用 Eigent
-
-Eigent 基于 OWL 框架构建，利用 CAMEL-AI 强大的多智能体协作能力。
-
-🔗 **[访问 Eigent 仓库](https://github.com/eigent-ai/eigent)** 以探索代码库、贡献或了解更多关于构建您自己的 AI 力工的信息。
-
-按照我们的[安装指南](#️-安装)立即开始构建您自己的 AI 力工！
 
 </div>
 
