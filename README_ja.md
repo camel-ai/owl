@@ -51,6 +51,17 @@
 
 </div>
 
+<div align="center" style="background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 3px solid #ff6b6b; margin: 20px 0;">
+  <h3 style="color: #d63031; margin: 0;">
+    ‼️ <b>重要なお知らせ</b> ‼️
+  </h3>
+  <p style="font-size: 1.1em; margin: 10px 0; color: #2d3436;">
+    <b>現在のOWLバージョンは、最新版の<a href="https://github.com/camel-ai/camel">CAMEL</a>を使用していません。</b><br>
+    workforceを活用した最高性能のエージェントを構築したい場合は、<a href="https://github.com/camel-ai/camel/blob/master/examples/workforce/eigent.py"><b>eigent.py</b></a>をご確認ください。<br>
+    CAMELを最新版に更新する作業も進行中です。
+  </p>
+</div>
+
 ![](./assets/owl_architecture.png)
 
 <br>

@@ -47,6 +47,17 @@
 
 </div>
 
+<div align="center" style="background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 3px solid #ff6b6b; margin: 20px 0;">
+  <h3 style="color: #d63031; margin: 0;">
+    ‼️ <b>重要提示</b> ‼️
+  </h3>
+  <p style="font-size: 1.1em; margin: 10px 0; color: #2d3436;">
+    <b>当前版本的 OWL 未使用最新版本的 <a href="https://github.com/camel-ai/camel">CAMEL</a>。</b><br>
+    如果您想构建基于 workforce 的最佳性能智能体，请查看 <a href="https://github.com/camel-ai/camel/blob/master/examples/workforce/eigent.py"><b>eigent.py</b></a>。<br>
+    我们也正在努力将 CAMEL 更新到最新版本。
+  </p>
+</div>
+
 ![](./assets/owl_architecture.png)
 
 
