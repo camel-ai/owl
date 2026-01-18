@@ -1,3 +1,14 @@
+<div align="center" style="background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 3px solid #ff6b6b; margin: 20px 0;">
+  <h3 style="color: #d63031; margin: 0;">
+    ‼️ <b>重要提示</b> ‼️
+  </h3>
+  <p style="font-size: 1.1em; margin: 10px 0; color: #2d3436;">
+    <b>当前版本的 OWL 未使用最新版本的 <a href="https://github.com/camel-ai/camel">CAMEL</a>。</b><br>
+    如果您想构建基于 workforce 的最佳性能智能体，请查看 <a href="https://github.com/camel-ai/camel/blob/master/examples/workforce/eigent.py"><b>eigent.py</b></a>。<br>
+    我们也正在努力将 CAMEL 更新到最新版本。
+  </p>
+</div>
+
 <h1 align="center">
 	🦉 OWL: Optimized Workforce Learning for General Multi-Agent Assistance in Real-World Task Automation
 	🦉 OWL: 优化劳动力学习的通用智能体，用于处理现实世界的自动化任务
@@ -45,17 +56,6 @@
 
 我们的愿景是彻底变革 AI 智能体协作解决现实任务的方式。通过利用动态智能体交互，OWL 实现了跨多领域更自然、高效且稳健的任务自动化。
 
-</div>
-
-<div align="center" style="background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 3px solid #ff6b6b; margin: 20px 0;">
-  <h3 style="color: #d63031; margin: 0;">
-    ‼️ <b>重要提示</b> ‼️
-  </h3>
-  <p style="font-size: 1.1em; margin: 10px 0; color: #2d3436;">
-    <b>当前版本的 OWL 未使用最新版本的 <a href="https://github.com/camel-ai/camel">CAMEL</a>。</b><br>
-    如果您想构建基于 workforce 的最佳性能智能体，请查看 <a href="https://github.com/camel-ai/camel/blob/master/examples/workforce/eigent.py"><b>eigent.py</b></a>。<br>
-    我们也正在努力将 CAMEL 更新到最新版本。
-  </p>
 </div>
 
 ![](./assets/owl_architecture.png)
