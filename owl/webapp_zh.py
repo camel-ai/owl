@@ -842,7 +842,7 @@ def create_ui():
                 logs2,
             )
 
-    with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as app:
+    with gr.Blocks() as app:
         gr.Markdown(
             """
                 # 🦉 OWL 多智能体协作系统
@@ -1067,7 +1067,6 @@ def create_ui():
                     placeholder="请输入您的问题...",
                     label="问题",
                     elem_id="question_input",
-                    show_copy_button=True,
                     value="打开百度搜索，总结一下camel-ai的camel框架的github star、fork数目等，并把数字用plot包写成python文件保存到本地，并运行生成的python文件。",
                 )
 
@@ -1273,7 +1272,7 @@ def main():
         app = create_ui()
 
         app.queue()
-        app.launch(share=False)
+        app.launch(share=False, theme=gr.themes.Soft(primary_hue="blue"))
     except Exception as e:
         logging.error(f"启动应用程序时发生错误: {str(e)}")
         print(f"启动应用程序时发生错误: {str(e)}")
