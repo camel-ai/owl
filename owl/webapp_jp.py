@@ -1084,7 +1084,6 @@ def create_ui():
                     placeholder="質問を入力してください...",
                     label="質問",
                     elem_id="question_input",
-                    show_copy_button=True,
                     value="Googleで検索して、camel-aiのcamelフレームワークのGitHubスター数、フォーク数などを要約し、その数値をplotパッケージを使ってPythonファイルに書き込み、ローカルに保存して、生成したPythonファイルを実行してください。",
                 )
 

@@ -867,7 +867,7 @@ def create_ui():
                 logs2,
             )
 
-    with gr.Blocks(title="OWL", theme=gr.themes.Soft(primary_hue="blue")) as app:
+    with gr.Blocks(title="OWL") as app:
         gr.Markdown(
             """
                 # 🦉 OWL Multi-Agent Collaboration System
@@ -1092,7 +1092,6 @@ def create_ui():
                     placeholder="Please enter your question...",
                     label="Question",
                     elem_id="question_input",
-                    show_copy_button=True,
                     value="Open Brave search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task.",
                 )
 
@@ -1306,6 +1305,7 @@ def main():
         app.queue()
         app.launch(
             share=False,
+            theme=gr.themes.Soft(primary_hue="blue"),
             favicon_path=os.path.join(
                 os.path.dirname(__file__), "assets", "owl-favicon.ico"
             ),
