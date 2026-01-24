@@ -13,17 +13,15 @@
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 
 """
-Workforce example using Groq models.
+Workforce example using Qwen models from Alibaba Cloud.
 
-This module provides integration with the Groq API platform for the OWL system.
-It configures different agent roles with appropriate Groq models based on their requirements:
-- Tool-intensive roles use GROQ_LLAMA_3_3_70B
-- Simple roles use GROQ_LLAMA_3_1_8B
+To run this file, you need to configure the Qwen API key.
+You can obtain your API key from Bailian platform: bailian.console.aliyun.com
+Set it as QWEN_API_KEY="your-api-key" in your .env file or add it to your environment variables.
 
-To use this module:
-1. Set GROQ_API_KEY in your .env file
-2. Set OPENAI_API_BASE_URL to "https://api.groq.com/openai/v1"
-3. Run with: python -m examples.run_workforce_groq
+Qwen models support:
+- QWEN_MAX: For text-based tasks
+- QWEN_VL_MAX: For vision-language tasks (multimodal)
 """
 
 import sys
@@ -35,7 +33,9 @@ from camel.toolkits import (
     FunctionTool,
     CodeExecutionToolkit,
     ExcelToolkit,
+    ImageAnalysisToolkit,
     SearchToolkit,
+    VideoAnalysisToolkit,
     FileToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
@@ -58,27 +58,37 @@ set_log_level(level="DEBUG")
 def construct_agent_list() -> List[Dict[str, Any]]:
     """Construct a list of agents with their configurations."""
     
-    # Use larger models for tool-intensive roles
+    # Use QWEN_MAX for text-based tasks
     web_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.QWEN,
+        model_type=ModelType.QWEN_MAX,
         model_config_dict={"temperature": 0},
     )
     
+    # Use QWEN_VL_MAX for document processing (supports multimodal)
     document_processing_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.QWEN,
+        model_type=ModelType.QWEN_VL_MAX,
         model_config_dict={"temperature": 0},
     )
     
+    # Use QWEN_MAX for reasoning tasks
     reasoning_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.QWEN,
+        model_type=ModelType.QWEN_MAX,
+        model_config_dict={"temperature": 0},
+    )
+    
+    # Use QWEN_VL_MAX for image analysis
+    image_analysis_model = ModelFactory.create( 
+        model_platform=ModelPlatformType.QWEN,
+        model_type=ModelType.QWEN_VL_MAX,
         model_config_dict={"temperature": 0},
     )
 
     search_toolkit = SearchToolkit()
     document_processing_toolkit = DocumentProcessingToolkit(model=document_processing_model)
+    image_analysis_toolkit = ImageAnalysisToolkit(model=image_analysis_model)
     code_runner_toolkit = CodeExecutionToolkit(sandbox="subprocess", verbose=True)
     file_toolkit = FileToolkit()
     excel_toolkit = ExcelToolkit()
@@ -101,6 +111,7 @@ Here are some tips that help you perform web search:
         tools=[
             FunctionTool(search_toolkit.search_duckduckgo),
             FunctionTool(search_toolkit.search_wiki),
+            FunctionTool(search_toolkit.search_baidu),
             FunctionTool(document_processing_toolkit.extract_document_content),
         ]
     )
@@ -110,6 +121,7 @@ Here are some tips that help you perform web search:
         document_processing_model,
         tools=[
             FunctionTool(document_processing_toolkit.extract_document_content),
+            FunctionTool(image_analysis_toolkit.ask_question_about_image),
             FunctionTool(code_runner_toolkit.execute_code),
             *file_toolkit.get_tools(),
         ]
@@ -154,19 +166,18 @@ Here are some tips that help you perform web search:
 def construct_workforce() -> Workforce:
     """Construct a workforce with coordinator and task agents."""
     
-    # Use smaller model for coordinator and task agent (they don't need tool capabilities)
     coordinator_agent_kwargs = {
         "model": ModelFactory.create(
-            model_platform=ModelPlatformType.GROQ,
-            model_type=ModelType.GROQ_LLAMA_3_1_8B,
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_MAX,
             model_config_dict={"temperature": 0},
         )
     }
     
     task_agent_kwargs = {
         "model": ModelFactory.create(
-            model_platform=ModelPlatformType.GROQ,
-            model_type=ModelType.GROQ_LLAMA_3_1_8B,
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_MAX,
             model_config_dict={"temperature": 0},
         )
     }

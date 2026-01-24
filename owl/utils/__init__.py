@@ -19,6 +19,8 @@ from .enhanced_role_playing import (
     run_society,
     arun_society,
 )
+from .enhanced_workforce import OwlWorkforce
+from .enhanced_chat_agent import OwlWorkforceChatAgent
 from .gaia import GAIABenchmark
 from .document_toolkit import DocumentProcessingToolkit
 
@@ -30,4 +32,6 @@ __all__ = [
     "arun_society",
     "GAIABenchmark",
     "DocumentProcessingToolkit",
+    "OwlWorkforce",
+    "OwlWorkforceChatAgent",
 ]

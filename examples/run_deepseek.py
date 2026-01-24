@@ -13,17 +13,11 @@
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 
 """
-Workforce example using Groq models.
+Workforce example using DeepSeek models.
 
-This module provides integration with the Groq API platform for the OWL system.
-It configures different agent roles with appropriate Groq models based on their requirements:
-- Tool-intensive roles use GROQ_LLAMA_3_3_70B
-- Simple roles use GROQ_LLAMA_3_1_8B
-
-To use this module:
-1. Set GROQ_API_KEY in your .env file
-2. Set OPENAI_API_BASE_URL to "https://api.groq.com/openai/v1"
-3. Run with: python -m examples.run_workforce_groq
+To run this file, you need to configure the DeepSeek API key.
+You can obtain your API key from DeepSeek platform: https://platform.deepseek.com/api_keys
+Set it as DEEPSEEK_API_KEY="your-api-key" in your .env file or add it to your environment variables.
 """
 
 import sys
@@ -58,22 +52,21 @@ set_log_level(level="DEBUG")
 def construct_agent_list() -> List[Dict[str, Any]]:
     """Construct a list of agents with their configurations."""
     
-    # Use larger models for tool-intensive roles
     web_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.DEEPSEEK,
+        model_type=ModelType.DEEPSEEK_CHAT,
         model_config_dict={"temperature": 0},
     )
     
     document_processing_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.DEEPSEEK,
+        model_type=ModelType.DEEPSEEK_CHAT,
         model_config_dict={"temperature": 0},
     )
     
     reasoning_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.DEEPSEEK,
+        model_type=ModelType.DEEPSEEK_CHAT,
         model_config_dict={"temperature": 0},
     )
 
@@ -101,6 +94,7 @@ Here are some tips that help you perform web search:
         tools=[
             FunctionTool(search_toolkit.search_duckduckgo),
             FunctionTool(search_toolkit.search_wiki),
+            FunctionTool(search_toolkit.search_baidu),
             FunctionTool(document_processing_toolkit.extract_document_content),
         ]
     )
@@ -154,19 +148,18 @@ Here are some tips that help you perform web search:
 def construct_workforce() -> Workforce:
     """Construct a workforce with coordinator and task agents."""
     
-    # Use smaller model for coordinator and task agent (they don't need tool capabilities)
     coordinator_agent_kwargs = {
         "model": ModelFactory.create(
-            model_platform=ModelPlatformType.GROQ,
-            model_type=ModelType.GROQ_LLAMA_3_1_8B,
+            model_platform=ModelPlatformType.DEEPSEEK,
+            model_type=ModelType.DEEPSEEK_CHAT,
             model_config_dict={"temperature": 0},
         )
     }
     
     task_agent_kwargs = {
         "model": ModelFactory.create(
-            model_platform=ModelPlatformType.GROQ,
-            model_type=ModelType.GROQ_LLAMA_3_1_8B,
+            model_platform=ModelPlatformType.DEEPSEEK,
+            model_type=ModelType.DEEPSEEK_CHAT,
             model_config_dict={"temperature": 0},
         )
     }
@@ -201,7 +194,7 @@ def construct_workforce() -> Workforce:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Default research question
-    default_task_prompt = "Summarize the github stars, fork counts, etc. of camel-ai's owl framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task."
+    default_task_prompt = "Search for recent news about the OWL project and generate a report, then save it locally."
     
     # Override default task if command line argument is provided
     task_prompt = sys.argv[1] if len(sys.argv) > 1 else default_task_prompt

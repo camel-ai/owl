@@ -29,6 +29,7 @@ dependencies = [
     "xmltodict>=0.14.2",
     "firecrawl>=2.5.3",
     "mistralai>=1.7.0",
+    "retry==0.9.2",
 ]
 
 [project.urls]
