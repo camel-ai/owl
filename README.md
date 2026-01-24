@@ -267,9 +267,36 @@ source .venv/bin/activate
 pip install -r requirements.txt --use-pep517
 ```
 
-### Option 3: Using conda
+### Option 3: Using conda（centos7.9）
 
-```bash
+1.安装python3.12
+# 下载最新版 Miniconda（Linux 示例）
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O Miniconda3.sh
+
+# 运行安装脚本
+bash Miniconda3.sh -b -p $HOME/miniconda3
+
+# 初始化 Conda
+~/miniconda3/bin/conda init
+
+# 激活环境（重新打开终端或运行）
+source ~/.bashrc
+
+
+安装python3.12
+
+# 创建新环境（命名为 py312）
+conda create -n py312 python=3.12 -y
+
+# 激活环境
+conda activate py312
+
+# 验证 Python 版本
+python --version
+# 应输出：Python 3.12.x
+
+安装owl
+
 # Clone github repo
 git clone https://github.com/camel-ai/owl.git
 
@@ -277,17 +304,21 @@ git clone https://github.com/camel-ai/owl.git
 cd owl
 
 # Create a conda environment
-conda create -n owl python=3.10
+conda create -n owl python=3.12
 
 # Activate the conda environment
 conda activate owl
 
+export CFLAGS="-std=c99"
+yum install gcc-c++
+conda install -c conda-forge gcc_linux-64 gxx_linux-64
+export CC=/root/miniconda3/envs/owl/bin/x86_64-conda-linux-gnu-gcc
+export CXX=/root/miniconda3/envs/owl/bin/x86_64-conda-linux-gnu-g++
+yum install libsndfile
 # Option 1: Install as a package (recommended)
 pip install -e .
-
 # Option 2: Install from requirements.txt
 pip install -r requirements.txt --use-pep517
-```
 
 ### Option 4: Using Docker
 
@@ -599,6 +630,7 @@ Selecting only necessary toolkits optimizes performance and reduces resource usa
 ```bash
 # Start the Chinese version
 python owl/webapp_zh.py
+app.launch(share=False)--->app.launch(share=False, server_name="0.0.0.0") for service at internet
 
 # Start the English version
 python owl/webapp.py
