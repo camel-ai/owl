@@ -19,6 +19,7 @@ import json
 import random
 import re
 import string
+import pandas as pd
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union, Tuple
 
@@ -120,15 +121,31 @@ class GAIABenchmark(BaseBenchmark):
         # Load metadata for both validation and test datasets
         for path, label in zip([valid_dir, test_dir], ["valid", "test"]):
             self._data[label] = []
-            with open(path / "metadata.jsonl", "r") as f:
-                lines = f.readlines()
-                for line in lines:
-                    data = json.loads(line)
+            metadata_jsonl_path = path / "metadata.jsonl"
+            metadata_parquet_path = path / "metadata.parquet"
+            if metadata_parquet_path.exists():
+                raw_data = pd.read_parquet(metadata_parquet_path)
+                # convert to dict
+                raw_data = raw_data.to_dict(orient="records")
+                for data in raw_data:
                     if data["task_id"] == "0-0-0-0-0":
                         continue
                     if data["file_name"]:
                         data["file_name"] = path / data["file_name"]
                     self._data[label].append(data)
+            elif metadata_jsonl_path.exists():
+                with open(metadata_jsonl_path, "r") as f:
+                    lines = f.readlines()
+                    for line in lines:
+                        data = json.loads(line)
+                        if data["task_id"] == "0-0-0-0-0":
+                            continue
+                        if data["file_name"]:
+                            data["file_name"] = path / data["file_name"]
+                        self._data[label].append(data)
+            else:
+                raise FileNotFoundError(f"Metadata file not found: {metadata_parquet_path} or {metadata_jsonl_path}")
+
         return self
 
     @property
@@ -167,7 +184,7 @@ class GAIABenchmark(BaseBenchmark):
                 f"Invalid value for `level`: {level}, expected 1, 2, 3 " "or 'all'."
             )
         logger.info(f"Running benchmark on {on} set at levels {levels}.")
-        datas = [data for data in self._data[on] if data["Level"] in levels]
+        datas = [data for data in self._data[on] if int(data["Level"]) in levels]
         # Shuffle and subset data if necessary
         if randomize:
             random.shuffle(datas)

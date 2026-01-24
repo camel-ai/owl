@@ -22,7 +22,7 @@ from camel.models import ModelFactory
 from camel.toolkits import (
     SearchToolkit,
     BrowserToolkit,
-    FileWriteToolkit,
+    FileToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.societies import RolePlaying
@@ -100,7 +100,7 @@ def construct_society(question: str) -> RolePlaying:
             output_language="Chinese",
         ).get_tools(),
         SearchToolkit().search_baidu,
-        *FileWriteToolkit(output_dir="./").get_tools(),
+        *FileToolkit().get_tools(),
     ]
 
     # Configure agent roles and parameters

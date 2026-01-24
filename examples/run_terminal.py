@@ -18,7 +18,7 @@ from camel.models import ModelFactory
 from camel.toolkits import (
     SearchToolkit,
     BrowserToolkit,
-    FileWriteToolkit,
+    FileToolkit,
     TerminalToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
@@ -73,14 +73,14 @@ def construct_society(question: str) -> RolePlaying:
 
     # Configure toolkits
     tools = [
-        *BrowserToolkit(
-            headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["browsing"],
-            planning_agent_model=models["planning"],
-        ).get_tools(),
+        # *BrowserToolkit(
+        #     headless=False,  # Set to True for headless mode (e.g., on remote servers)
+        #     web_agent_model=models["browsing"],
+        #     planning_agent_model=models["planning"],
+        # ).get_tools(),
         SearchToolkit().search_duckduckgo,
         SearchToolkit().search_wiki,
-        *FileWriteToolkit(output_dir="./").get_tools(),
+        *FileToolkit().get_tools(),
         *TerminalToolkit().get_tools(),
     ]
 

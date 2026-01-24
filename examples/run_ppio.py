@@ -24,7 +24,7 @@ from camel.models import ModelFactory
 from camel.toolkits import (
     ExcelToolkit,
     SearchToolkit,
-    FileWriteToolkit,
+    FileToolkit,
     CodeExecutionToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
@@ -73,7 +73,7 @@ def construct_society(question: str) -> RolePlaying:
         SearchToolkit().search_wiki,
         SearchToolkit().search_baidu,
         *ExcelToolkit().get_tools(),
-        *FileWriteToolkit(output_dir="./").get_tools(),
+        *FileToolkit().get_tools(),
     ]
 
     # Configure agent roles and parameters

@@ -82,7 +82,7 @@ from camel.models import ModelFactory
 from camel.toolkits import FunctionTool
 from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
-from camel.toolkits import MCPToolkit, FileWriteToolkit, CodeExecutionToolkit
+from camel.toolkits import MCPToolkit, FileToolkit, CodeExecutionToolkit
 from camel.societies import RolePlaying
 
 from owl.utils.enhanced_role_playing import arun_society
@@ -161,7 +161,7 @@ async def main():
         # Connect to toolkits
         tools = [
             *mcp_toolkit.get_tools(),
-            *FileWriteToolkit().get_tools(),
+            *FileToolkit().get_tools(),
             *CodeExecutionToolkit().get_tools(),
         ]
         society = await construct_society(task, tools)

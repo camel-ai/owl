@@ -67,13 +67,15 @@ class OwlRolePlaying(RolePlaying):
 
     def _init_agents(
         self,
-        init_assistant_sys_msg: BaseMessage,
-        init_user_sys_msg: BaseMessage,
+        init_assistant_sys_msg: Optional[BaseMessage],
+        init_user_sys_msg: Optional[BaseMessage],
         assistant_agent_kwargs: Optional[Dict] = None,
         user_agent_kwargs: Optional[Dict] = None,
         output_language: Optional[str] = None,
         is_reasoning_task: bool = False,
         stop_event: Optional[threading.Event] = None,
+        assistant_agent: Optional[ChatAgent] = None,
+        user_agent: Optional[ChatAgent] = None,
     ) -> None:
         r"""Initialize assistant and user agents with their system messages.
 
@@ -105,20 +107,60 @@ class OwlRolePlaying(RolePlaying):
         #         model_platform=ModelPlatformType.OPENAI,
         #         model_type=ModelType.O3_MINI,
         #     )
+        if assistant_agent is not None:
+            # Ensure functionality consistent with our configuration
+            if (
+                hasattr(assistant_agent, 'output_language')
+                and output_language is not None
+            ):
+                assistant_agent.output_language = output_language
+            if hasattr(assistant_agent, 'stop_event'):
+                assistant_agent.stop_event = stop_event
+            self.assistant_agent = assistant_agent
+            # Handle potential None system_message - use provided or fallback
+            if assistant_agent.system_message is not None:
+                self.assistant_sys_msg = assistant_agent.system_message
+            elif init_assistant_sys_msg is not None:
+                self.assistant_sys_msg = init_assistant_sys_msg
+            else:
+                raise ValueError("Assistant system message cannot be None")
+        else:
+            if init_assistant_sys_msg is None:
+                raise ValueError("Assistant system message cannot be None")
 
-        self.assistant_agent = ChatAgent(
-            init_assistant_sys_msg,
-            output_language=output_language,
-            **(assistant_agent_kwargs or {}),
-        )
-        self.assistant_sys_msg = self.assistant_agent.system_message
+            self.assistant_agent = ChatAgent(
+                init_assistant_sys_msg,
+                output_language=output_language,
+                **(assistant_agent_kwargs or {}),
+            )
+            self.assistant_sys_msg = self.assistant_agent.system_message
 
-        self.user_agent = ChatAgent(
-            init_user_sys_msg,
-            output_language=output_language,
-            **(user_agent_kwargs or {}),
-        )
-        self.user_sys_msg = self.user_agent.system_message
+        if user_agent is not None:
+            # Ensure functionality consistent with our configuration
+            if (
+                hasattr(user_agent, 'output_language')
+                and output_language is not None
+            ):
+                user_agent.output_language = output_language
+            if hasattr(user_agent, 'stop_event'):
+                user_agent.stop_event = stop_event
+            self.user_agent = user_agent
+            # Handle potential None system_message - use provided or fallback
+            if user_agent.system_message is not None:
+                self.user_sys_msg = user_agent.system_message
+            elif init_user_sys_msg is not None:
+                self.user_sys_msg = init_user_sys_msg
+            else:
+                raise ValueError("User system message cannot be None")
+        else:
+            if init_user_sys_msg is None:
+                raise ValueError("User system message cannot be None")
+            self.user_agent = ChatAgent(
+                init_user_sys_msg,
+                output_language=output_language,
+                **(user_agent_kwargs or {}),
+            )
+            self.user_sys_msg = self.user_agent.system_message
 
     # def _judge_if_reasoning_task(self, question: str) -> bool:
     #     r"""Judge if the question is a reasoning task."""

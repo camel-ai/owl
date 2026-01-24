@@ -21,7 +21,7 @@ from camel.toolkits import (
     ImageAnalysisToolkit,
     SearchToolkit,
     BrowserToolkit,
-    FileWriteToolkit,
+    FileToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
@@ -99,7 +99,7 @@ def construct_society(question: str) -> RolePlaying:
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
         *DocumentProcessingToolkit(model=models["document"]).get_tools(),
-        *FileWriteToolkit(output_dir="./").get_tools(),
+        *FileToolkit().get_tools(),
     ]
 
     # Configure agent roles and parameters

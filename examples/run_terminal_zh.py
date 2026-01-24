@@ -18,7 +18,7 @@ from camel.models import ModelFactory
 from camel.toolkits import (
     SearchToolkit,
     BrowserToolkit,
-    FileWriteToolkit,
+    FileToolkit,
     TerminalToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
@@ -80,7 +80,7 @@ def construct_society(question: str) -> RolePlaying:
         ).get_tools(),
         SearchToolkit().search_duckduckgo,
         SearchToolkit().search_wiki,
-        *FileWriteToolkit(output_dir="./").get_tools(),
+        *FileToolkit().get_tools(),
         *TerminalToolkit().get_tools(),
     ]
 
