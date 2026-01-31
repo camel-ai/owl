@@ -21,6 +21,7 @@ import logging
 import datetime
 from typing import Tuple
 import importlib
+import inspect
 from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
@@ -249,7 +250,8 @@ MODULE_DESCRIPTIONS = {
     "run_deepseek_zh": "Using deepseek model to process Chinese tasks",
     "run_mistral": "Using Mistral models to process tasks",
     "run_openai_compatible_model": "Using openai compatible model to process tasks",
-    "run_ollama": "Using local ollama model to process tasks",
+    "run_ollama": "Use a local model served by Ollama. Make sure Ollama is running.",
+    "run_developer_daemon": "Run the autonomous developer agent. WARNING: This is a persistent process that runs in a loop.",
     "run_qwen_mini_zh": "Using qwen model with minimal configuration to process tasks",
     "run_qwen_zh": "Using qwen model to process tasks",
     "run_azure_openai": "Using azure openai model to process tasks",
@@ -257,6 +259,7 @@ MODULE_DESCRIPTIONS = {
     "run_ppio": "Using ppio model to process tasks",
     "run_together_ai": "Using together ai model to process tasks",
     "run_novita_ai": "Using novita ai model to process tasks",
+    "run_openrouter": "Using a custom model from OpenRouter.",
 }
 
 
@@ -282,6 +285,9 @@ QWEN_API_KEY='Your_Key'
 
 # DeepSeek API (https://platform.deepseek.com/api_keys)
 DEEPSEEK_API_KEY='Your_Key'
+
+# OpenRouter API (https://openrouter.ai/keys)
+OPENROUTER_API_KEY='Your_Key'
 
 #===========================================
 # Tools & Services API
@@ -315,15 +321,26 @@ def validate_input(question: str) -> bool:
     return True
 
 
-def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
-    """Run the OWL system and return results
+def run_owl(
+    question: str,
+    example_module: str,
+    openrouter_model_name: str = None,
+    ollama_model_name: str = None,
+    message_queue: queue.Queue = None,
+) -> Tuple[str, str, str]:
+    """Run the OWL system and return results.
 
     Args:
-        question: User question
-        example_module: Example module name to import (e.g., "run_terminal_zh" or "run_deep")
+        question: User question.
+        example_module: Example module name to import.
+        openrouter_model_name (str, optional): The name of the OpenRouter
+            model to use.
+        ollama_model_name (str, optional): The name of the Ollama model to use.
+        message_queue (queue.Queue, optional): A queue to stream messages
+            back to the UI.
 
     Returns:
-        Tuple[...]: Answer, token count, status
+        Tuple[...]: Answer, token count, status.
     """
     global CURRENT_PROCESS
 
@@ -357,6 +374,8 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
         try:
             logging.info(f"Importing module: {module_path}")
             module = importlib.import_module(module_path)
+            # Reload the module to ensure latest changes are used
+            importlib.reload(module)
         except ImportError as ie:
             logging.error(f"Unable to import module {module_path}: {str(ie)}")
             return (
@@ -388,7 +407,21 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
         # Build society simulation
         try:
             logging.info("Building society simulation...")
-            society = module.construct_society(question)
+
+            # Inspect the signature of the target construct_society function
+            sig = inspect.signature(module.construct_society)
+            kwargs = {"question": question}
+
+            if "openrouter_model_name" in sig.parameters:
+                kwargs["openrouter_model_name"] = openrouter_model_name
+                logging.info(f"Passing openrouter_model_name: {openrouter_model_name}")
+
+            if "ollama_model_name" in sig.parameters:
+                kwargs["ollama_model_name"] = ollama_model_name
+                logging.info(f"Passing ollama_model_name: {ollama_model_name}")
+
+            # Call the function with the supported arguments
+            society = module.construct_society(**kwargs)
 
         except Exception as e:
             logging.error(f"Error occurred while building society simulation: {str(e)}")
@@ -401,7 +434,13 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
         # Run society simulation
         try:
             logging.info("Running society simulation...")
-            answer, chat_history, token_info = run_society(society)
+            # Inspect the signature of the run_society function
+            run_sig = inspect.signature(run_society)
+            run_kwargs = {"society": society}
+            if "message_queue" in run_sig.parameters:
+                run_kwargs["message_queue"] = message_queue
+
+            answer, chat_history, token_info = run_society(**run_kwargs)
             logging.info("Society simulation completed")
         except Exception as e:
             logging.error(f"Error occurred while running society simulation: {str(e)}")
@@ -610,6 +649,7 @@ def is_api_related(key: str) -> bool:
         "hugging",
         "chunkr",
         "firecrawl",
+        "openrouter",
     ]
 
     # Check if it contains API-related keywords (case insensitive)
@@ -644,6 +684,8 @@ def get_api_guide(key: str) -> str:
         return "https://www.firecrawl.dev/"
     elif "novita" in key_lower:
         return "https://novita.ai/settings/key-management?utm_source=github_owl&utm_medium=github_readme&utm_campaign=github_link"
+    elif "openrouter" in key_lower:
+        return "https://openrouter.ai/keys"
     else:
         return ""
 
@@ -801,71 +843,80 @@ def create_ui():
             logging.error(f"Error clearing log file: {str(e)}")
             return ""
 
-    # Create a real-time log update function
-    def process_with_live_logs(question, module_name):
-        """Process questions and update logs in real-time"""
+    def stream_conversation(
+        question, module_name, openrouter_model_name=None, ollama_model_name=None
+    ):
+        """
+        Streams the agent conversation to the chatbot UI and updates logs.
+        """
         global CURRENT_PROCESS
 
-        # Clear log file
+        # Clear previous logs and chatbot history
         clear_log_file()
+        yield [], "0", "<span class='status-indicator status-running'></span> Processing..."
 
-        # Create a background thread to process the question
+        # Set up queues for communication
+        chat_queue = queue.Queue()
         result_queue = queue.Queue()
 
+        # Define the background task for running the agent society
         def process_in_background():
             try:
-                result = run_owl(question, module_name)
+                # Pass the chat_queue to run_owl
+                result = run_owl(
+                    question,
+                    module_name,
+                    openrouter_model_name,
+                    ollama_model_name,
+                    chat_queue,
+                )
                 result_queue.put(result)
             except Exception as e:
                 result_queue.put(
                     (f"Error occurred: {str(e)}", "0", f"❌ Error: {str(e)}")
                 )
 
-        # Start background processing thread
+        # Start the background thread
         bg_thread = threading.Thread(target=process_in_background)
-        CURRENT_PROCESS = bg_thread  # Record current process
+        CURRENT_PROCESS = bg_thread
         bg_thread.start()
 
-        # While waiting for processing to complete, update logs once per second
+        # Stream updates from the chat_queue to the chatbot UI
+        chat_history = []
         while bg_thread.is_alive():
-            # Update conversation record display
-            logs2 = get_latest_logs(100, LOG_QUEUE)
+            try:
+                # Non-blocking get from the queue
+                message = chat_queue.get_nowait()
 
-            # Always update status
-            yield (
-                "0",
-                "<span class='status-indicator status-running'></span> Processing...",
-                logs2,
-            )
+                # Format for chatbot
+                user_msg = message.get("user", "")
+                assistant_msg = message.get("assistant", "")
 
-            time.sleep(1)
+                # Append user and assistant messages to chat history
+                if user_msg:
+                    chat_history.append((user_msg, None))
+                    yield chat_history, "0", "<span class='status-indicator status-running'></span> User message..."
 
-        # Processing complete, get results
-        if not result_queue.empty():
-            result = result_queue.get()
-            answer, token_count, status = result
+                if assistant_msg:
+                    chat_history[-1] = (chat_history[-1][0], assistant_msg)
+                    yield chat_history, "0", "<span class='status-indicator status-running'></span> Assistant message..."
 
-            # Final update of conversation record
-            logs2 = get_latest_logs(100, LOG_QUEUE)
+            except queue.Empty:
+                # Yield the current state if queue is empty
+                yield chat_history, "0", "<span class='status-indicator status-running'></span> Processing..."
+                time.sleep(0.5)
 
-            # Set different indicators based on status
-            if "Error" in status:
-                status_with_indicator = (
-                    f"<span class='status-indicator status-error'></span> {status}"
-                )
-            else:
-                status_with_indicator = (
-                    f"<span class='status-indicator status-success'></span> {status}"
-                )
+        # Get final result from the result_queue
+        final_result = result_queue.get()
+        answer, token_count, status = final_result
 
-            yield token_count, status_with_indicator, logs2
+        # Final update to the UI
+        if "Error" in status:
+            status_with_indicator = f"<span class='status-indicator status-error'></span> {status}"
         else:
-            logs2 = get_latest_logs(100, LOG_QUEUE)
-            yield (
-                "0",
-                "<span class='status-indicator status-error'></span> Terminated",
-                logs2,
-            )
+            status_with_indicator = f"<span class='status-indicator status-success'></span> {status}"
+
+        yield chat_history, token_count, status_with_indicator
 
     with gr.Blocks(title="OWL", theme=gr.themes.Soft(primary_hue="blue")) as app:
         gr.Markdown(
@@ -1113,6 +1164,20 @@ def create_ui():
                     elem_classes="module-info",
                 )
 
+                openrouter_model_name_textbox = gr.Textbox(
+                    label="OpenRouter Model Name",
+                    placeholder="e.g., mistralai/mistral-7b-instruct",
+                    value="mistralai/mistral-7b-instruct",
+                    visible=False,
+                )
+
+                ollama_model_name_textbox = gr.Textbox(
+                    label="Ollama Model Name",
+                    placeholder="e.g., llama3, mistral",
+                    value="llama3",
+                    visible=False,
+                )
+
                 with gr.Row():
                     run_button = gr.Button(
                         "Run", variant="primary", elem_classes="primary"
@@ -1144,22 +1209,34 @@ def create_ui():
                         </div>
                     """)
 
-            with gr.Tabs():  # Set conversation record as the default selected tab
-                with gr.TabItem("Conversation Record"):
+            with gr.Tabs():
+                with gr.TabItem("Conversation"):
+                    chatbot_display = gr.Chatbot(
+                        label="Agent Conversation",
+                        elem_id="chatbot",
+                        height=600,
+                        show_copy_button=True,
+                        bubble_full_width=False,
+                    )
+                    with gr.Row():
+                        clear_chatbot_button = gr.Button(
+                            "Clear Conversation", variant="secondary"
+                        )
+
+                with gr.TabItem("Full Logs"):
                     # Add conversation record display area
                     with gr.Group():
-                        log_display2 = gr.Markdown(
-                            value="No conversation records yet.",
-                            elem_classes="log-display",
+                        log_display = gr.Markdown(
+                            value="No logs yet.", elem_classes="log-display"
                         )
 
                     with gr.Row():
-                        refresh_logs_button2 = gr.Button("Refresh Record")
-                        auto_refresh_checkbox2 = gr.Checkbox(
+                        refresh_logs_button = gr.Button("Refresh Logs")
+                        auto_refresh_checkbox = gr.Checkbox(
                             label="Auto Refresh", value=True, interactive=True
                         )
-                        clear_logs_button2 = gr.Button(
-                            "Clear Record", variant="secondary"
+                        clear_logs_button = gr.Button(
+                            "Clear Logs", variant="secondary"
                         )
 
                 with gr.TabItem("Environment Variable Management", id="env-settings"):
@@ -1245,38 +1322,65 @@ def create_ui():
 
                     refresh_button.click(fn=update_env_table, outputs=[env_table])
 
-        # Set up event handling
+        # Set up event handling for the run button
         run_button.click(
-            fn=process_with_live_logs,
-            inputs=[question_input, module_dropdown],
-            outputs=[token_count_output, status_output, log_display2],
+            fn=stream_conversation,
+            inputs=[
+                question_input,
+                module_dropdown,
+                openrouter_model_name_textbox,
+                ollama_model_name_textbox,
+            ],
+            outputs=[chatbot_display, token_count_output, status_output],
         )
 
-        # Module selection updates description
+        # Module selection updates description and UI visibility
+        def handle_module_change(module_name):
+            description = update_module_description(module_name)
+            openrouter_visible = module_name == "run_openrouter"
+            ollama_visible = module_name == "run_ollama"
+            return (
+                description,
+                gr.update(visible=openrouter_visible),
+                gr.update(visible=ollama_visible),
+            )
+
         module_dropdown.change(
-            fn=update_module_description,
+            fn=handle_module_change,
             inputs=module_dropdown,
-            outputs=module_description,
+            outputs=[
+                module_description,
+                openrouter_model_name_textbox,
+                ollama_model_name_textbox,
+            ],
         )
 
-        # Conversation record related event handling
-        refresh_logs_button2.click(
-            fn=lambda: get_latest_logs(100, LOG_QUEUE), outputs=[log_display2]
+        # --- Chatbot Tab ---
+        def clear_chatbot():
+            return []
+
+        clear_chatbot_button.click(fn=clear_chatbot, outputs=[chatbot_display])
+
+        # --- Full Logs Tab ---
+        refresh_logs_button.click(
+            fn=lambda: get_latest_logs(100, LOG_QUEUE), outputs=[log_display]
         )
 
-        clear_logs_button2.click(fn=clear_log_file, outputs=[log_display2])
+        clear_logs_button.click(fn=clear_log_file, outputs=[log_display])
 
-        # Auto refresh control
         def toggle_auto_refresh(enabled):
             if enabled:
+                # Gradio's every= is not working as expected for stopping,
+                # so we just return the component update.
+                # A different approach would be needed for start/stop.
                 return gr.update(every=3)
             else:
-                return gr.update(every=0)
+                return gr.update(every=None)
 
-        auto_refresh_checkbox2.change(
+        auto_refresh_checkbox.change(
             fn=toggle_auto_refresh,
-            inputs=[auto_refresh_checkbox2],
-            outputs=[log_display2],
+            inputs=[auto_refresh_checkbox],
+            outputs=[log_display],
         )
 
         # No longer automatically refresh logs by default
@@ -1285,7 +1389,7 @@ def create_ui():
 
 
 # Main function
-def main():
+def main(port: int = 7860, share: bool = False):
     try:
         # Initialize logging system
         global LOG_FILE
@@ -1305,7 +1409,9 @@ def main():
 
         app.queue()
         app.launch(
-            share=False,
+            server_name="0.0.0.0",
+            server_port=port,
+            share=share,
             favicon_path=os.path.join(
                 os.path.dirname(__file__), "assets", "owl-favicon.ico"
             ),
