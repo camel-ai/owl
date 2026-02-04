@@ -30,7 +30,8 @@ import subprocess
 import xmltodict
 import nest_asyncio
 import traceback
-import html2text
+import asyncio
+from crawl4ai import AsyncWebCrawler
 
 nest_asyncio.apply()
 
@@ -237,19 +238,31 @@ class DocumentProcessingToolkit(BaseToolkit):
 
             return str(data["data"][0]["markdown"])
         else:
-            logger.warning("Firecrawl API key is not set. Use html2text to extract the content of the webpage.")
-            return self._extract_webpage_content_with_html2text(url)
+            logger.warning("Firecrawl API key is not set. Use crawl4ai to extract the content of the webpage.")
+            return self._extract_webpage_content_with_crawl4ai(url)
     
     
-    def _extract_webpage_content_with_html2text(self, url: str) -> str:
-        r"""Extract the content of a webpage using html2text."""
-        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    def _extract_webpage_content_with_crawl4ai(self, url: str) -> str:
+        r"""Extract the content of a webpage using crawl4ai."""
         try:
-            response = requests.get(url, headers={"User-Agent": user_agent})
-            response.raise_for_status()
-            return html2text.html2text(response.text)
+            # Use asyncio.run to execute the async function
+            return asyncio.run(self._async_extract_webpage_content_with_crawl4ai(url))
         except Exception as e:
             logger.error(f"Error while extracting the content of the webpage: {e}")
+            return "Error while extracting the content of the webpage."
+    
+    async def _async_extract_webpage_content_with_crawl4ai(self, url: str) -> str:
+        r"""Async helper method to extract webpage content using crawl4ai."""
+        try:
+            async with AsyncWebCrawler(verbose=False) as crawler:
+                result = await crawler.arun(url=url)
+                if result.markdown:
+                    return result.markdown
+                else:
+                    logger.warning("No markdown content extracted from the webpage.")
+                    return "No content found on the webpage."
+        except Exception as e:
+            logger.error(f"Error while extracting the content of the webpage with crawl4ai: {e}")
             return "Error while extracting the content of the webpage."
 
 
