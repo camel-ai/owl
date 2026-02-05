@@ -13,19 +13,33 @@
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 
 """
-Workforce example using Groq models.
+Workforce example using VLLM or other OpenAI-compatible models.
 
-This module provides integration with the Groq API platform for the OWL system.
-It configures different agent roles with appropriate Groq models based on their requirements:
-- Tool-intensive roles use GROQ_LLAMA_3_3_70B
-- Simple roles use GROQ_LLAMA_3_1_8B
+This example demonstrates how to use VLLM or any other OpenAI-compatible API endpoint
+with the Workforce architecture. VLLM provides a high-performance inference server
+that is compatible with OpenAI's API format.
 
-To use this module:
-1. Set GROQ_API_KEY in your .env file
-2. Set OPENAI_API_BASE_URL to "https://api.groq.com/openai/v1"
-3. Run with: python -m examples.run_workforce_groq
+To use this file:
+1. Set up a VLLM server or any OpenAI-compatible API endpoint
+2. Set the API endpoint URL in VLLM_API_URL environment variable (default: http://localhost:8000/v1)
+3. Optionally set VLLM_API_KEY if your endpoint requires authentication
+4. Set the model name in VLLM_MODEL_NAME environment variable (e.g., "meta-llama/Llama-2-7b-chat-hf")
+5. Run with: python -m examples.run_workforce_vllm
+
+Example VLLM setup:
+```bash
+# Start VLLM server
+python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-2-7b-chat-hf \
+    --port 8000
+```
+
+Then set in .env:
+VLLM_API_URL=http://localhost:8000/v1
+VLLM_MODEL_NAME=meta-llama/Llama-2-7b-chat-hf
 """
 
+import os
 import sys
 import pathlib
 from dotenv import load_dotenv
@@ -38,7 +52,7 @@ from camel.toolkits import (
     SearchToolkit,
     FileToolkit,
 )
-from camel.types import ModelPlatformType, ModelType
+from camel.types import ModelPlatformType
 from camel.logger import set_log_level
 from camel.tasks.task import Task
 
@@ -58,22 +72,32 @@ set_log_level(level="DEBUG")
 def construct_agent_list() -> List[Dict[str, Any]]:
     """Construct a list of agents with their configurations."""
     
-    # Use larger models for tool-intensive roles
+    # Get configuration from environment variables
+    api_url = os.getenv("VLLM_API_URL", "http://localhost:8000/v1")
+    api_key = os.getenv("VLLM_API_KEY", None)
+    model_name = os.getenv("VLLM_MODEL_NAME", "meta-llama/Llama-2-7b-chat-hf")
+    
     web_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+        model_type=model_name,
+        url=api_url,
+        api_key=api_key,
         model_config_dict={"temperature": 0},
     )
     
     document_processing_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+        model_type=model_name,
+        url=api_url,
+        api_key=api_key,
         model_config_dict={"temperature": 0},
     )
     
     reasoning_model = ModelFactory.create(
-        model_platform=ModelPlatformType.GROQ,
-        model_type=ModelType.GROQ_LLAMA_3_3_70B,
+        model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+        model_type=model_name,
+        url=api_url,
+        api_key=api_key,
         model_config_dict={"temperature": 0},
     )
 
@@ -154,19 +178,27 @@ Here are some tips that help you perform web search:
 def construct_workforce() -> Workforce:
     """Construct a workforce with coordinator and task agents."""
     
-    # Use smaller model for coordinator and task agent (they don't need tool capabilities)
+    # Get configuration from environment variables
+    api_url = os.getenv("VLLM_API_URL", "http://localhost:8000/v1")
+    api_key = os.getenv("VLLM_API_KEY", None)
+    model_name = os.getenv("VLLM_MODEL_NAME", "meta-llama/Llama-2-7b-chat-hf")
+    
     coordinator_agent_kwargs = {
         "model": ModelFactory.create(
-            model_platform=ModelPlatformType.GROQ,
-            model_type=ModelType.GROQ_LLAMA_3_1_8B,
+            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+            model_type=model_name,
+            url=api_url,
+            api_key=api_key,
             model_config_dict={"temperature": 0},
         )
     }
     
     task_agent_kwargs = {
         "model": ModelFactory.create(
-            model_platform=ModelPlatformType.GROQ,
-            model_type=ModelType.GROQ_LLAMA_3_1_8B,
+            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+            model_type=model_name,
+            url=api_url,
+            api_key=api_key,
             model_config_dict={"temperature": 0},
         )
     }

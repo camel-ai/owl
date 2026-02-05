@@ -30,6 +30,8 @@ import subprocess
 import xmltodict
 import nest_asyncio
 import traceback
+import asyncio
+from crawl4ai import AsyncWebCrawler
 
 nest_asyncio.apply()
 
@@ -218,22 +220,51 @@ class DocumentProcessingToolkit(BaseToolkit):
     @retry_on_error()
     def _extract_webpage_content(self, url: str) -> str:
         api_key = os.getenv("FIRECRAWL_API_KEY")
-        from firecrawl import FirecrawlApp
+        if api_key is not None:
+            from firecrawl import FirecrawlApp
 
-        # Initialize the FirecrawlApp with your API key
-        app = FirecrawlApp(api_key=api_key)
+            # Initialize the FirecrawlApp with your API key
+            app = FirecrawlApp(api_key=api_key)
 
-        data = app.crawl_url(
-            url, params={"limit": 1, "scrapeOptions": {"formats": ["markdown"]}}
-        )
-        logger.debug(f"Extractred data from {url}: {data}")
-        if len(data["data"]) == 0:
-            if data["success"]:
-                return "No content found on the webpage."
-            else:
-                return "Error while crawling the webpage."
+            data = app.crawl_url(
+                url, params={"limit": 1, "scrapeOptions": {"formats": ["markdown"]}}
+            )
+            logger.debug(f"Extractred data from {url}: {data}")
+            if len(data["data"]) == 0:
+                if data["success"]:
+                    return "No content found on the webpage."
+                else:
+                    return "Error while crawling the webpage."
 
-        return str(data["data"][0]["markdown"])
+            return str(data["data"][0]["markdown"])
+        else:
+            logger.warning("Firecrawl API key is not set. Use crawl4ai to extract the content of the webpage.")
+            return self._extract_webpage_content_with_crawl4ai(url)
+    
+    
+    def _extract_webpage_content_with_crawl4ai(self, url: str) -> str:
+        r"""Extract the content of a webpage using crawl4ai."""
+        try:
+            # Use asyncio.run to execute the async function
+            return asyncio.run(self._async_extract_webpage_content_with_crawl4ai(url))
+        except Exception as e:
+            logger.error(f"Error while extracting the content of the webpage: {e}")
+            return "Error while extracting the content of the webpage."
+    
+    async def _async_extract_webpage_content_with_crawl4ai(self, url: str) -> str:
+        r"""Async helper method to extract webpage content using crawl4ai."""
+        try:
+            async with AsyncWebCrawler(verbose=False) as crawler:
+                result = await crawler.arun(url=url)
+                if result.markdown:
+                    return result.markdown
+                else:
+                    logger.warning("No markdown content extracted from the webpage.")
+                    return "No content found on the webpage."
+        except Exception as e:
+            logger.error(f"Error while extracting the content of the webpage with crawl4ai: {e}")
+            return "Error while extracting the content of the webpage."
+
 
     def _download_file(self, url: str):
         r"""Download a file from a URL and save it to the cache directory."""

@@ -1,14 +1,3 @@
-<div align="center" style="background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 3px solid #ff6b6b; margin: 20px 0;">
-  <h3 style="color: #d63031; margin: 0;">
-    ‼️ <b>重要提示</b> ‼️
-  </h3>
-  <p style="font-size: 1.1em; margin: 10px 0; color: #2d3436;">
-    <b>当前版本的 OWL 未使用最新版本的 <a href="https://github.com/camel-ai/camel">CAMEL</a>。</b><br>
-    如果您想构建基于 workforce 的最佳性能智能体，请查看 <a href="https://github.com/camel-ai/camel/blob/master/examples/workforce/eigent.py"><b>eigent.py</b></a>。<br>
-    我们也正在努力将 CAMEL 更新到最新版本。
-  </p>
-</div>
-
 <h1 align="center">
 	🦉 OWL: Optimized Workforce Learning for General Multi-Agent Assistance in Real-World Task Automation
 	🦉 OWL: 优化劳动力学习的通用智能体，用于处理现实世界的自动化任务
@@ -73,11 +62,38 @@
 - [📋 目录](#-目录)
 - [🔥 新闻](#-新闻)
 - [🎬 演示视频](#-演示视频)
-- [✨️ 核心功能](#-核心功能)
+- [✨️ 核心功能](#️-核心功能)
 - [🛠️ 安装](#️-安装)
+  - [选项1：使用 uv（推荐）](#选项1使用-uv推荐)
+  - [选项2：使用 venv 和 pip](#选项2使用-venv-和-pip)
+  - [选项3：使用 conda](#选项3使用-conda)
+  - [**设置环境变量**](#设置环境变量)
+    - [选项 1：使用 `.env` 文件（推荐）](#选项-1使用-env-文件推荐)
+    - [选项 2：直接设置环境变量](#选项-2直接设置环境变量)
+  - [**使用Docker运行**](#使用docker运行)
+    - [**设置说明**](#设置说明)
+    - [**部署选项**](#部署选项)
+      - [**选项1：使用预构建镜像（推荐）**](#选项1使用预构建镜像推荐)
+      - [**选项2：本地构建镜像**](#选项2本地构建镜像)
+      - [**选项3：使用便捷脚本**](#选项3使用便捷脚本)
+    - [**MCP Desktop Commander设置**](#mcp-desktop-commander设置)
 - [🚀 快速开始](#-快速开始)
+  - [基本用法](#基本用法)
+  - [使用不同的模型](#使用不同的模型)
+    - [模型要求](#模型要求)
+      - [支持的模型](#支持的模型)
 - [🧰 工具包与功能](#-工具包与功能)
-  - [模型上下文协议 (MCP)](#模型上下文协议-mcp)
+  - [模型上下文协议（MCP）](#模型上下文协议mcp)
+    - [**安装 Node.js**](#安装-nodejs)
+    - [Windows](#windows)
+    - [Linux](#linux)
+    - [Mac](#mac)
+    - [**安装 MCP 服务**](#安装-mcp-服务)
+  - [可用工具包](#可用工具包)
+  - [主要工具包](#主要工具包)
+    - [多模态工具包（需要模型具备多模态能力）](#多模态工具包需要模型具备多模态能力)
+    - [基于文本的工具包](#基于文本的工具包)
+  - [自定义配置](#自定义配置)
 - [🌐 网页界面](#-网页界面)
 - [🧪 实验](#-实验)
 - [⏱️ 未来计划](#️-未来计划)
@@ -87,6 +103,7 @@
 - [🔥 社区](#-社区)
 - [❓ 常见问题](#-常见问题)
 - [📚 探索 CAMEL 依赖](#-探索-camel-依赖)
+  - [访问 CAMEL 源代码](#访问-camel-源代码)
 - [⭐ Star History](#-star-history)
 
 </div>

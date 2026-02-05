@@ -1,14 +1,3 @@
-<div align="center" style="background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 3px solid #ff6b6b; margin: 20px 0;">
-  <h3 style="color: #d63031; margin: 0;">
-    ‼️ <b>IMPORTANT NOTICE</b> ‼️
-  </h3>
-  <p style="font-size: 1.1em; margin: 10px 0; color: #2d3436;">
-    <b>The current version of OWL does not use the up-to-date version of <a href="https://github.com/camel-ai/camel">CAMEL</a>.</b><br>
-    If you want to build the best performing agents powered by workforce, please check out <a href="https://github.com/camel-ai/camel/blob/master/examples/workforce/eigent.py"><b>eigent.py</b></a>.<br>
-    We are also working on updating CAMEL to the latest version.
-  </p>
-</div>
-
 <div align="center">
 
 </div>
