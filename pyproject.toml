@@ -23,7 +23,7 @@ keywords = [
 dependencies = [
     "camel-ai[owl]==0.2.57",
     "docx2markdown>=0.1.1",
-    "gradio>=3.50.2",
+    "gradio>=6.4.0",
     "mcp-simple-arxiv==0.2.2",
     "mcp-server-fetch==2025.1.17",
     "xmltodict>=0.14.2",

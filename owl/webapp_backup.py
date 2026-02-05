@@ -628,7 +628,6 @@ def create_ui():
                         placeholder="请输入您的问题...",
                         label="问题",
                         elem_id="question_input",
-                        show_copy_button=True,
                     )
 
                     # 增强版模块选择下拉菜单
