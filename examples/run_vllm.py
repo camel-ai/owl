@@ -50,6 +50,7 @@ from camel.toolkits import (
     CodeExecutionToolkit,
     ExcelToolkit,
     SearchToolkit,
+    BrowserToolkit,
     FileToolkit,
 )
 from camel.types import ModelPlatformType
@@ -101,24 +102,50 @@ def construct_agent_list() -> List[Dict[str, Any]]:
         model_config_dict={"temperature": 0},
     )
 
+    browsing_model = ModelFactory.create(
+        model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+        model_type=model_name,
+        url=api_url,
+        api_key=api_key,
+        model_config_dict={"temperature": 0},
+    )
+
+    planning_model = ModelFactory.create(
+        model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+        model_type=model_name,
+        url=api_url,
+        api_key=api_key,
+        model_config_dict={"temperature": 0},
+    )
+
     search_toolkit = SearchToolkit()
     document_processing_toolkit = DocumentProcessingToolkit(model=document_processing_model)
     code_runner_toolkit = CodeExecutionToolkit(sandbox="subprocess", verbose=True)
     file_toolkit = FileToolkit()
     excel_toolkit = ExcelToolkit()
+    browser_toolkit = BrowserToolkit(
+        headless=False,  # Set to True for headless mode (e.g., on remote servers)
+        web_agent_model=browsing_model,
+        planning_agent_model=planning_model,
+    )
 
     web_agent = ChatAgent(
-        """You are a helpful assistant that can search the web, extract webpage content, and provide relevant information to solve the given task.
+        """You are a helpful assistant that can search the web, extract webpage content, simulate browser actions, and provide relevant information to solve the given task.
 Keep in mind that:
 - Do not be overly confident in your own knowledge. Searching can provide a broader perspective and help validate existing knowledge.
 - If one way fails to provide an answer, try other ways or methods. The answer does exist.
-- When looking for specific numerical values (e.g., dollar amounts), prioritize reliable sources.
+- If the search snippet is unhelpful but the URL comes from an authoritative source, try visit the website for more details.
+- When looking for specific numerical values (e.g., dollar amounts), prioritize reliable sources and avoid relying only on search snippets.
 - When solving tasks that require web searches, check Wikipedia first before exploring other websites.
+- You can also simulate browser actions to get more information or verify the information you have found.
+- Browser simulation is also helpful for finding target URLs. Browser simulation operations do not necessarily need to find specific answers, but can also help find web page URLs that contain answers (usually difficult to find through simple web searches). You can find the answer to the question by performing subsequent operations on the URL, such as extracting the content of the webpage.
+- Do not solely rely on document tools or browser simulation to find the answer, you should combine document tools and browser simulation to comprehensively process web page information. Some content may need to do browser simulation to get, or some content is rendered by javascript.
 - In your response, you should mention the urls you have visited and processed.
 
 Here are some tips that help you perform web search:
-- Never add too many keywords in your search query!
-- If the question is complex, search results typically do not provide precise answers. The search query should be concise and focuses on finding official sources rather than direct answers.
+- Never add too many keywords in your search query! Some detailed results need to perform browser interaction to get, not using search toolkit.
+- If the question is complex, search results typically do not provide precise answers. It is not likely to find the answer directly using search toolkit only, the search query should be concise and focuses on finding official sources rather than direct answers.
+  For example, as for the question "What is the maximum length in meters of #9 in the first National Geographic short on YouTube that was ever released according to the Monterey Bay Aquarium website?", your first search term must be coarse-grained like "National Geographic YouTube" to find the youtube website first, and then try other fine-grained search terms step-by-step to find more urls.
 - The results you return do not have to directly answer the original question, you only need to collect relevant information.
 """,
         model=web_model,
@@ -126,6 +153,7 @@ Here are some tips that help you perform web search:
             FunctionTool(search_toolkit.search_duckduckgo),
             FunctionTool(search_toolkit.search_wiki),
             FunctionTool(document_processing_toolkit.extract_document_content),
+            *browser_toolkit.get_tools(),
         ]
     )
     

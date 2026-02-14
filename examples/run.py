@@ -48,25 +48,37 @@ def construct_agent_list() -> List[Dict[str, Any]]:
 
     web_model = ModelFactory.create(
         model_platform=ModelPlatformType.OPENAI,
-        model_type=ModelType.GPT_5_1,
+        model_type=ModelType.GPT_5_2,
         model_config_dict={"temperature": 0},
     )
     
     document_processing_model = ModelFactory.create(
         model_platform=ModelPlatformType.OPENAI,
-        model_type=ModelType.GPT_5_1,
+        model_type=ModelType.GPT_5_2,
         model_config_dict={"temperature": 0},
     )
     
     reasoning_model = ModelFactory.create(
         model_platform=ModelPlatformType.OPENAI,
-        model_type=ModelType.GPT_5_1,
+        model_type=ModelType.GPT_5_2,
         model_config_dict={"temperature": 0},
     )
     
     image_analysis_model = ModelFactory.create( 
         model_platform=ModelPlatformType.OPENAI,
-        model_type=ModelType.GPT_5_1,
+        model_type=ModelType.GPT_5_2,
+        model_config_dict={"temperature": 0},
+    )
+
+    browsing_model = ModelFactory.create(
+        model_platform=ModelPlatformType.OPENAI,
+        model_type=ModelType.GPT_5_2,
+        model_config_dict={"temperature": 0},
+    )
+
+    planning_model = ModelFactory.create(
+        model_platform=ModelPlatformType.OPENAI,
+        model_type=ModelType.GPT_5_2,
         model_config_dict={"temperature": 0},
     )
 
@@ -76,6 +88,11 @@ def construct_agent_list() -> List[Dict[str, Any]]:
     code_runner_toolkit = CodeExecutionToolkit(sandbox="subprocess", verbose=True)
     file_toolkit = FileToolkit()
     excel_toolkit = ExcelToolkit()
+    browser_toolkit = BrowserToolkit(
+        headless=False,  # Set to True for headless mode (e.g., on remote servers)
+        web_agent_model=browsing_model,
+        planning_agent_model=planning_model,
+    )
 
     web_agent = ChatAgent(
 """
@@ -103,6 +120,7 @@ Here are some tips that help you perform web search:
             FunctionTool(search_toolkit.search_duckduckgo),
             FunctionTool(search_toolkit.search_wiki),
             FunctionTool(document_processing_toolkit.extract_document_content),
+            *browser_toolkit.get_tools(),
         ]
     )
     
@@ -158,7 +176,7 @@ def construct_workforce() -> Workforce:
     coordinator_agent_kwargs = {
         "model": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_5_1,
+            model_type=ModelType.GPT_4O,
             model_config_dict={"temperature": 0},
         )
     }
@@ -166,7 +184,7 @@ def construct_workforce() -> Workforce:
     task_agent_kwargs = {
         "model": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_5_1,
+            model_type=ModelType.GPT_4O,
             model_config_dict={"temperature": 0},
         )
     }
@@ -201,7 +219,7 @@ def construct_workforce() -> Workforce:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Default research question
-    default_task_prompt = "Summarize the github stars, fork counts, etc. of camel-ai's owl framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task."
+    default_task_prompt = "Use Browser Toolkit to summarize the github stars, fork counts, etc. of camel-ai's owl framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file. Note: You have been provided with the necessary tools to complete this task."
     
     # Override default task if command line argument is provided
     task_prompt = sys.argv[1] if len(sys.argv) > 1 else default_task_prompt
