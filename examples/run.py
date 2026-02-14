@@ -176,7 +176,7 @@ def construct_workforce() -> Workforce:
     coordinator_agent_kwargs = {
         "model": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
+            model_type=ModelType.GPT_5_2,
             model_config_dict={"temperature": 0},
         )
     }
@@ -184,7 +184,7 @@ def construct_workforce() -> Workforce:
     task_agent_kwargs = {
         "model": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
+            model_type=ModelType.GPT_5_2,
             model_config_dict={"temperature": 0},
         )
     }

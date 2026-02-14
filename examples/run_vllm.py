@@ -76,7 +76,7 @@ def construct_agent_list() -> List[Dict[str, Any]]:
     # Get configuration from environment variables
     api_url = os.getenv("VLLM_API_URL", "http://localhost:8000/v1")
     api_key = os.getenv("VLLM_API_KEY", None)
-    model_name = os.getenv("VLLM_MODEL_NAME", "meta-llama/Llama-2-7b-chat-hf")
+    model_name = os.getenv("VLLM_MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
     
     web_model = ModelFactory.create(
         model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
