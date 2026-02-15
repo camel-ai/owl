@@ -562,7 +562,7 @@ async def arun_society(
         assistant_response, user_response = await society.astep(input_msg)
         # Check if usage info is available before accessing it
         if assistant_response.info.get("usage") and user_response.info.get("usage"):
-            overall_prompt_token_count += assistant_response.info["usage"].get(
+            overall_completion_token_count += assistant_response.info["usage"].get(
                 "completion_tokens", 0
             )
             overall_prompt_token_count += assistant_response.info["usage"].get(
