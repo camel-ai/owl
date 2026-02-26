@@ -30,7 +30,7 @@
 [コミュニティ](https://github.com/camel-ai/owl#community) |
 [インストール](#️-installation) |
 [例](https://github.com/camel-ai/owl/tree/main/owl) |
-[論文](https://arxiv.org/abs/2303.17760) |
+[論文](https://arxiv.org/abs/2505.23885) |
 [引用](https://github.com/camel-ai/owl#citation) |
 [貢献](https://github.com/camel-ai/owl/graphs/contributors) |
 [CAMEL-AI](https://www.camel-ai.org/)
@@ -39,7 +39,7 @@
 
 <div align="center" style="background-color: #f0f7ff; padding: 10px; border-radius: 5px; margin: 15px 0;">
   <h3 style="color: #1e88e5; margin: 0;">
-    🏆 OWLはGAIAベンチマークで<span style="color: #d81b60; font-weight: bold; font-size: 1.2em;">58.18</span>の平均スコアを達成し、オープンソースフレームワークの中で<span style="color: #d81b60; font-weight: bold; font-size: 1.2em;">🏅️ #1</span>にランクインしました！ 🏆
+    🏆 OWLはGAIAベンチマークで<span style="color: #d81b60; font-weight: bold; font-size: 1.2em;">69.09</span>の平均スコアを達成し、オープンソースフレームワークの中で<span style="color: #d81b60; font-weight: bold; font-size: 1.2em;">🏅️ #1</span>にランクインしました！ 🏆
   </h3>
 </div>
 
@@ -141,6 +141,12 @@
   </p>
 </div>
 
+- **[2025.05.27]**: OWLの技術報告書を公開しました。労働力（フレームワーク）と最適化労働力学習（訓練手法）についての詳細が含まれています。[論文](https://arxiv.org/abs/2505.23885)。
+- **[2025.05.18]**: GAIAでの労働力実験を複製するための初期バージョンを[こちら](https://github.com/camel-ai/owl/tree/gaia69)でオープンソース化しました。
+- **[2025.04.18]**: OWLの新しいGAIAベンチマークスコア**69.09%**をアップロードし、オープンソースフレームワークの中で#1にランクインしました。技術報告書は[こちら](https://hypnotic-mind-6bd.notion.site/OWL-Optimized-Workforce-Learning-for-General-Multi-Agent-Assistance-in-Real-World-Task-Automation-1d4004aeb21380158749c7f84b20643f)をご覧ください。
+- **[2025.03.27]**: SearxNG検索エンジンを使用したウェブ検索を実行するSearxNGToolkitを統合。
+- **[2025.03.26]**: "chrome"、"msedge"、"chromium"チャンネルのマルチブラウザサポートでBrowser Toolkitを強化。
+- **[2025.03.25]**: Gemini 2.5 Proをサポート、実行例コードを追加
 - **[2025.03.21]**: OpenRouterモデルプラットフォームを統合し、Geminiツール呼び出しのバグを修正
 - **[2025.03.20]**: MCPツールキットにAcceptヘッダーを追加し、Playwrightの自動インストールをサポート
 - **[2025.03.16]**: Bing検索、Baidu検索をサポート
@@ -169,7 +175,29 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 
 # 🛠️ インストール
 
-OWLは、ワークフロープリファレンスに合わせた複数のインストール方法をサポートしています。最適なオプションを選択してください。
+## **前提条件**
+
+### Pythonのインストール
+OWLをインストールする前に、Pythonがインストールされていることを確認してください（バージョン3.10、3.11、または3.12がサポートされています）：
+
+> **GAIAベンチマークユーザー向けの注意**：GAIAベンチマーク評価を実行する場合は、`owl/camel`ディレクトリに標準CAMELインストールと比較してGAIAベンチマーク用に最適化された安定性向上ツールキットを含むCAMELフレームワークのカスタマイズバージョンが含まれている`gaia69`ブランチを使用してください。
+
+```bash
+# Pythonがインストールされているかチェック
+python --version
+
+# インストールされていない場合は、https://www.python.org/downloads/からダウンロードしてインストール
+# Homebrewを使用しているmacOSユーザーの場合：
+brew install python@3.10
+
+# Ubuntu/Debianの場合：
+sudo apt update
+sudo apt install python3.10 python3.10-venv python3-pip
+```
+
+## **インストールオプション**
+
+OWLは、ワークフロープリファレンスに合わせた複数のインストール方法をサポートしています。
 
 ## オプション1：uvを使用する（推奨）
 
@@ -476,7 +504,9 @@ npm install -g @executeautomation/playwright-mcp-server
 npx playwright install-deps
 ```
 
-`examples/run_mcp.py`の包括的なMCP例を試して、これらの機能を実際に体験してください！
+私たちの包括的なMCP例を試してみてください：
+- `examples/run_mcp.py` - 基本的なMCP機能デモンストレーション（ローカル呼び出し、依存関係が必要）
+- `examples/run_mcp_sse.py` - SSEプロトコルを使用した例（リモートサービスを使用、依存関係不要）
 
 ## 利用可能なツールキット
 
@@ -577,16 +607,19 @@ python owl/webapp_jp.py
 
 # 🧪 実験
 
-OWLのGAIAベンチマークスコア58.18を再現するには：
+OWLのGAIAベンチマークスコアを再現するには：
+さらに、GAIAベンチマークでの最適なパフォーマンスを確保するために、`gaia69`ブランチには`owl/camel`ディレクトリに標準のCAMELインストールと比較してGAIAベンチマーク用に最適化された、安定性が向上したツールキットを含むCAMELフレームワークのカスタマイズバージョンが含まれていることにご注意ください。
 
-1. `gaia58.18`ブランチに切り替え：
+ベンチマーク評価を実行する際は：
+
+1. `gaia69`ブランチに切り替え：
    ```bash
-   git checkout gaia58.18
+   git checkout gaia69
    ```
 
 2. 評価スクリプトを実行：
    ```bash
-   python run_gaia_roleplaying.py
+   python run_gaia_workforce_claude.py
    ```
 
 これにより、GAIAベンチマークでトップランクのパフォーマンスを達成したのと同じ構成が実行されます。
@@ -595,10 +628,10 @@ OWLのGAIAベンチマークスコア58.18を再現するには：
 
 私たちはOWLの改善に継続的に取り組んでいます。以下は私たちのロードマップです：
 
-- [ ] 現実のタスクにおけるマルチエージェント協力の探求と洞察を詳述する技術ブログ記事を書く
-- [ ] 特定の分野のタスクに対応する専門ツールを追加してツールキットエコシステムを強化
-- [ ] より高度なエージェント相互作用パターンと通信プロトコルを開発
-- [ ] 複雑な多段階推論タスクのパフォーマンスを向上
+- [x] 現実のタスクにおけるマルチエージェント協力の探求と洞察を詳述する技術ブログ記事を書く
+- [x] 特定の分野のタスクに対応する専門ツールを追加してツールキットエコシステムを強化
+- [x] より高度なエージェント相互作用パターンと通信プロトコルを開発
+- [x] 複雑な多段階推論タスクのパフォーマンスを向上
 
 # 📄 ライセンス
 
@@ -610,12 +643,14 @@ OWLのGAIAベンチマークスコア58.18を再現するには：
 
 
 ```
-@misc{owl2025,
-  title        = {OWL: Optimized Workforce Learning for General Multi-Agent Assistance in Real-World Task Automation},
-  author       = {{CAMEL-AI.org}},
-  howpublished = {\url{https://github.com/camel-ai/owl}},
-  note         = {Accessed: 2025-03-07},
-  year         = {2025}
+@misc{hu2025owl,
+      title={OWL: Optimized Workforce Learning for General Multi-Agent Assistance in Real-World Task Automation}, 
+      author={Mengkang Hu and Yuhang Zhou and Wendong Fan and Yuzhou Nie and Bowei Xia and Tao Sun and Ziyu Ye and Zhaoxuan Jin and Yingru Li and Qiguang Chen and Zeyu Zhang and Yifeng Wang and Qianshuo Ye and Bernard Ghanem and Ping Luo and Guohao Li},
+      year={2025},
+      eprint={2505.23885},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2505.23885}, 
 }
 ```
 
@@ -644,7 +679,7 @@ OWLのGAIAベンチマークスコア58.18を再現するには：
 
 さらなる議論に参加してください！
 <!-- ![](./assets/community.png) -->
-![](./assets/community.jpeg)
+![](./assets/community_code.jpeg)
 
 # ❓ FAQ
 
@@ -659,6 +694,16 @@ A: OWLはPython 3.10、3.11、および3.12をサポートしています。
 **Q: プロジェクトにどのように貢献できますか？**
 
 A: 参加方法の詳細については、[貢献](#-貢献)セクションを参照してください。コードの改善からドキュメントの更新まで、あらゆる種類の貢献を歓迎します。
+
+## 実験の質問
+
+**Q: どのCAMELバージョンを使用してロールプレイングの結果を複製すべきですか？**
+
+A: gaia69ブランチで修正されたCAMELバージョン（owl/camel）を提供しています。実験にはこのCAMELバージョンを使用してください。
+
+**Q: なぜ実験結果が報告された数値よりも低いのですか？**
+
+A: GAIAベンチマークは現実世界でLLMエージェントを評価するため、大きなランダム性が導入されます。ユーザーのフィードバックに基づくと、複製において最も一般的な問題の一つは、例えば、ネットワークの理由で特定のウェブページでエージェントがブロックされることです。これらのエラーを迅速にフィルタリングするためのキーワードマッチングスクリプトを[こちら](https://github.com/camel-ai/owl/blob/gaia58.18/owl/filter_failed_cases.py)にアップロードしました。現実的なオープンワールド環境でLLMエージェントを評価する際の詳細については、この[技術報告書](https://hypnotic-mind-6bd.notion.site/OWL-Optimized-Workforce-Learning-for-General-Multi-Agent-Assistance-in-Real-World-Task-Automation-1d4004aeb21380158749c7f84b20643f?pvs=74)も確認できます。
 
 # 📚 CAMEL依存関係の探索
 
