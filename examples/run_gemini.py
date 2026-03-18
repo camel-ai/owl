@@ -56,37 +56,37 @@ def construct_agent_list() -> List[Dict[str, Any]]:
 
     web_model = ModelFactory.create(
         model_platform=ModelPlatformType.GEMINI,
-        model_type=ModelType.GEMINI_3_1_PRO,
+        model_type=ModelType.GEMINI_3_PRO,
         model_config_dict={"temperature": 0},
     )
 
     document_processing_model = ModelFactory.create(
         model_platform=ModelPlatformType.GEMINI,
-        model_type=ModelType.GEMINI_3_1_PRO,
+        model_type=ModelType.GEMINI_3_PRO,
         model_config_dict={"temperature": 0},
     )
 
     reasoning_model = ModelFactory.create(
         model_platform=ModelPlatformType.GEMINI,
-        model_type=ModelType.GEMINI_3_1_PRO,
+        model_type=ModelType.GEMINI_3_PRO,
         model_config_dict={"temperature": 0},
     )
 
     image_analysis_model = ModelFactory.create(
         model_platform=ModelPlatformType.GEMINI,
-        model_type=ModelType.GEMINI_3_1_PRO,
+        model_type=ModelType.GEMINI_3_PRO,
         model_config_dict={"temperature": 0},
     )
 
     browsing_model = ModelFactory.create(
         model_platform=ModelPlatformType.GEMINI,
-        model_type=ModelType.GEMINI_3_1_PRO,
+        model_type=ModelType.GEMINI_3_PRO,
         model_config_dict={"temperature": 0},
     )
 
     planning_model = ModelFactory.create(
         model_platform=ModelPlatformType.GEMINI,
-        model_type=ModelType.GEMINI_3_1_PRO,
+        model_type=ModelType.GEMINI_3_PRO,
         model_config_dict={"temperature": 0},
     )
 
@@ -185,7 +185,7 @@ def construct_workforce() -> Workforce:
     coordinator_agent_kwargs = {
         "model": ModelFactory.create(
             model_platform=ModelPlatformType.GEMINI,
-            model_type=ModelType.GEMINI_3_1_PRO,
+            model_type=ModelType.GEMINI_3_PRO,
             model_config_dict={"temperature": 0},
         )
     }
@@ -193,7 +193,7 @@ def construct_workforce() -> Workforce:
     task_agent_kwargs = {
         "model": ModelFactory.create(
             model_platform=ModelPlatformType.GEMINI,
-            model_type=ModelType.GEMINI_3_1_PRO,
+            model_type=ModelType.GEMINI_3_PRO,
             model_config_dict={"temperature": 0},
         )
     }
