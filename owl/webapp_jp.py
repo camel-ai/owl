@@ -253,6 +253,7 @@ MODULE_DESCRIPTIONS = {
     "run_azure_openai": "Azure OpenAIモデルを使用してタスクを処理します",
     "run_groq": "groqモデルを使用してタスクを処理します",
     "run_together_ai": "together aiモデルを使用してタスクを処理します",
+    "run_minimax": "MiniMaxモデル（MiniMax-M2.7）を使用してタスクを処理します",
 }
 
 
@@ -278,6 +279,9 @@ QWEN_API_KEY='あなたのキー'
 
 # DeepSeek API (https://platform.deepseek.com/api_keys)
 DEEPSEEK_API_KEY='あなたのキー'
+
+# MiniMax API (https://platform.minimaxi.com/)
+# MINIMAX_API_KEY='あなたのキー'
 
 #===========================================
 # ツール & サービス API
