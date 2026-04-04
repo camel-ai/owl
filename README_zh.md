@@ -408,6 +408,9 @@ python examples/run_azure_openai.py
 
 # 使用 Ollama 运行
 python examples/run_ollama.py
+
+# 使用 MiniMax 模型 (MiniMax-M2.7) 运行
+python examples/run_minimax.py
 ```
 
 你可以通过修改 `examples/run.py` 脚本来运行自己的任务：

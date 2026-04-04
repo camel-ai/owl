@@ -431,6 +431,9 @@ python examples/run_azure_openai.py
 
 # Run with Ollama
 python examples/run_ollama.py
+
+# Run with MiniMax model (MiniMax-M2.7)
+python examples/run_minimax.py
 ```
 
 For a simpler version that only requires an LLM API key, you can try our minimal example:

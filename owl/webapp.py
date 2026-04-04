@@ -257,6 +257,7 @@ MODULE_DESCRIPTIONS = {
     "run_ppio": "Using ppio model to process tasks",
     "run_together_ai": "Using together ai model to process tasks",
     "run_novita_ai": "Using novita ai model to process tasks",
+    "run_minimax": "Using MiniMax model (MiniMax-M2.7) to process tasks",
 }
 
 
@@ -282,6 +283,9 @@ QWEN_API_KEY='Your_Key'
 
 # DeepSeek API (https://platform.deepseek.com/api_keys)
 DEEPSEEK_API_KEY='Your_Key'
+
+# MiniMax API (https://platform.minimaxi.com/)
+# MINIMAX_API_KEY='Your_Key'
 
 #===========================================
 # Tools & Services API
