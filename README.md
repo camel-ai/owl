@@ -336,6 +336,7 @@ You can set environment variables directly in your terminal:
   ```bash
   export OPENAI_API_KEY="your-openai-api-key-here"
   # Add other required API keys as needed
+  export ATLASCLOUD_API_KEY="your-atlascloud-api-key-here"
   ```
 
 - **Windows (Command Prompt)**:
@@ -371,6 +372,14 @@ If you prefer using a `.env` file instead, you can:
 
 2. **Configure Your API Keys**:
    Open the `.env` file in your preferred text editor and insert your API keys in the corresponding fields.
+
+   AtlasCloud's OpenAI-compatible LLM endpoint requires the `/v1` suffix:
+
+   ```bash
+   ATLASCLOUD_API_KEY="your-atlascloud-api-key-here"
+   ATLASCLOUD_API_BASE_URL="https://api.atlascloud.ai/v1"
+   ATLASCLOUD_MODEL_NAME="deepseek-ai/DeepSeek-V3-0324"
+   ```
 
 > **Note**: For the minimal example (`examples/run_mini.py`), you only need to configure the LLM API key (e.g., `OPENAI_API_KEY`).
 
@@ -421,7 +430,7 @@ python examples/run_qwen_zh.py
 python examples/run_deepseek_zh.py
 
 # Run with other OpenAI-compatible models
-python examples/run_openai_compatible_model.py
+python examples/run_atlascloud.py
 
 # Run with Gemini model
 python examples/run_gemini.py
