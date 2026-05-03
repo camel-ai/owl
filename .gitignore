@@ -61,3 +61,7 @@ coverage.xml
 owl/camel/types/__pycache__/
 owl/camel/__pycache__/
 owl/camel/utils/__pycache_/
+
+# my_
+.venv/
+models.json
