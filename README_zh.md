@@ -259,6 +259,26 @@ OWL 需要各种 API 密钥来与不同的服务进行交互。`owl/.env_templat
 
    > **注意**：对于最小示例（`examples/run_mini.py`），你只需要配置 LLM API 密钥（例如，`OPENAI_API_KEY`）。
 
+   Atlas Cloud 的 OpenAI 兼容 LLM 端点需要保留 `/v1` 后缀：
+
+   ```bash
+   ATLASCLOUD_API_KEY="your-atlascloud-api-key-here"
+   ATLASCLOUD_API_BASE_URL="https://api.atlascloud.ai/v1"
+   ATLASCLOUD_MODEL_NAME="deepseek-ai/DeepSeek-V3-0324"
+   ```
+
+   > 🎁 **[Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=owl)** 是一个全模态 AI 推理平台，开发者通过一个统一 API 即可访问视频生成、图像生成和 LLM API，无需维护多家厂商接入。
+   >
+   > 可查看 Atlas Cloud 最新编程计划优惠活动：https://www.atlascloud.ai/console/coding-plan
+
+   `ATLASCLOUD_MODEL_NAME` 已验证可用的 Atlas `50` 个聊天模型池：
+
+   - `deepseek-ai/DeepSeek-V3-0324`, `deepseek-ai/deepseek-r1-0528`, `moonshotai/Kimi-K2-Instruct`, `Qwen/Qwen3-Coder`, `Qwen/Qwen3-235B-A22B-Instruct-2507`, `deepseek-ai/DeepSeek-V3.1`, `moonshotai/Kimi-K2-Instruct-0905`, `Qwen/Qwen3-Next-80B-A3B-Instruct`, `Qwen/Qwen3-Next-80B-A3B-Thinking`, `Qwen/Qwen3-30B-A3B-Instruct-2507`
+   - `deepseek-ai/DeepSeek-V3.1-Terminus`, `deepseek-ai/DeepSeek-V3.2-Exp`, `zai-org/GLM-4.6`, `MiniMaxAI/MiniMax-M2`, `Qwen/Qwen3-VL-235B-A22B-Instruct`, `moonshotai/Kimi-K2-Thinking`, `google/gemini-2.5-flash`, `google/gemini-2.5-flash-lite`, `openai/gpt-5.1`, `openai/gpt-5.1-chat`
+   - `openai/gpt-4o`, `openai/gpt-4o-mini`, `openai/gpt-4.1`, `openai/gpt-4.1-mini`, `openai/gpt-4.1-nano`, `openai/o1`, `openai/o3`, `openai/o3-mini`, `openai/o4-mini`, `anthropic/claude-sonnet-4.5-20250929`
+   - `deepseek-ai/deepseek-v3.2`, `openai/gpt-5`, `openai/gpt-5-chat`, `openai/gpt-5-mini`, `openai/gpt-5-nano`, `openai/gpt-5.2`, `openai/gpt-5.2-chat`, `google/gemini-2.5-pro`, `anthropic/claude-opus-4.5-20251101`, `google/gemini-3-flash-preview`
+   - `zai-org/glm-4.7`, `minimaxai/minimax-m2.1`, `google/gemini-2.0-flash`, `qwen/qwen3-8b`, `qwen/qwen3-235b-a22b-thinking-2507`, `qwen/qwen3-vl-235b-a22b-thinking`, `qwen/qwen3-30b-a3b`, `qwen/qwen3-30b-a3b-thinking-2507`, `deepseek-ai/deepseek-ocr`, `xai/grok-4-0709`
+
 ### 选项 2：直接设置环境变量
 
 或者，你可以直接在终端中设置环境变量：
