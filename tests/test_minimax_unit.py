@@ -40,7 +40,7 @@ class TestMiniMaxModuleConstants:
         """Test that MiniMax model name is correctly defined."""
         module_path = project_root / "examples" / "run_minimax.py"
         content = module_path.read_text()
-        assert 'MINIMAX_MODEL = "MiniMax-M2.7"' in content
+        assert 'MINIMAX_MODEL = "MiniMax-M3"' in content
 
     def test_minimax_model_is_valid(self):
         """Test that the configured model name is a known MiniMax model."""
@@ -52,9 +52,9 @@ class TestMiniMaxModuleConstants:
         assert match is not None
         model_name = match.group(1)
         valid_models = [
+            "MiniMax-M3",
             "MiniMax-M2.7",
-            "MiniMax-M2.5",
-            "MiniMax-M2.5-highspeed",
+            "MiniMax-M2.7-highspeed",
         ]
         assert model_name in valid_models
 
@@ -185,6 +185,21 @@ class TestMiniMaxModelFactory:
 
         model = ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+            model_type="MiniMax-M3",
+            url="https://api.minimax.io/v1",
+            api_key="test-key-123",
+            model_config_dict={"temperature": 0},
+        )
+        assert model is not None
+
+    @patch.dict(os.environ, {"MINIMAX_API_KEY": "test-key-123"})
+    def test_model_factory_create_m27(self):
+        """Test that ModelFactory.create works with MiniMax-M2.7."""
+        from camel.models import ModelFactory
+        from camel.types import ModelPlatformType
+
+        model = ModelFactory.create(
+            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
             model_type="MiniMax-M2.7",
             url="https://api.minimax.io/v1",
             api_key="test-key-123",
@@ -193,29 +208,14 @@ class TestMiniMaxModelFactory:
         assert model is not None
 
     @patch.dict(os.environ, {"MINIMAX_API_KEY": "test-key-123"})
-    def test_model_factory_create_m25(self):
-        """Test that ModelFactory.create works with MiniMax-M2.5."""
+    def test_model_factory_create_m27_highspeed(self):
+        """Test that ModelFactory.create works with MiniMax-M2.7-highspeed."""
         from camel.models import ModelFactory
         from camel.types import ModelPlatformType
 
         model = ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="MiniMax-M2.5",
-            url="https://api.minimax.io/v1",
-            api_key="test-key-123",
-            model_config_dict={"temperature": 0},
-        )
-        assert model is not None
-
-    @patch.dict(os.environ, {"MINIMAX_API_KEY": "test-key-123"})
-    def test_model_factory_create_m25_highspeed(self):
-        """Test that ModelFactory.create works with MiniMax-M2.5-highspeed."""
-        from camel.models import ModelFactory
-        from camel.types import ModelPlatformType
-
-        model = ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="MiniMax-M2.5-highspeed",
+            model_type="MiniMax-M2.7-highspeed",
             url="https://api.minimax.io/v1",
             api_key="test-key-123",
             model_config_dict={"temperature": 0},

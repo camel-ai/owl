@@ -47,7 +47,7 @@ class TestMiniMaxLiveAPI:
 
         model = ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="MiniMax-M2.7",
+            model_type="MiniMax-M3",
             url="https://api.minimax.io/v1",
             api_key=MINIMAX_API_KEY,
             model_config_dict={"temperature": 0},
@@ -74,7 +74,7 @@ class TestMiniMaxLiveAPI:
         for role in ["web", "reasoning", "coordinator"]:
             models[role] = ModelFactory.create(
                 model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-                model_type="MiniMax-M2.7",
+                model_type="MiniMax-M3",
                 url="https://api.minimax.io/v1",
                 api_key=MINIMAX_API_KEY,
                 model_config_dict={"temperature": 0},
@@ -91,7 +91,7 @@ class TestMiniMaxLiveAPI:
 
         model = ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="MiniMax-M2.7",
+            model_type="MiniMax-M3",
             url="https://api.minimax.io/v1",
             api_key=MINIMAX_API_KEY,
             model_config_dict={"temperature": 0},

@@ -257,7 +257,7 @@ MODULE_DESCRIPTIONS = {
     "run_ppio": "Using ppio model to process tasks",
     "run_together_ai": "Using together ai model to process tasks",
     "run_novita_ai": "Using novita ai model to process tasks",
-    "run_minimax": "Using MiniMax model (MiniMax-M2.7) to process tasks",
+    "run_minimax": "Using MiniMax model (MiniMax-M3) to process tasks",
 }
 
 

@@ -409,7 +409,7 @@ python examples/run_azure_openai.py
 # 使用 Ollama 运行
 python examples/run_ollama.py
 
-# 使用 MiniMax 模型 (MiniMax-M2.7) 运行
+# 使用 MiniMax 模型 (MiniMax-M3) 运行
 python examples/run_minimax.py
 ```
 

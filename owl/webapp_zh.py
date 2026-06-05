@@ -256,7 +256,7 @@ MODULE_DESCRIPTIONS = {
     "run_ppio": "使用ppio模型处理任务",
     "run_together_ai": "使用together ai模型处理任务",
     "run_novita_ai": "使用novita ai模型处理任务",
-    "run_minimax": "使用MiniMax模型(MiniMax-M2.7)处理任务",
+    "run_minimax": "使用MiniMax模型(MiniMax-M3)处理任务",
 }
 
 

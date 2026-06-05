@@ -16,8 +16,8 @@
 Workforce example using MiniMax models via the OpenAI-compatible API.
 
 MiniMax provides powerful language models with tool calling support and
-up to 1M token context windows. This example demonstrates how to use
-MiniMax models (MiniMax-M2.7) with the OWL multi-agent workforce.
+large context windows. This example demonstrates how to use
+MiniMax models (MiniMax-M3) with the OWL multi-agent workforce.
 
 To use this file:
 1. Get your API key from https://platform.minimaxi.com/
@@ -56,7 +56,7 @@ set_log_level(level="DEBUG")
 
 # MiniMax API configuration
 MINIMAX_API_URL = "https://api.minimax.io/v1"
-MINIMAX_MODEL = "MiniMax-M2.7"
+MINIMAX_MODEL = "MiniMax-M3"
 
 
 def construct_agent_list() -> List[Dict[str, Any]]:

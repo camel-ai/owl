@@ -432,7 +432,7 @@ python examples/run_azure_openai.py
 # Run with Ollama
 python examples/run_ollama.py
 
-# Run with MiniMax model (MiniMax-M2.7)
+# Run with MiniMax model (MiniMax-M3)
 python examples/run_minimax.py
 ```
 
