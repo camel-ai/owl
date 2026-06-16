@@ -65,7 +65,7 @@ def run_society_with_strict_limit(society, round_limit=5, progress_callback=None
             logger.info(f"Reached round limit of {round_limit}, forcibly terminating.")
             # Force a TASK_DONE in the user response to trigger termination
             result = original_step(*args, **kwargs)
-            if len(result) >= 2 and hasattr(result[1], 'msgs') and result[1].msgs and len(result[1].msgs) > 0:
+            if len(result) >= 2 and hasattr(result[1], 'msgs') and result[1].msgs:
                 result[1].msgs[0].content += "\n\nTASK_DONE"
                 result[1].terminated = True
             return result
