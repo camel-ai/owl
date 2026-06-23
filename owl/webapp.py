@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
-# Import from the correct module path
-from utils import run_society
 import os
 import gradio as gr
 import time
@@ -25,6 +23,8 @@ from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
 import re
+from camel.tasks.task import Task
+from utils import run_society
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -250,6 +250,7 @@ MODULE_DESCRIPTIONS = {
     "run_mistral": "Using Mistral models to process tasks",
     "run_openai_compatible_model": "Using openai compatible model to process tasks",
     "run_ollama": "Using local ollama model to process tasks",
+    "run_atlascloud": "Using AtlasCloud's OpenAI-compatible model to process tasks",
     "run_qwen_mini_zh": "Using qwen model with minimal configuration to process tasks",
     "run_qwen_zh": "Using qwen model to process tasks",
     "run_azure_openai": "Using azure openai model to process tasks",
@@ -269,6 +270,11 @@ DEFAULT_ENV_TEMPLATE = """#===========================================
 # OPENAI API (https://platform.openai.com/api-keys)
 OPENAI_API_KEY='Your_Key'
 # OPENAI_API_BASE_URL=""
+
+# AtlasCloud API (https://www.atlascloud.ai/docs/get-started)
+# ATLASCLOUD_API_KEY='Your_Key'
+# ATLASCLOUD_API_BASE_URL="https://api.atlascloud.ai/v1"
+# ATLASCLOUD_MODEL_NAME="deepseek-ai/DeepSeek-V3-0324"
 
 # Azure OpenAI API
 # AZURE_OPENAI_BASE_URL=""
@@ -374,41 +380,56 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
                 f"❌ Error: {str(e)}",
             )
 
-        # Check if it contains the construct_society function
-        if not hasattr(module, "construct_society"):
+        if hasattr(module, "construct_society"):
+            try:
+                logging.info("Building society simulation...")
+                society = module.construct_society(question)
+            except Exception as e:
+                logging.error(
+                    f"Error occurred while building society simulation: {str(e)}"
+                )
+                return (
+                    f"Error occurred while building society simulation: {str(e)}",
+                    "0",
+                    f"❌ Error: Build failed - {str(e)}",
+                )
+
+            try:
+                logging.info("Running society simulation...")
+                answer, chat_history, token_info = run_society(society)
+                logging.info("Society simulation completed")
+            except Exception as e:
+                logging.error(
+                    f"Error occurred while running society simulation: {str(e)}"
+                )
+                return (
+                    f"Error occurred while running society simulation: {str(e)}",
+                    "0",
+                    f"❌ Error: Run failed - {str(e)}",
+                )
+        elif hasattr(module, "construct_workforce"):
+            try:
+                logging.info("Building workforce...")
+                workforce = module.construct_workforce()
+                processed_task = workforce.process_task(Task(content=question))
+                answer = processed_task.result
+                token_info = {}
+                logging.info("Workforce run completed")
+            except Exception as e:
+                logging.error(f"Error occurred while running workforce: {str(e)}")
+                return (
+                    f"Error occurred while running workforce: {str(e)}",
+                    "0",
+                    f"❌ Error: Run failed - {str(e)}",
+                )
+        else:
             logging.error(
-                f"construct_society function not found in module {module_path}"
+                f"Neither construct_society nor construct_workforce was found in module {module_path}"
             )
             return (
-                f"construct_society function not found in module {module_path}",
+                f"Module {module_path} is missing a supported entrypoint",
                 "0",
                 "❌ Error: Module interface incompatible",
-            )
-
-        # Build society simulation
-        try:
-            logging.info("Building society simulation...")
-            society = module.construct_society(question)
-
-        except Exception as e:
-            logging.error(f"Error occurred while building society simulation: {str(e)}")
-            return (
-                f"Error occurred while building society simulation: {str(e)}",
-                "0",
-                f"❌ Error: Build failed - {str(e)}",
-            )
-
-        # Run society simulation
-        try:
-            logging.info("Running society simulation...")
-            answer, chat_history, token_info = run_society(society)
-            logging.info("Society simulation completed")
-        except Exception as e:
-            logging.error(f"Error occurred while running society simulation: {str(e)}")
-            return (
-                f"Error occurred while running society simulation: {str(e)}",
-                "0",
-                f"❌ Error: Run failed - {str(e)}",
             )
 
         # Safely get token count
@@ -632,6 +653,8 @@ def get_api_guide(key: str) -> str:
         return "https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key"
     elif "deepseek" in key_lower:
         return "https://platform.deepseek.com/api_keys"
+    elif "atlascloud" in key_lower:
+        return "https://www.atlascloud.ai/docs/get-started"
     elif "ppio" in key_lower:
         return "https://ppinfra.com/settings/key-management?utm_source=github_owl"
     elif "google" in key_lower:

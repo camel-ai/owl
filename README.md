@@ -336,6 +336,7 @@ You can set environment variables directly in your terminal:
   ```bash
   export OPENAI_API_KEY="your-openai-api-key-here"
   # Add other required API keys as needed
+  export ATLASCLOUD_API_KEY="your-atlascloud-api-key-here"
   ```
 
 - **Windows (Command Prompt)**:
@@ -372,7 +373,27 @@ If you prefer using a `.env` file instead, you can:
 2. **Configure Your API Keys**:
    Open the `.env` file in your preferred text editor and insert your API keys in the corresponding fields.
 
+   AtlasCloud's OpenAI-compatible LLM endpoint requires the `/v1` suffix:
+
+   ```bash
+   ATLASCLOUD_API_KEY="your-atlascloud-api-key-here"
+   ATLASCLOUD_API_BASE_URL="https://api.atlascloud.ai/v1"
+   ATLASCLOUD_MODEL_NAME="deepseek-ai/DeepSeek-V3-0324"
+   ```
+
 > **Note**: For the minimal example (`examples/run_mini.py`), you only need to configure the LLM API key (e.g., `OPENAI_API_KEY`).
+> 🎁 **[Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=owl)** is a full-modal AI inference platform that gives developers a single AI API to access video generation, image generation, and LLM APIs. Instead of managing multiple vendor integrations, you connect once and get unified access to 300+ curated models across all modalities.
+>
+> Check out Atlas Cloud's new coding plan promotion for more budget-friendly API access: [https://www.atlascloud.ai/console/coding-plan](https://www.atlascloud.ai/console/coding-plan)
+
+Validated Atlas chat model pool for `ATLASCLOUD_MODEL_NAME`:
+
+- `deepseek-ai/DeepSeek-V3-0324`, `deepseek-ai/deepseek-r1-0528`, `moonshotai/Kimi-K2-Instruct`, `Qwen/Qwen3-Coder`, `Qwen/Qwen3-235B-A22B-Instruct-2507`, `deepseek-ai/DeepSeek-V3.1`, `moonshotai/Kimi-K2-Instruct-0905`, `Qwen/Qwen3-Next-80B-A3B-Instruct`, `Qwen/Qwen3-Next-80B-A3B-Thinking`, `Qwen/Qwen3-30B-A3B-Instruct-2507`
+- `deepseek-ai/DeepSeek-V3.1-Terminus`, `deepseek-ai/DeepSeek-V3.2-Exp`, `zai-org/GLM-4.6`, `MiniMaxAI/MiniMax-M2`, `Qwen/Qwen3-VL-235B-A22B-Instruct`, `moonshotai/Kimi-K2-Thinking`, `google/gemini-2.5-flash`, `google/gemini-2.5-flash-lite`, `openai/gpt-5.1`, `openai/gpt-5.1-chat`
+- `openai/gpt-4o`, `openai/gpt-4o-mini`, `openai/gpt-4.1`, `openai/gpt-4.1-mini`, `openai/gpt-4.1-nano`, `openai/o1`, `openai/o3`, `openai/o3-mini`, `openai/o4-mini`, `anthropic/claude-sonnet-4.5-20250929`
+- `deepseek-ai/deepseek-v3.2`, `openai/gpt-5`, `openai/gpt-5-chat`, `openai/gpt-5-mini`, `openai/gpt-5-nano`, `openai/gpt-5.2`, `openai/gpt-5.2-chat`, `google/gemini-2.5-pro`, `anthropic/claude-opus-4.5-20251101`, `google/gemini-3-flash-preview`
+- `zai-org/glm-4.7`, `minimaxai/minimax-m2.1`, `google/gemini-2.0-flash`, `qwen/qwen3-8b`, `qwen/qwen3-235b-a22b-thinking-2507`, `qwen/qwen3-vl-235b-a22b-thinking`, `qwen/qwen3-30b-a3b`, `qwen/qwen3-30b-a3b-thinking-2507`, `deepseek-ai/deepseek-ocr`, `xai/grok-4-0709`
+
 
 ### **MCP Desktop Commander Setup**
 
@@ -421,7 +442,7 @@ python examples/run_qwen_zh.py
 python examples/run_deepseek_zh.py
 
 # Run with other OpenAI-compatible models
-python examples/run_openai_compatible_model.py
+python examples/run_atlascloud.py
 
 # Run with Gemini model
 python examples/run_gemini.py

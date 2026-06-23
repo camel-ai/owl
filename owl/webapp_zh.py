@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
-# Import from the correct module path
-from utils import run_society
 import os
 import gradio as gr
 import time
@@ -25,6 +23,8 @@ from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
 import re  # For regular expression operations
+from camel.tasks.task import Task
+from utils import run_society
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -249,6 +249,7 @@ MODULE_DESCRIPTIONS = {
     "run_deepseek_zh": "使用eepseek模型处理中文任务",
     "run_openai_compatible_model": "使用openai兼容模型处理任务",
     "run_ollama": "使用本地ollama模型处理任务",
+    "run_atlascloud": "使用 AtlasCloud 的 OpenAI 兼容模型处理任务",
     "run_qwen_mini_zh": "使用qwen模型最小化配置处理任务",
     "run_qwen_zh": "使用qwen模型处理任务",
     "run_azure_openai": "使用azure openai模型处理任务",
@@ -268,6 +269,11 @@ DEFAULT_ENV_TEMPLATE = """#===========================================
 # OPENAI API (https://platform.openai.com/api-keys)
 OPENAI_API_KEY='Your_Key'
 # OPENAI_API_BASE_URL=""
+
+# AtlasCloud API (https://www.atlascloud.ai/docs/get-started)
+# ATLASCLOUD_API_KEY='Your_Key'
+# ATLASCLOUD_API_BASE_URL="https://api.atlascloud.ai/v1"
+# ATLASCLOUD_MODEL_NAME="deepseek-ai/DeepSeek-V3-0324"
 
 # Azure OpenAI API
 # AZURE_OPENAI_BASE_URL=""
@@ -361,39 +367,52 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
             logging.error(f"导入模块 {module_path} 时发生错误: {str(e)}")
             return (f"导入模块时发生错误: {module_path}", "0", f"❌ 错误: {str(e)}")
 
-        # 检查是否包含construct_society函数
-        if not hasattr(module, "construct_society"):
-            logging.error(f"模块 {module_path} 中未找到 construct_society 函数")
+        if hasattr(module, "construct_society"):
+            try:
+                logging.info("正在构建社会模拟...")
+                society = module.construct_society(question)
+            except Exception as e:
+                logging.error(f"构建社会模拟时发生错误: {str(e)}")
+                return (
+                    f"构建社会模拟时发生错误: {str(e)}",
+                    "0",
+                    f"❌ 错误: 构建失败 - {str(e)}",
+                )
+
+            try:
+                logging.info("正在运行社会模拟...")
+                answer, chat_history, token_info = run_society(society)
+                logging.info("社会模拟运行完成")
+            except Exception as e:
+                logging.error(f"运行社会模拟时发生错误: {str(e)}")
+                return (
+                    f"运行社会模拟时发生错误: {str(e)}",
+                    "0",
+                    f"❌ 错误: 运行失败 - {str(e)}",
+                )
+        elif hasattr(module, "construct_workforce"):
+            try:
+                logging.info("正在构建 Workforce...")
+                workforce = module.construct_workforce()
+                processed_task = workforce.process_task(Task(content=question))
+                answer = processed_task.result
+                token_info = {}
+                logging.info("Workforce 运行完成")
+            except Exception as e:
+                logging.error(f"运行 Workforce 时发生错误: {str(e)}")
+                return (
+                    f"运行 Workforce 时发生错误: {str(e)}",
+                    "0",
+                    f"❌ 错误: 运行失败 - {str(e)}",
+                )
+        else:
+            logging.error(
+                f"模块 {module_path} 中既没有 construct_society，也没有 construct_workforce"
+            )
             return (
-                f"模块 {module_path} 中未找到 construct_society 函数",
+                f"模块 {module_path} 缺少受支持的入口函数",
                 "0",
                 "❌ 错误: 模块接口不兼容",
-            )
-
-        # 构建社会模拟
-        try:
-            logging.info("正在构建社会模拟...")
-            society = module.construct_society(question)
-
-        except Exception as e:
-            logging.error(f"构建社会模拟时发生错误: {str(e)}")
-            return (
-                f"构建社会模拟时发生错误: {str(e)}",
-                "0",
-                f"❌ 错误: 构建失败 - {str(e)}",
-            )
-
-        # 运行社会模拟
-        try:
-            logging.info("正在运行社会模拟...")
-            answer, chat_history, token_info = run_society(society)
-            logging.info("社会模拟运行完成")
-        except Exception as e:
-            logging.error(f"运行社会模拟时发生错误: {str(e)}")
-            return (
-                f"运行社会模拟时发生错误: {str(e)}",
-                "0",
-                f"❌ 错误: 运行失败 - {str(e)}",
             )
 
         # 安全地获取令牌计数
@@ -615,6 +634,8 @@ def get_api_guide(key: str) -> str:
         return "https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key"
     elif "deepseek" in key_lower:
         return "https://platform.deepseek.com/api_keys"
+    elif "atlascloud" in key_lower:
+        return "https://www.atlascloud.ai/docs/get-started"
     elif "ppio" in key_lower:
         return "https://ppinfra.com/settings/key-management?utm_source=github_owl"
     elif "google" in key_lower:

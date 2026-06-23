@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
-# 正しいモジュールパスからインポート
-from utils import run_society
 import os
 import gradio as gr
 import time
@@ -25,6 +23,8 @@ from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
 import re
+from camel.tasks.task import Task
+from utils import run_society
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -248,6 +248,7 @@ MODULE_DESCRIPTIONS = {
     "run_deepseek_zh": "中国語タスクを処理するためにdeepseekモデルを使用します",
     "run_openai_compatible_model": "OpenAI互換モデルを使用してタスクを処理します",
     "run_ollama": "ローカルのollamaモデルを使用してタスクを処理します",
+    "run_atlascloud": "AtlasCloud の OpenAI 互換モデルを使用してタスクを処理します",
     "run_qwen_mini_zh": "最小限の設定でqwenモデルを使用してタスクを処理します",
     "run_qwen_zh": "qwenモデルを使用して中国語タスクを処理します",
     "run_azure_openai": "Azure OpenAIモデルを使用してタスクを処理します",
@@ -265,6 +266,11 @@ DEFAULT_ENV_TEMPLATE = """#===========================================
 # OPENAI API (https://platform.openai.com/api-keys)
 OPENAI_API_KEY='あなたのキー'
 # OPENAI_API_BASE_URL=""
+
+# AtlasCloud API (https://www.atlascloud.ai/docs/get-started)
+# ATLASCLOUD_API_KEY='Your_Key'
+# ATLASCLOUD_API_BASE_URL="https://api.atlascloud.ai/v1"
+# ATLASCLOUD_MODEL_NAME="deepseek-ai/DeepSeek-V3-0324"
 
 # Azure OpenAI API
 # AZURE_OPENAI_BASE_URL=""
@@ -370,45 +376,56 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
                 f"❌ エラー: {str(e)}",
             )
 
-        # Check if it contains the construct_society function
-        if not hasattr(module, "construct_society"):
+        if hasattr(module, "construct_society"):
+            try:
+                logging.info("社会シミュレーションを構築中...")
+                society = module.construct_society(question)
+            except Exception as e:
+                logging.error(
+                    f"社会シミュレーションの構築中にエラーが発生しました: {str(e)}"
+                )
+                return (
+                    f"社会シミュレーションの構築中にエラーが発生しました: {str(e)}",
+                    "0",
+                    f"❌ エラー: 構築に失敗しました - {str(e)}",
+                )
+
+            try:
+                logging.info("社会シミュレーションを実行中...")
+                answer, chat_history, token_info = run_society(society)
+                logging.info("社会シミュレーションが完了しました")
+            except Exception as e:
+                logging.error(
+                    f"社会シミュレーションの実行中にエラーが発生しました: {str(e)}"
+                )
+                return (
+                    f"社会シミュレーションの実行中にエラーが発生しました: {str(e)}",
+                    "0",
+                    f"❌ エラー: 実行に失敗しました - {str(e)}",
+                )
+        elif hasattr(module, "construct_workforce"):
+            try:
+                logging.info("Workforce を構築中...")
+                workforce = module.construct_workforce()
+                processed_task = workforce.process_task(Task(content=question))
+                answer = processed_task.result
+                token_info = {}
+                logging.info("Workforce 実行が完了しました")
+            except Exception as e:
+                logging.error(f"Workforce の実行中にエラーが発生しました: {str(e)}")
+                return (
+                    f"Workforce の実行中にエラーが発生しました: {str(e)}",
+                    "0",
+                    f"❌ エラー: 実行に失敗しました - {str(e)}",
+                )
+        else:
             logging.error(
-                f"construct_society 関数がモジュール {module_path} に見つかりません"
+                f"construct_society または construct_workforce がモジュール {module_path} に見つかりません"
             )
             return (
-                f"construct_society 関数がモジュール {module_path} に見つかりません",
+                f"モジュール {module_path} に対応するエントリポイントがありません",
                 "0",
                 "❌ エラー: モジュールインターフェースが互換性がありません",
-            )
-
-        # Build society simulation
-        try:
-            logging.info("社会シミュレーションを構築中...")
-            society = module.construct_society(question)
-
-        except Exception as e:
-            logging.error(
-                f"社会シミュレーションの構築中にエラーが発生しました: {str(e)}"
-            )
-            return (
-                f"社会シミュレーションの構築中にエラーが発生しました: {str(e)}",
-                "0",
-                f"❌ エラー: 構築に失敗しました - {str(e)}",
-            )
-
-        # Run society simulation
-        try:
-            logging.info("社会シミュレーションを実行中...")
-            answer, chat_history, token_info = run_society(society)
-            logging.info("社会シミュレーションが完了しました")
-        except Exception as e:
-            logging.error(
-                f"社会シミュレーションの実行中にエラーが発生しました: {str(e)}"
-            )
-            return (
-                f"社会シミュレーションの実行中にエラーが発生しました: {str(e)}",
-                "0",
-                f"❌ エラー: 実行に失敗しました - {str(e)}",
             )
 
         # Safely get token count
@@ -630,6 +647,8 @@ def get_api_guide(key: str) -> str:
         return "https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key"
     elif "deepseek" in key_lower:
         return "https://platform.deepseek.com/api_keys"
+    elif "atlascloud" in key_lower:
+        return "https://www.atlascloud.ai/docs/get-started"
     elif "google" in key_lower:
         return "https://coda.io/@jon-dallas/google-image-search-pack-example/search-engine-id-and-google-api-key-3"
     elif "search_engine_id" in key_lower:
