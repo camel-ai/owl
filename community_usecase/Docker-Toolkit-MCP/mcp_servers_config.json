@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "MCP_DOCKER": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-l",
+        "--rm",
+        "-i",
+        "alpine/socat",
+        "STDIO",
+        "TCP:host.docker.internal:8811"
+      ]
+    }
+  }
+}
