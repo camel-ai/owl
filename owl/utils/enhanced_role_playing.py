@@ -24,9 +24,500 @@ from camel.logger import get_logger
 
 
 from copy import deepcopy
-
+import uuid
+from typing import List, Dict, Any, Generator, Optional, AsyncGenerator
+import datetime
+from typing import Dict, List, Optional, Tuple
 logger = get_logger(__name__)
 
+
+
+class EventType:
+    START_OF_WORKFLOW = "start_of_workflow"
+    END_OF_WORKFLOW = "end_of_workflow"
+    START_OF_AGENT = "start_of_agent"
+    END_OF_AGENT = "end_of_agent"
+    MESSAGE = "message"
+    TOOL_CALL = "tool_call"
+    ERROR = "error" # New event for handling issues
+    START_OF_LLM = "start_of_llm"
+    END_OF_LLM = "end_of_llm"
+
+class StreamRolePlaying(RolePlaying):
+    def __init__(self, **kwargs):
+        self.user_role_name = kwargs.get("user_role_name", "user")
+        self.assistant_role_name = kwargs.get("assistant_role_name", "assistant")
+        self.output_language = kwargs.get("output_language", None)
+        self.user_agent_kwargs: dict = kwargs.get("user_agent_kwargs", {})
+        self.assistant_agent_kwargs: dict = kwargs.get("assistant_agent_kwargs", {})
+        self.output_language = kwargs.get("output_language", None)
+        super().__init__(**kwargs)
+        init_user_sys_msg, init_assistant_sys_msg = self._construct_gaia_sys_msgs()
+        self.assistant_agent: ChatAgent
+        self.user_agent: ChatAgent
+        self.assistant_sys_msg: Optional[BaseMessage]
+        self.user_sys_msg: Optional[BaseMessage]
+        self._init_agents(
+            init_assistant_sys_msg,
+            init_user_sys_msg,
+            assistant_agent_kwargs=self.assistant_agent_kwargs,
+            user_agent_kwargs=self.user_agent_kwargs,
+            output_language=self.output_language,
+        )
+
+    def _init_agents(
+        self,
+        init_assistant_sys_msg: BaseMessage,
+        init_user_sys_msg: BaseMessage,
+        assistant_agent_kwargs: Optional[Dict] = None,
+        user_agent_kwargs: Optional[Dict] = None,
+        output_language: Optional[str] = None,
+        is_reasoning_task: bool = False,
+    ) -> None:
+        r"""Initialize assistant and user agents with their system messages.
+
+        Args:
+            init_assistant_sys_msg (BaseMessage): Assistant agent's initial
+                system message.
+            init_user_sys_msg (BaseMessage): User agent's initial system
+                message.
+            assistant_agent_kwargs (Dict, optional): Additional arguments to
+                pass to the assistant agent. (default: :obj:`None`)
+            user_agent_kwargs (Dict, optional): Additional arguments to
+                pass to the user agent. (default: :obj:`None`)
+            output_language (str, optional): The language to be output by the
+                agents. (default: :obj:`None`)
+        """
+        if self.model is not None:
+            if assistant_agent_kwargs is None:
+                assistant_agent_kwargs = {"model": self.model}
+            elif "model" not in assistant_agent_kwargs:
+                assistant_agent_kwargs.update(dict(model=self.model))
+            if user_agent_kwargs is None:
+                user_agent_kwargs = {"model": self.model}
+            elif "model" not in user_agent_kwargs:
+                user_agent_kwargs.update(dict(model=self.model))
+
+        self.assistant_agent = ChatAgent(
+            init_assistant_sys_msg,
+            output_language=output_language,
+            **(assistant_agent_kwargs or {}),
+        )
+        self.assistant_sys_msg = self.assistant_agent.system_message
+
+        self.user_agent = ChatAgent(
+            init_user_sys_msg,
+            output_language=output_language,
+            **(user_agent_kwargs or {}),
+        )
+        self.user_sys_msg = self.user_agent.system_message
+    
+    def create_custom_system_messages(self,task_prompt: str):
+        """创建自定义系统消息
+        
+        Args:
+            task_prompt: 任务提示
+            
+        Returns:
+            Tuple: 包含助手和用户系统消息的元组
+        """
+
+        CUSTOM_ASSISTANT_SYSTEM_PROMPT = """===== ASSISTANT GUIDELINES =====
+        你是一个可以使用多种工具的AI助手。你的目标是高效协助用户完成任务，按照提供的计划步骤执行，并适当使用你所能获取的工具。
+        任务: {task}
+        CURRENT DATE: {current_date}
+        # 指南
+        1. **引用**: 使用搜索或浏览工具收集信息时，若源包含URL，**必须**在回复中包含。格式为`[源文本](URL)`。
+        RESPONSE FORMAT:
+        Unless told the task is complete, always structure your responses as:
+
+        Solution: 
+        [Your detailed solution here in Chinese, including code, explanations, and step-by-step instructions]
+
+        Always end with "Next request."
+        """
+
+        CUSTOM_USER_SYSTEM_PROMPT = """===== USER GUIDELINES =====
+        You are a super user working with an AI assistant to complete tasks efficiently.
+
+        YOUR TASK: {task}
+        CURRENT DATE: {current_date}
+
+        INSTRUCTION FORMAT:
+        Give the assistant one instruction at a time using one of these formats:
+
+        1. With input:
+        Instruction: [Your instruction]
+        Input: [Your input]
+
+        2. Without input:
+        Instruction: [Your instruction]
+        Input: None
+
+        GUIDELINES:
+        1. Give clear, specific instructions
+        2. Provide one instruction at a time
+        3. Evaluate the assistant's solutions carefully
+        4. When the task is fully completed, respond with only: <CAMEL_TASK_DONE>
+        5. ALWAYS USE CHINESE for your instructions and evaluations
+
+        Begin by giving your first instruction.
+        """
+
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+
+        assistant_msg = BaseMessage.make_assistant_message(
+            role_name="assistant",
+            content=CUSTOM_ASSISTANT_SYSTEM_PROMPT.format(task=task_prompt,  current_date=current_date)
+        )
+        
+        user_sys_msg = BaseMessage.make_assistant_message(
+            role_name="assistant",
+            content=CUSTOM_USER_SYSTEM_PROMPT.format(task=task_prompt, current_date=current_date)
+        )
+        
+        return assistant_msg, user_sys_msg
+    
+    def _construct_gaia_sys_msgs(self):
+        assistant_sys_msg, user_sys_msg = self.create_custom_system_messages(self.task_prompt)
+        return user_sys_msg, assistant_sys_msg
+
+    def step_stream(
+        self,
+        assistant_msg: BaseMessage,
+        workflow_id: str
+    ) -> Generator[Dict[str, Any], None, None]:
+        """流式处理一次对话步骤，同时生成事件流
+        
+        Args:
+            assistant_msg: 助手的消息
+            workflow_id: 工作流ID
+            
+        Yields:
+            Dict: 事件数据，包含事件类型和相关数据
+        """
+        # 初始化响应存储属性
+        self.last_assistant_response = None
+        self.last_user_response = None
+        
+        # 1. 用户处理助手消息
+        user_agent_id = f"{workflow_id}_user"
+        yield {
+            "event": EventType.START_OF_AGENT,
+            "data": {
+                "agent_name": "用户代理",
+                "agent_id": user_agent_id
+            }
+        }
+        
+        user_response = self.user_agent.step(assistant_msg)
+        self.last_user_response = user_response  # 保存用户响应
+        
+        if user_response.terminated or user_response.msgs is None:
+            yield {
+                "event": EventType.END_OF_AGENT,
+                "data": {"agent_id": user_agent_id}
+            }
+            return  # 早期返回，响应已保存
+        
+        user_msg = self._reduce_message_options(user_response.msgs)
+        
+        # 记录n>1兼容性逻辑
+        if (
+            'n' in self.user_agent.model_backend.model_config_dict.keys()
+            and self.user_agent.model_backend.model_config_dict['n'] > 1
+        ):
+            self.user_agent.record_message(user_msg)
+        
+        # 生成用户消息事件
+        yield {
+            "event": EventType.START_OF_LLM,
+            "data": {"agent_name": "用户代理"}
+        }
+        
+        user_msg_id = f"msg_{workflow_id}_user"
+        yield {
+            "event": EventType.MESSAGE,
+            "data": {
+                "message_id": user_msg_id,
+                "delta": {"content": user_msg.content}
+            }
+        }
+        
+        yield {
+            "event": EventType.END_OF_LLM,
+            "data": {"agent_name": "用户代理"}
+        }
+        
+        yield {
+            "event": EventType.END_OF_AGENT,
+            "data": {"agent_id": user_agent_id}
+        }
+        
+        # 2. 助手处理用户消息
+        assistant_agent_id = f"{workflow_id}_assistant"
+        yield {
+            "event": EventType.START_OF_AGENT,
+            "data": {
+                "agent_name": "执行代理",
+                "agent_id": assistant_agent_id
+            }
+        }
+        
+        assistant_response = self.assistant_agent.step(user_msg)
+        self.last_assistant_response = assistant_response  # 保存助手响应
+        
+        if assistant_response.terminated or assistant_response.msgs is None:
+            yield {
+                "event": EventType.END_OF_AGENT,
+                "data": {"agent_id": assistant_agent_id}
+            }
+            return  # 早期返回，响应已保存
+        
+        assistant_msg = self._reduce_message_options(assistant_response.msgs)
+        
+        # 记录n>1兼容性逻辑
+        if (
+            'n' in self.assistant_agent.model_backend.model_config_dict.keys()
+            and self.assistant_agent.model_backend.model_config_dict['n'] > 1
+        ):
+            self.assistant_agent.record_message(assistant_msg)
+        
+        # 处理工具调用
+        tool_calls = []
+        if assistant_response.info.get("tool_calls"):
+            tool_calls = assistant_response.info["tool_calls"]
+            for idx, tool_call in enumerate(tool_calls):
+                try:
+                    # 提取工具信息
+                    tool_name = ""
+                    tool_args = {}
+                    
+                    if hasattr(tool_call, "as_dict") and callable(getattr(tool_call, "as_dict")):
+                        tool_dict = tool_call.as_dict()
+                        tool_name = tool_dict.get("tool_name", "")
+                        tool_result = tool_dict.get("result", "")
+
+                        tool_args = tool_dict.get("args", {})
+                    else:
+                        tool_name = getattr(tool_call, "tool_name", f"tool_{idx}")
+                        tool_args = getattr(tool_call, "args", {})
+                        tool_result = getattr(tool_call, "result", {})
+
+                    # 创建唯一ID，使用UUID确保唯一性
+                    unique_id = f"{workflow_id}_tool_{tool_name}_{uuid.uuid4().hex[:8]}"
+                    
+                    # 生成工具调用事件
+                    yield {
+                        "event": EventType.TOOL_CALL,
+                        "data": {
+                            "tool_call_id": unique_id,
+                            "tool_name": tool_name,
+                            "tool_input": tool_args,
+                            "tool_result": tool_result
+                        }
+                    }
+                except Exception as e:
+                    logger.error(f"处理工具调用时出错: {str(e)}")
+        
+        # 生成助手消息事件
+        yield {
+            "event": EventType.START_OF_LLM,
+            "data": {"agent_name": "执行代理"}
+        }
+        
+        assistant_msg_id = f"msg_{workflow_id}_assistant"
+        yield {
+            "event": EventType.MESSAGE,
+            "data": {
+                "message_id": assistant_msg_id,
+                "delta": {"content": assistant_msg.content}
+            }
+        }
+        
+        yield {
+            "event": EventType.END_OF_LLM,
+            "data": {"agent_name": "执行代理"}
+        }
+        
+        yield {
+            "event": EventType.END_OF_AGENT,
+            "data": {"agent_id": assistant_agent_id}
+        }
+        
+    def get_last_step_result(self) -> Tuple[ChatAgentResponse, ChatAgentResponse]:
+        """获取最后一次step_stream处理的结果
+        
+        Returns:
+            Tuple[ChatAgentResponse, ChatAgentResponse]: 助手响应和用户响应
+        """
+        if not hasattr(self, 'last_assistant_response') or not hasattr(self, 'last_user_response'):
+            raise ValueError("需要先调用step_stream方法")
+            
+        return self.last_assistant_response, self.last_user_response
+        
+    async def astep_stream(
+        self,
+        assistant_msg: BaseMessage,
+        workflow_id: str
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+        """异步流式处理一次对话步骤，同时生成事件流
+        
+        Args:
+            assistant_msg: 助手的消息
+            workflow_id: 工作流ID
+            
+        Yields:
+            Dict: 事件数据，包含事件类型和相关数据
+        """
+        # 初始化响应存储属性
+        self.last_assistant_response = None
+        self.last_user_response = None
+        
+        # 1. 用户处理助手消息
+        user_agent_id = f"{workflow_id}_user"
+        yield {
+            "event": EventType.START_OF_AGENT,
+            "data": {
+                "agent_name": "用户代理",
+                "agent_id": user_agent_id
+            }
+        }
+        
+        user_response = await self.user_agent.astep(assistant_msg)
+        self.last_user_response = user_response  # 保存用户响应
+        
+        if user_response.terminated or user_response.msgs is None:
+            yield {
+                "event": EventType.END_OF_AGENT,
+                "data": {"agent_id": user_agent_id}
+            }
+            return  # 早期返回，响应已保存
+        
+        user_msg = self._reduce_message_options(user_response.msgs)
+        
+        # 记录n>1兼容性逻辑
+        if (
+            'n' in self.user_agent.model_backend.model_config_dict.keys()
+            and self.user_agent.model_backend.model_config_dict['n'] > 1
+        ):
+            self.user_agent.record_message(user_msg)
+        
+        # 生成用户消息事件
+        yield {
+            "event": EventType.START_OF_LLM,
+            "data": {"agent_name": "用户代理"}
+        }
+        
+        user_msg_id = f"msg_{workflow_id}_user"
+        yield {
+            "event": EventType.MESSAGE,
+            "data": {
+                "message_id": user_msg_id,
+                "delta": {"content": user_msg.content}
+            }
+        }
+        
+        yield {
+            "event": EventType.END_OF_LLM,
+            "data": {"agent_name": "用户代理"}
+        }
+        
+        yield {
+            "event": EventType.END_OF_AGENT,
+            "data": {"agent_id": user_agent_id}
+        }
+        
+        # 2. 助手处理用户消息
+        assistant_agent_id = f"{workflow_id}_assistant"
+        yield {
+            "event": EventType.START_OF_AGENT,
+            "data": {
+                "agent_name": "执行代理",
+                "agent_id": assistant_agent_id
+            }
+        }
+        
+        assistant_response = await self.assistant_agent.astep(user_msg)
+        self.last_assistant_response = assistant_response  # 保存助手响应
+        
+        if assistant_response.terminated or assistant_response.msgs is None:
+            yield {
+                "event": EventType.END_OF_AGENT,
+                "data": {"agent_id": assistant_agent_id}
+            }
+            return  # 早期返回，响应已保存
+        
+        assistant_msg = self._reduce_message_options(assistant_response.msgs)
+        
+        # 记录n>1兼容性逻辑
+        if (
+            'n' in self.assistant_agent.model_backend.model_config_dict.keys()
+            and self.assistant_agent.model_backend.model_config_dict['n'] > 1
+        ):
+            self.assistant_agent.record_message(assistant_msg)
+        
+        # 处理工具调用
+        tool_calls = []
+        if assistant_response.info.get("tool_calls"):
+            tool_calls = assistant_response.info["tool_calls"]
+            for idx, tool_call in enumerate(tool_calls):
+                try:
+                    # 提取工具信息
+                    tool_name = ""
+                    tool_args = {}
+                    
+                    if hasattr(tool_call, "as_dict") and callable(getattr(tool_call, "as_dict")):
+                        tool_dict = tool_call.as_dict()
+                        tool_name = tool_dict.get("tool_name", "")
+                        tool_result = tool_dict.get("result", "")
+
+                        tool_args = tool_dict.get("args", {})
+                    else:
+                        tool_name = getattr(tool_call, "tool_name", f"tool_{idx}")
+                        tool_args = getattr(tool_call, "args", {})
+                        tool_result = getattr(tool_call, "result", {})
+
+                    # 创建唯一ID，使用UUID确保唯一性
+                    unique_id = f"{workflow_id}_tool_{tool_name}_{uuid.uuid4().hex[:8]}"
+                    
+                    # 生成工具调用事件
+                    yield {
+                        "event": EventType.TOOL_CALL,
+                        "data": {
+                            "tool_call_id": unique_id,
+                            "tool_name": tool_name,
+                            "tool_input": tool_args,
+                            "tool_result": tool_result
+                        }
+                    }
+                except Exception as e:
+                    logger.error(f"处理工具调用时出错: {str(e)}")
+        
+        # 生成助手消息事件
+        yield {
+            "event": EventType.START_OF_LLM,
+            "data": {"agent_name": "执行代理"}
+        }
+        
+        assistant_msg_id = f"msg_{workflow_id}_assistant"
+        yield {
+            "event": EventType.MESSAGE,
+            "data": {
+                "message_id": assistant_msg_id,
+                "delta": {"content": assistant_msg.content}
+            }
+        }
+        
+        yield {
+            "event": EventType.END_OF_LLM,
+            "data": {"agent_name": "执行代理"}
+        }
+        
+        yield {
+            "event": EventType.END_OF_AGENT,
+            "data": {"agent_id": assistant_agent_id}
+        }
 
 class OwlRolePlaying(RolePlaying):
     def __init__(self, **kwargs):
