@@ -56,4 +56,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import sys; sys.exit(0 if __import__('os').path.exists('/app/owl') else 1)"
 
 # Container startup command
-CMD ["/bin/bash", "-c", "owl-welcome && /bin/bash"]
+CMD ["xvfb-python", "webapp.py"]

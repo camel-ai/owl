@@ -1,12 +1,22 @@
 services:
   owl:
-    build:
-      context: ..
-      dockerfile: .container/Dockerfile
+    # Option 1: Use pre-built image from Docker Hub
+    image: mugglejinx/owl:latest
+
+    # Option 2: Build image locally
+    # Uncomment the following lines and comment out the 'image' line above to build locally
+    # build:
+    #   context: ..
+    #   dockerfile: .container/Dockerfile
+
     volumes:
+      # Mount .env file for easy API key configuration
       - ../owl/.env:/app/owl/.env
+      # Mount examples folder to support running code examples inside the Docker container
       - ../examples:/app/examples
+      # Mount data directory
       - ./data:/app/owl/data
+      # Mount cache directories to avoid repeated downloads
       - ~/.cache/pip:/root/.pip/cache
       - ~/.cache/playwright:/root/.cache/ms-playwright
     environment:
@@ -23,11 +33,13 @@ services:
     stdin_open: true
     tty: true
     shm_size: 2gb
+    # Simplify resource limits
     deploy:
       resources:
         limits:
           memory: 4G
 
+# Define persistent volumes for caching
 volumes:
   playwright-cache:
   pip-cache:
