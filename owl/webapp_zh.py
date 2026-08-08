@@ -246,7 +246,7 @@ MODULE_DESCRIPTIONS = {
     "run_mini": "使用使用OpenAI模型最小化配置处理任务",
     "run_gemini": "使用 Gemini模型处理任务",
     "run_claude": "使用 Claude模型处理任务",
-    "run_deepseek_zh": "使用eepseek模型处理中文任务",
+    "run_deepseek_zh": "使用Deepseek模型处理中文任务",
     "run_openai_compatible_model": "使用openai兼容模型处理任务",
     "run_ollama": "使用本地ollama模型处理任务",
     "run_qwen_mini_zh": "使用qwen模型最小化配置处理任务",
