@@ -1,0 +1,5 @@
+chunkr_ai
+python-dotenv
+streamlit
+camel-ai["all"]
+docx2markdown
