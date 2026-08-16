@@ -682,7 +682,7 @@ cd camel
 
 # ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=camel-ai/owl&type=Date)](https://star-history.com/#camel-ai/owl&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=camel-ai/owl&type=Date)](https://star-history.dera.page/#camel-ai/owl&Date)
 
 [docs-image]: https://img.shields.io/badge/Documentation-EB3ECC
 [docs-url]: https://camel-ai.github.io/camel/index.html
