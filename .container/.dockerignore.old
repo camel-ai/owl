@@ -1,0 +1,74 @@
+# Git
+.git
+.gitignore
+.github
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+DOCKER_README.md
+run_in_docker.sh
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Temporary files
+temp_*
+*.tmp
+*.log
+*.bak
+
+# Cache
+.cache/
+.npm/
+.yarn/
+
+# Large data files
+*.csv
+*.sqlite
+*.db
+*.hdf5
+*.h5
+*.parquet
+*.feather
+*.pkl
+*.pickle
+
+# Data directory
+data/
