@@ -50,6 +50,7 @@
 Our vision is to revolutionize how AI agents collaborate to solve real-world tasks. By leveraging dynamic agent interactions, OWL enables more natural, efficient, and robust task automation across diverse domains.
 
 If you find this repo useful, please consider citing our work ([citation](#-cite)).
+
 </div>
 
 ![](./assets/owl_architecture.png)
@@ -59,6 +60,17 @@ If you find this repo useful, please consider citing our work ([citation](#-cite
 </div>
 
 <!-- # Key Features -->
+
+# Adaptation Albert & other OpenAi Compatible Providers
+
+```
+
+python3.11
+
+python ./example/run_compatible.py
+
+
+```
 
 # 📋 Table of Contents
 
@@ -618,7 +630,7 @@ The web interface is built using Gradio and runs locally on your machine. No dat
 
 To reproduce OWL's GAIA benchmark score:
 
-We also provide an enhanced OWL in the `main` branch, so you can directly benefit from upgraded toolkits and increased stability even without switching branches. 
+We also provide an enhanced OWL in the `main` branch, so you can directly benefit from upgraded toolkits and increased stability even without switching branches.
 For the original GAIA-specific performance, we recommend our `gaia69` branch.
 
 When running the benchmark evaluation:
