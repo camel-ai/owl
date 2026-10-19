@@ -25,6 +25,7 @@ from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
 import re
+from camel.tasks.task import Task
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -375,20 +376,30 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
             )
 
         # Check if it contains the construct_society function
-        if not hasattr(module, "construct_society"):
-            logging.error(
-                f"construct_society function not found in module {module_path}"
-            )
-            return (
-                f"construct_society function not found in module {module_path}",
-                "0",
-                "❌ Error: Module interface incompatible",
-            )
+        # if not hasattr(module, "construct_society"):
+        #     logging.error(
+        #         f"construct_society function not found in module {module_path}"
+        #     )
+        #     return (
+        #         f"construct_society function not found in module {module_path}",
+        #         "0",
+        #         "❌ Error: Module interface incompatible",
+        #     )
 
         # Build society simulation
         try:
             logging.info("Building society simulation...")
-            society = module.construct_society(question)
+            # society = module.construct_society(question)
+            task = Task(
+                content=question,
+            )
+
+            workforce = module.construct_workforce()
+
+            processed_task = workforce.process_task(task)
+
+            # Output the result
+            print(f"\033[94mAnswer: {processed_task.result}\033[0m")
 
         except Exception as e:
             logging.error(f"Error occurred while building society simulation: {str(e)}")
