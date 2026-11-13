@@ -6,4 +6,6 @@ mcp-server-fetch==2025.1.17
 xmltodict>=0.14.2
 firecrawl>=2.5.3
 crawl4ai>=0.3.0
+chunkr-ai
+nest-asyncio
 retry==0.9.2
