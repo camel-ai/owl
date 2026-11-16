@@ -347,6 +347,12 @@ class GAIABenchmark(BaseBenchmark):
             bool: The score of the model
         """
 
+        if not isinstance(model_answer, str):
+            logger.warning(
+                "Model answer is missing, scoring the task as incorrect."
+            )
+            return False
+
         def is_float(element: Any) -> bool:
             try:
                 float(element)
