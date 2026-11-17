@@ -243,20 +243,9 @@ def get_latest_logs(max_lines=100, queue_source=None):
 # Dictionary containing module descriptions
 MODULE_DESCRIPTIONS = {
     "run": "Default mode: Using OpenAI model's default agent collaboration mode, suitable for most tasks.",
-    "run_mini": "Using OpenAI model with minimal configuration to process tasks",
     "run_gemini": "Using Gemini model to process tasks",
     "run_claude": "Using Claude model to process tasks",
-    "run_deepseek_zh": "Using deepseek model to process Chinese tasks",
-    "run_mistral": "Using Mistral models to process tasks",
-    "run_openai_compatible_model": "Using openai compatible model to process tasks",
-    "run_ollama": "Using local ollama model to process tasks",
-    "run_qwen_mini_zh": "Using qwen model with minimal configuration to process tasks",
-    "run_qwen_zh": "Using qwen model to process tasks",
-    "run_azure_openai": "Using azure openai model to process tasks",
     "run_groq": "Using groq model to process tasks",
-    "run_ppio": "Using ppio model to process tasks",
-    "run_together_ai": "Using together ai model to process tasks",
-    "run_novita_ai": "Using novita ai model to process tasks",
 }
 
 
