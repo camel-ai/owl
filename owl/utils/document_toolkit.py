@@ -26,12 +26,12 @@ import json
 from typing import List, Optional, Tuple, Literal
 from urllib.parse import urlparse
 import os
-import subprocess
 import xmltodict
 import nest_asyncio
 import traceback
 import asyncio
 from crawl4ai import AsyncWebCrawler
+from owl.utils.zip_utils import extract_zip
 
 nest_asyncio.apply()
 
@@ -299,17 +299,7 @@ class DocumentProcessingToolkit(BaseToolkit):
         extract_path = os.path.join(self.cache_dir, zip_name)
         os.makedirs(extract_path, exist_ok=True)
 
-        try:
-            subprocess.run(["unzip", "-o", zip_path, "-d", extract_path], check=True)
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Failed to unzip file: {e}")
-
-        extracted_files = []
-        for root, _, files in os.walk(extract_path):
-            for file in files:
-                extracted_files.append(os.path.join(root, file))
-
-        return extracted_files
+        return extract_zip(zip_path, extract_path)
 
     def get_tools(self) -> List[FunctionTool]:
         r"""Returns a list of FunctionTool objects representing the functions in the toolkit.
